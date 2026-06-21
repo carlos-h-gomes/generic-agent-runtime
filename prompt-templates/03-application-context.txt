@@ -1,0 +1,74 @@
+# Application Context Template
+
+Use this template to brief an AI agent before project profiling or a Level 2/3 task.
+
+## 1. Context and overview
+
+- What it is:
+- Problem it solves:
+- Primary users:
+- Business goal:
+- Current maturity: prototype / internal / production / critical production
+
+## 2. Functional requirements
+
+- Must do:
+- Must not do:
+- Important business rules:
+- Edge cases:
+
+## 3. Non-functional requirements
+
+- Performance:
+- Security:
+- Privacy/compliance:
+- Scalability/volume:
+- Reliability/availability:
+- Observability:
+- Cost constraints:
+
+## 4. Stack and infrastructure
+
+- Main language/framework:
+- Runtime/deployment:
+- Database/storage:
+- Queues/background jobs:
+- Auth/secrets:
+- External tools:
+
+## 5. Data flow and integrations
+
+- External systems:
+- Communication format: REST / GraphQL / gRPC / events / files / spreadsheets / other
+- Input payloads/contracts:
+- Output payloads/contracts:
+- Idempotency key:
+- Retry/reprocessing rules:
+
+## 6. Architecture and UML expectations
+
+For medium/critical changes, use the smallest useful model:
+
+- C4 context/container:
+- Component diagram:
+- Sequence diagram:
+- Class/domain model:
+- State diagram:
+- Deployment diagram:
+- Threat model:
+
+## 7. Files and tool coordination
+
+- Files likely to be edited:
+- Files that must not be touched:
+- Files that may be edited by more than one tool:
+- Handoff notes:
+
+## 8. AI agent rules
+
+- Follow AGENTS.md and CLAUDE.md.
+- Follow Clean Code, SOLID, separation of concerns and secure-by-design defaults.
+- Prefer existing project patterns over new abstractions.
+- Do not use deprecated or unnecessarily complex dependencies if native/simple options solve the problem.
+- Keep context lean, but document important context in docs/ai.
+- Never rely on mental notes.

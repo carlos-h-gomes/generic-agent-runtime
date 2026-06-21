@@ -1,0 +1,16 @@
+Read AGENTS.md and CLAUDE.md.
+
+Task:
+[descreva a tarefa]
+
+Instructions:
+- Classify the task level.
+- Use the smallest sufficient workflow.
+- Load specialist skills only when required by AGENTS.md.
+- Before implementing, write the necessary context packet.
+- For Level 2/3 tasks, create or update docs/ai/tasks/YYYY-MM-DD-short-task-name.md.
+- Identify owned files, shared files and do-not-touch files.
+- Do not keep any important detail as a mental note. Write durable context to docs/ai.
+- Use architecture/UML review when the task changes workflows, contracts, modules, data, integrations or deployment.
+- Prioritize low token usage, but never skip required context, validation or risk gates.
+- Implement, validate, and summarize only what matters.

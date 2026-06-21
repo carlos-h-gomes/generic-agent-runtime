@@ -1,0 +1,24 @@
+Leia AGENTS.md e CLAUDE.md.
+
+Este projeto já existe. Não reestruture nada ainda.
+
+Faça apenas uma leitura inicial e atualize, quando necessário:
+- docs/ai/project-profile.md
+- docs/ai/commands.md
+- docs/ai/conventions.md
+- docs/ai/shared-context.md
+- docs/ai/risks.md
+
+Valide especialmente:
+- contexto atual do projeto;
+- comandos reais disponíveis;
+- padrões existentes;
+- arquivos que podem ser manipulados por mais de uma ferramenta;
+- riscos técnicos, segurança, custo e operação;
+- lacunas de documentação que podem fazer outro agente perder contexto.
+
+Regras:
+- não altere código de produto;
+- não crie documentação genérica;
+- não rode migrations;
+- não confie em memória mental. Se algo precisa ser lembrado, documente em docs/ai.

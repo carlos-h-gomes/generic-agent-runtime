@@ -1,0 +1,17 @@
+Antes de implementar qualquer coisa, leia AGENTS.md e CLAUDE.md.
+
+Execute apenas o Project Profiling inicial.
+
+Objetivo:
+- entender o propósito do projeto;
+- identificar stack, arquitetura, módulos, caminhos importantes e integrações;
+- identificar comandos reais de build/test/lint/typecheck/dev;
+- identificar riscos técnicos, segurança, privacidade, custo, operação e handoff entre ferramentas;
+- atualizar docs/ai/project-profile.md, docs/ai/commands.md, docs/ai/conventions.md, docs/ai/shared-context.md e docs/ai/risks.md.
+
+Regras:
+- não implemente features;
+- não altere código de produto;
+- não rode migrations;
+- não invente comandos;
+- não guarde contexto mentalmente: tudo que for importante deve ficar documentado em texto nos arquivos docs/ai.
