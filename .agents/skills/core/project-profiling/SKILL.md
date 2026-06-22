@@ -1,3 +1,8 @@
+---
+name: project-profiling
+description: "Build a concise, accurate written profile of an unfamiliar or under-documented repository: stack, verified commands, architecture boundaries, important paths, integrations and risks. Use this FIRST on a new project, when docs/ai/project-profile.md is missing/empty/stale, or whenever the agent is unsure how to build, test, run or validate the project. Does not implement features."
+---
+
 # Project Profiling
 
 ## Objective
@@ -34,6 +39,7 @@ Create a compact, accurate written profile of the repository so future agent wor
 3. Identify stack, commands, architecture, important paths, integrations, and risk areas.
 4. Do not implement features.
 5. Update only:
+   - `docs/ai/constitution.md` (only the durable principles/hard constraints; leave as template if none are clear yet)
    - `docs/ai/project-profile.md`
    - `docs/ai/commands.md`
    - `docs/ai/conventions.md`
@@ -41,6 +47,14 @@ Create a compact, accurate written profile of the repository so future agent wor
    - `docs/ai/risks.md`
 6. Keep all documents concise and factual.
 7. Mark unknowns explicitly instead of guessing.
+
+## Orientation, not a directory dump
+
+Empirical studies of agent-context files (Chatlatanagulchai et al. 2025; Lulla et al. 2026) find that verified commands, constraints and non-standard patterns improve agent behavior and lower cost, while generic architecture overviews and file-tree maps do not measurably help delivery and can inflate token use. Therefore:
+
+- Favor commands, constraints, conventions, and the few non-obvious patterns a new agent could not infer.
+- Keep the architecture map high-level (boundaries and data flow), not a file-by-file inventory the agent can discover itself.
+- Do not copy README prose or directory trees into project memory.
 
 ## Quality criteria
 

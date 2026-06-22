@@ -1,3 +1,8 @@
+---
+name: finops-cost
+description: "Prevent avoidable variable-cost growth and runaway spend while preserving quality. Use whenever a change involves LLMs, embeddings, OCR, paid APIs, cloud compute/storage/networking, queues, recurring or high-volume jobs, scraping, or high-cardinality logs/dashboards. Ties cost to billing unit and volume, models worst case, and defines guardrails, caching/batching/dedup, fallback behavior and alert thresholds."
+---
+
 # FinOps and Cost Specialist
 
 ## Objective

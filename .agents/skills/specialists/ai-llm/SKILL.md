@@ -1,3 +1,8 @@
+---
+name: ai-llm
+description: "Design and review AI/LLM features for reliability, safety, cost control, privacy and evaluation. Use whenever a feature sends content to a model, uses model output in a system, uses tools/retrieval/RAG, stores prompts, handles user/customer context, does AI classification/extraction, or can be prompt-injected. Defines task fit, prompt/context boundaries, injection and tool-abuse defenses, output schema/validation, evaluation cases, cost controls and fallback behavior."
+---
+
 # AI and LLM Specialist
 
 ## Objective
@@ -36,6 +41,20 @@ Design and review AI/LLM features for reliability, safety, cost control, privacy
 - Output validation strategy.
 - Evaluation checklist.
 - Risk and cost controls.
+
+## Injection and output-handling defenses (2026 baseline)
+
+Treat these as the default posture for any model that touches external or user content:
+
+- Separate trusted instructions from untrusted data. System/developer intent must not be overridable by content arriving in user input, retrieved documents, files, tool results, or web pages. Frame external content as data to analyze, never as commands to follow.
+- Treat all model output as untrusted before it acts on a system. Never `eval`/exec it, never pass it unchecked into shells, SQL, file paths, or downstream tool calls. Validate against a strict output schema first.
+- Least-privilege tools: expose only the tools and scopes the task needs. Validate tool arguments and results.
+- Human-in-the-loop on state-mutating or high-impact actions; prefer plan-then-confirm for those.
+- Bound autonomy: cap loops/retries/steps, and provide a stop path, so a hijacked plan cannot run away (cascading failure).
+- Guard durable memory: validate anything written to persistent context to prevent memory poisoning across runs.
+- Minimize sensitive data sent to the model; scrub/mask PII and secrets from both prompts and logs.
+
+For deeper coverage when the feature is a full agent (multiple tools, retrieval, memory, multi-agent), defer to `specialists/risk-security-compliance` and its OWASP ASI Top 10 mapping.
 
 ## Quality criteria
 

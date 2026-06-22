@@ -1,8 +1,15 @@
+---
+name: code-quality-testing
+description: "Improve correctness, maintainability and regression safety, and own the autonomous implementation/testing reflection loop after code changes. Use for business-logic changes, shared utilities, refactors, edge-case-heavy code, new validation rules, or any task whose plan includes ./scripts/test.sh or ./scripts/lint.sh. Runs validation, returns exact failure output to implementation, and retries up to the configured attempt limit before pausing for human review."
+---
+
 # Code Quality and Testing Specialist
 
 ## Objective
 
 Improve correctness, maintainability, and regression safety while avoiding unnecessary complexity.
+
+This specialist owns the autonomous quality reflection loop after implementation.
 
 ## When to use
 
@@ -12,14 +19,18 @@ Improve correctness, maintainability, and regression safety while avoiding unnec
 - Edge-case-heavy code.
 - New validation rules.
 - Bug fixes that need regression coverage.
+- Any task whose validation plan includes `./scripts/test.sh`, `./scripts/lint.sh`, or equivalent project commands.
 
 ## Inputs expected
 
+- Structured task specification from `core/task-triage`.
 - Acceptance criteria.
 - Existing test patterns.
 - Changed files.
 - Edge cases.
 - Validation commands.
+- Current attempt number.
+- Previous terminal output from failed attempts, when applicable.
 
 ## Process
 
@@ -30,7 +41,29 @@ Improve correctness, maintainability, and regression safety while avoiding unnec
 5. Avoid hidden mutable state where practical.
 6. Add or update tests at the lowest useful level.
 7. Add integration or contract tests when boundaries are involved.
-8. Confirm validation commands.
+8. Run the smallest relevant validation commands.
+9. Prefer the standard quality loop commands when available:
+   - `./scripts/test.sh`
+   - `./scripts/lint.sh`
+10. Capture command, exit code, stdout summary, and stderr/failure output.
+11. If validation fails, return the exact actionable failure output to `core/implementation`.
+12. Repeat until validation passes or the attempt limit in `docs/ai/quality-gates.md` is reached.
+13. If the limit is reached, pause the task and mark it for human review instead of hiding the failure.
+
+## Reflection loop contract
+
+Use this loop for spec-driven implementation work:
+
+```text
+1. implementation changes code
+2. code-quality-testing runs validation
+3. if validation fails, return stderr/output to implementation
+4. implementation fixes the failure
+5. code-quality-testing reruns validation
+6. stop after pass or after the configured maximum attempts
+```
+
+The default maximum is 3 attempts unless `docs/ai/quality-gates.md` defines a different value for the project.
 
 ## Deliverables
 
@@ -38,6 +71,42 @@ Improve correctness, maintainability, and regression safety while avoiding unnec
 - Test plan.
 - Edge-case list.
 - Validation outcome.
+- Commands run with pass/fail status.
+- Failure packet for implementation when validation fails.
+- Human review packet when the loop reaches the maximum attempts.
+
+## Failure packet format
+
+When validation fails, return structured feedback:
+
+```json
+{
+  "quality_status": "failed",
+  "attempt": 1,
+  "max_attempts": 3,
+  "failed_command": "./scripts/test.sh",
+  "exit_code": 1,
+  "stderr_or_failure_output": "Paste the actionable terminal failure output here.",
+  "likely_cause": "Best grounded hypothesis, or unknown.",
+  "required_next_action": "Return to core/implementation for correction."
+}
+```
+
+## Human review packet format
+
+When the loop reaches the maximum attempts:
+
+```json
+{
+  "quality_status": "paused_for_human_review",
+  "attempts_used": 3,
+  "reason": "Validation still fails after the configured reflection loop limit.",
+  "last_failed_command": "./scripts/test.sh",
+  "last_failure_output": "Paste the final actionable terminal output here.",
+  "changed_files": ["path/or/file"],
+  "recommended_human_review_focus": ["What the human should inspect first."]
+}
+```
 
 ## Quality criteria
 
@@ -45,11 +114,12 @@ Improve correctness, maintainability, and regression safety while avoiding unnec
 - Tests protect important behavior.
 - Edge cases are covered or documented.
 - No unnecessary dependency or abstraction.
-
+- Validation output is preserved honestly.
+- Broken code is not sent for human review until the reflection loop has been attempted, unless validation cannot run.
 
 ## Written memory rule
 
-For Level 2/3 work, record durable findings, assumptions, risks, and handoff notes in the active task file or the appropriate `docs/ai` file. Do not rely on mental notes.
+For Level 2/3 work, record durable findings, assumptions, risks, validation outcomes, and handoff notes in the active task file or the appropriate `docs/ai` file. Do not rely on mental notes.
 
 ## Checklist
 
@@ -58,3 +128,8 @@ For Level 2/3 work, record durable findings, assumptions, risks, and handoff not
 - [ ] Existing patterns respected.
 - [ ] Tests considered/updated.
 - [ ] Validation command identified.
+- [ ] `./scripts/test.sh` run when available/relevant.
+- [ ] `./scripts/lint.sh` run when available/relevant.
+- [ ] Failure output returned to implementation when needed.
+- [ ] Attempt count respected.
+- [ ] Human review packet produced if the loop fails repeatedly.

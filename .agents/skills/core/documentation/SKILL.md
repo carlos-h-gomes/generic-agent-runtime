@@ -1,3 +1,8 @@
+---
+name: documentation
+description: "Record durable project knowledge (architecture decisions, new integrations, endpoints/contracts, schemas/migrations, operational workflows, new cost/security/compliance risks, cross-tool handoffs) without creating noise. Use after Level 2/3 work or when a future agent must understand something to work safely. Prefers updating existing docs over creating new ones; skips trivial/cosmetic changes."
+---
+
 # Documentation
 
 ## Objective

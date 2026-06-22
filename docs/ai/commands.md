@@ -22,7 +22,9 @@ Only document commands verified from repository files such as package files, Mak
 
 # Build
 
-# Security check
+# Security check (SAST + secrets)
+
+# Dependency / supply-chain scan (SCA, e.g. trivy fs / pip-audit / npm audit)
 
 # Docker/infra check
 

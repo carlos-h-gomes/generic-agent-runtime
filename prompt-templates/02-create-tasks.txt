@@ -4,13 +4,50 @@ Task:
 [descreva a tarefa]
 
 Instructions:
+- Load `core/task-triage` first.
+- Convert the task into the strict structured task specification required by `.agents/skills/core/task-triage/SKILL.md`.
 - Classify the task level.
+- Clarify ambiguities, edge cases and unstated assumptions before planning Level 2/3 work; record question/answer pairs in the task file. If acceptance criteria or safe affected-file discovery cannot be defined, return `needs_clarification`.
 - Use the smallest sufficient workflow.
 - Load specialist skills only when required by AGENTS.md.
 - Before implementing, write the necessary context packet.
 - For Level 2/3 tasks, create or update docs/ai/tasks/YYYY-MM-DD-short-task-name.md.
 - Identify owned files, shared files and do-not-touch files.
 - Do not keep any important detail as a mental note. Write durable context to docs/ai.
-- Use architecture/UML review when the task changes workflows, contracts, modules, data, integrations or deployment.
+- Respect docs/ai/constitution.md principles and hard constraints when present.
+- Use UX/Product review before implementation when the task is user-facing.
+- Use architecture/UML review before implementation when the task changes workflows, contracts, modules, data, integrations, deployment or cross-cutting behavior.
+- Before implementation on Level 2/3 work, run the read-only cross-artifact consistency check (analyze) across the task spec, UX artifact and architecture artifact; fix gaps before coding.
+- For security-sensitive or agent/tool/LLM/retrieval/memory features, apply the OWASP ASI Top 10 (2026) review from `specialists/risk-security-compliance`.
+- The implementation agent must not invent architecture. It may only implement the defined architecture/contracts.
+- After implementation, run the autonomous reflection loop with `specialists/code-quality-testing`.
+- Run `./scripts/test.sh` and `./scripts/lint.sh` when available and relevant.
+- If validation fails, return stderr/failure output to implementation and retry up to 3 loops.
+- If validation still fails after 3 loops, pause and create a human review packet.
 - Prioritize low token usage, but never skip required context, validation or risk gates.
 - Implement, validate, and summarize only what matters.
+
+Required response blocks:
+
+## Triage JSON
+Provide the strict task specification JSON. If required information is missing, set `triage_status` to `needs_clarification` or `blocked` and do not implement.
+
+## Plano de Execução
+List the smallest safe workflow and loaded skills.
+
+## Artefatos Obrigatórios Antes da Implementação
+State whether UX/Product and/or Architecture/UML artifacts are required. If required, create or update the active task file before implementation.
+
+## Implementação
+Summarize only what changed and why.
+
+## Reflection Loop
+List each validation attempt with command, result, and failure feedback if any.
+
+## Handoff
+Summarize residual risks, pending items, and human approval status.
+
+## Critérios de Validação Técnica
+End the response with this section. Include commands run, manual checks, and acceptance criteria status.
+
+If the final section `## Critérios de Validação Técnica` is missing, the response must be rejected.

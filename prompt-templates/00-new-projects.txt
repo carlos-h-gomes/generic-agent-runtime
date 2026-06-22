@@ -7,6 +7,7 @@ Objetivo:
 - identificar stack, arquitetura, módulos, caminhos importantes e integrações;
 - identificar comandos reais de build/test/lint/typecheck/dev;
 - identificar riscos técnicos, segurança, privacidade, custo, operação e handoff entre ferramentas;
+- registrar princípios duradouros e restrições inegociáveis em docs/ai/constitution.md (apenas se já estiverem claros);
 - atualizar docs/ai/project-profile.md, docs/ai/commands.md, docs/ai/conventions.md, docs/ai/shared-context.md e docs/ai/risks.md.
 
 Regras:
@@ -14,4 +15,35 @@ Regras:
 - não altere código de produto;
 - não rode migrations;
 - não invente comandos;
-- não guarde contexto mentalmente: tudo que for importante deve ficar documentado em texto nos arquivos docs/ai.
+- não guarde contexto mentalmente: tudo que for importante deve ficar documentado em texto nos arquivos docs/ai;
+- não crie documentação genérica ou longa sem utilidade operacional.
+
+Formato obrigatório da resposta:
+
+## Perfil do Projeto
+- Propósito:
+- Stack:
+- Arquitetura:
+- Caminhos importantes:
+
+## Comandos Verificados
+- Build:
+- Test:
+- Lint:
+- Typecheck:
+- Dev/local:
+- Observação sobre comandos não encontrados:
+
+## Riscos e Gates
+- Segurança/privacidade:
+- Dados/integrações:
+- Operação/release:
+- Custo/FinOps:
+
+## Arquivos Atualizados
+- Liste exatamente os arquivos docs/ai alterados.
+
+## Lacunas / Próximos Passos
+- Liste apenas o que ainda precisa ser descoberto ou confirmado.
+
+Se alguma seção obrigatória não puder ser preenchida, mantenha a seção e escreva `Não identificado` com o motivo.

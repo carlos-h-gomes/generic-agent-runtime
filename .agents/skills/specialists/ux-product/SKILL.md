@@ -1,3 +1,8 @@
+---
+name: ux-product
+description: "Raise the quality of any user-facing work by combining product framing, information architecture, interaction and visual design, responsive behavior, accessibility and heuristic review, then produce concrete implementation handoff and acceptance criteria. Use BEFORE implementation for any screen, page, modal, form, dashboard, onboarding, pricing, settings, empty/loading/error/success state, notification or user-facing copy."
+---
+
 # UX Product Specialist
 
 ## Objective

@@ -1,8 +1,10 @@
 # AGENTS.md — Generic Agent Runtime
 
-Version: 3.1
+Version: 3.5
 Runtime language: English, to maximize compatibility with coding agents.
 User-facing responses may use the user's language.
+
+> Compatibility note: `AGENTS.md` is the cross-tool standard (Codex, Cursor, Copilot, Gemini CLI, Aider, Windsurf, and others) and is also read by Claude Code, which additionally reads the richer `CLAUDE.md`. Keep this file focused on commands, constraints, routing and non-standard patterns: empirical studies (Lulla et al. 2026; Chatlatanagulchai et al. 2025) show a focused agent-context file measurably lowers agent runtime and token cost, while generic architecture dumps and directory maps do not improve delivery and inflate cost. Do not paste discoverable content (README prose, file trees) here.
 
 ## 0. Prime directive
 
@@ -14,11 +16,13 @@ Before changing product code, the agent must:
 2. Read `CLAUDE.md` when available.
 3. Read the active project memory files in `docs/ai/` that are relevant to the task.
 4. Classify the task level by scope, risk, and reversibility.
-5. Build a compact written context packet before implementation.
-6. Use the smallest workflow that can safely deliver high quality.
-7. Load only the skills relevant to the current task.
-8. Run available validation commands when practical.
-9. Stop before destructive, production, security-sensitive, privacy-sensitive, customer-impacting, or cost-increasing actions unless explicitly approved.
+5. Produce a strict structured task specification before implementation.
+6. Build a compact written context packet before implementation.
+7. Use the smallest workflow that can safely deliver high quality.
+8. Load only the skills relevant to the current task.
+9. Run available validation commands when practical.
+10. Use the implementation/testing reflection loop when validation commands are available.
+11. Stop before destructive, production, security-sensitive, privacy-sensitive, customer-impacting, or cost-increasing actions unless explicitly approved.
 
 Quality means the right amount of process, not maximum process.
 
@@ -44,14 +48,17 @@ Durable items include:
 Use these files as the written memory layer:
 
 ```text
+docs/ai/constitution.md          Durable, rarely-changing project principles and hard constraints (optional but recommended)
 docs/ai/project-profile.md       Project identity, stack, architecture, paths, environments
 docs/ai/commands.md              Verified commands only
 docs/ai/conventions.md           Code, architecture, UX, testing, docs conventions
 docs/ai/risks.md                 Security, privacy, cost, operational, UX/product risks
-docs/ai/decision-log.md          Durable architecture/product/technical decisions
+docs/ai/decision-log.md          Decisions, rejected alternatives, and reasons
 docs/ai/shared-context.md        Cross-session and cross-tool context that must not be lost
 docs/ai/tasks/                   Task-specific context, plan, gates, validation and handoff
 ```
+
+The `constitution.md` holds the small set of non-negotiable principles every task must respect (for example: "all user input is validated", "self-hosted/open-source preferred", "no per-client customization", "human approval before production changes"). It is the most stable layer and bounds every other artifact. Keep it short; it is principles, not implementation detail.
 
 If a detail matters but no existing file fits, create or update the smallest appropriate `docs/ai` file and explain why.
 
@@ -63,13 +70,37 @@ When sources conflict, use this order:
 
 1. User's latest explicit instruction.
 2. Safety/security constraints and explicit approval boundaries.
-3. Repository files and current code.
-4. `docs/ai` project memory.
-5. Existing tests and CI configuration.
-6. Previous task files and decision log.
-7. General best practices.
+3. `docs/ai/constitution.md` durable project principles, when present.
+4. Repository files and current code.
+5. `docs/ai` project memory.
+6. Existing tests and CI configuration.
+7. Previous task files and decision log.
+8. General best practices.
 
 Never invent commands, architecture, or business rules. Mark unknowns explicitly.
+
+---
+
+## 2.1 Strict task specification rule
+
+Before implementation, `core/task-triage` must convert the user's intent into structured data.
+
+Implementation must not start from vague chat instructions. It must start from a task specification that includes, at minimum:
+
+- clear description;
+- acceptance criteria;
+- affected files or a file discovery plan;
+- owned/shared/do-not-touch file coordination;
+- triggered gates;
+- validation plan;
+- human approval status.
+
+Preferred format: JSON. YAML is acceptable only when the target agent cannot handle JSON well.
+
+If description, acceptance criteria, or affected-file discovery are missing, the task is not ready for implementation. The triage result must be `needs_clarification` or `blocked`, with missing fields listed.
+
+For Level 2/3 tasks, store the structured task specification in the active task file under `docs/ai/tasks/`.
+
 
 ---
 
@@ -86,6 +117,7 @@ docs/ai/tasks/YYYY-MM-DD-short-task-name.md
 
 The context packet must include, as applicable:
 
+- Structured task specification from `core/task-triage`.
 - User request and acceptance criteria.
 - Task level and triggered gates.
 - Files likely to change.
@@ -203,15 +235,25 @@ The canonical full harness is:
 
 ```text
 Intent
+→ Strict task specification (specify)
+→ Clarify ambiguities before planning
 → Context packet
 → Requirements / Mini PRD
+→ UX/Product review when triggered
 → Architecture/UML review when triggered
 → Specialist gates when triggered
+→ Cross-artifact consistency check (analyze) before implementation
 → Implementation
-→ Tests / validation
+→ Code quality/testing reflection loop
 → Release / rollback / monitoring when triggered
 → Handoff notes
 ```
+
+This mirrors the now-standard spec-driven sequence (specify → clarify → plan → tasks → analyze → implement) used by tools such as Spec Kit, while staying tool-agnostic.
+
+**Clarify step:** before planning a Level 2/3 task, resolve ambiguities, edge cases and unstated assumptions. Record answers in the task file. If the agent cannot define acceptance criteria or safe affected-file discovery, triage returns `needs_clarification` instead of guessing. For an exploratory spike, the agent may explicitly skip clarification and say so.
+
+**Analyze step:** before implementation on Level 2/3 work, run a quick cross-artifact consistency check across the task spec, the UX/Product artifact, and the Architecture/UML artifact. Confirm acceptance criteria are covered, the artifacts do not contradict each other or the codebase, and nothing required is missing. This is read-only; it produces a short list of gaps to fix, not code.
 
 The harness may be shortened for Level 0/1 work, but a skipped gate must be either clearly not applicable or intentionally deferred with a reason.
 
@@ -249,7 +291,7 @@ Examples:
 Workflow:
 
 ```text
-Intent → Relevant context → Implement → Validate → Short summary
+Intent → Structured task spec → Relevant context → Implement → Validate → Short summary
 ```
 
 Use `core/implementation` and `core/validation` when helpful.
@@ -269,7 +311,7 @@ Examples:
 Workflow:
 
 ```text
-Intent → Written context packet → Mini PRD → Technical plan → Implement → Tests → Validation summary → Handoff notes
+Intent → Structured task spec → Written context packet → Mini PRD → UX/Architecture gates when triggered → Technical plan → Implement → Reflection loop → Validation summary → Handoff notes
 ```
 
 Create a task file when the change affects architecture, data, integration, operations, or future maintenance.
@@ -294,14 +336,16 @@ Workflow:
 
 ```text
 Intent
+→ Structured task specification
 → Written context packet
 → PRD
+→ UX/Product review when triggered
 → Architecture/UML review
 → Required specialist gates
 → Implementation plan
 → Human approval when required
 → Implementation
-→ Tests
+→ Code quality/testing reflection loop
 → Validation
 → Release, monitoring and rollback plan
 → Handoff notes
@@ -340,6 +384,21 @@ For Level 2/3 work, evaluate architecture with lightweight models before impleme
 
 Text diagrams using Mermaid/PlantUML are acceptable. Do not create heavyweight diagrams for small tasks.
 
+
+### Product and architecture pipeline order
+
+For new features or meaningful behavior changes, use this order before implementation:
+
+```text
+task-triage → UX/Product when user-facing → Software Architecture/UML when architecture/data/integration/deployment is affected → implementation → code-quality-testing → validation/handoff
+```
+
+Implementation is not the architecture owner. If the task changes database behavior, schemas, integrations, n8n flows, Caddy/reverse-proxy behavior, deployment topology, external contracts, queues, jobs, or cross-cutting workflows, `specialists/software-architecture-uml` must produce a Markdown/Mermaid architecture artifact before implementation starts.
+
+If the task is user-facing, `specialists/ux-product` must define the product/UX acceptance criteria before implementation starts.
+
+Implementation must return the task to triage or the missing specialist when required artifacts are absent, ambiguous, or incompatible with the codebase.
+
 ---
 
 ## 10. Skill loading policy
@@ -372,6 +431,14 @@ Specialist skills:
 
 Use specialists as gates, not as theater. If a specialist is not relevant, do not load it.
 
+### Skill format and discovery
+
+Every skill is a folder containing `SKILL.md` with YAML frontmatter (`name`, `description`) followed by the markdown body. The `name` must match the folder name. The `description` states both what the skill does and when to use it; modern agents (Claude Code, Codex, Cursor, and others) auto-discover skills from this frontmatter at startup and load the full body only when a task matches. Keep `name` + `description` portable; any agent-specific frontmatter fields are safely ignored by agents that do not support them.
+
+### Optional subagent / isolation pattern
+
+When the host agent supports subagents (e.g. Claude Code `context: fork`, `skills:`, `allowed-tools`), heavy read-only work such as repository exploration, architecture analysis, or a security/red-team pass may run in an isolated subagent to keep the main context lean. Recommended pattern: give research/review subagents read-only tools and let the parent agent perform edits and run commands that need approval. This is optional and tool-specific; the runtime does not require it.
+
 ---
 
 ## 11. Mandatory gates by trigger
@@ -394,13 +461,17 @@ Must evaluate:
 
 Use when adding or changing meaningful business logic, shared utilities, refactors, test strategy, or code paths with edge cases.
 
+When validation commands exist, this gate owns the autonomous reflection loop between implementation and testing.
+
 ### UX/Product gate
 
 Use when there is any interface, workflow, product flow, onboarding, dashboard, form, empty state, error state, pricing page, guided tour, notification, or user-facing copy.
 
 ### Security/Compliance gate
 
-Use when there are credentials, auth, permissions, external input, public endpoints, file uploads, customer data, personal data, logs, third-party transfer, or production impact.
+Use when there are credentials, auth, permissions, external input, public endpoints, file uploads, customer data, personal data, logs, third-party transfer, dependency/supply-chain changes, or production impact.
+
+For agent, tool-using, retrieval, or memory features, also evaluate against the OWASP Top 10 for Agentic Applications (2026) (ASI01–ASI10): goal hijack, tool misuse, identity/privilege abuse, supply chain, unexpected code execution, memory poisoning, insecure inter-agent comms, cascading failures, human-agent trust exploitation, and rogue agents. See `specialists/risk-security-compliance` for the mapping and baseline mitigations.
 
 ### Data/Integration gate
 
@@ -476,6 +547,27 @@ Validation depth by level:
 
 ---
 
+
+## 13.1 Autonomous reflection loop
+
+For spec-driven implementation tasks, use a closed loop before human review when safe validation commands exist:
+
+```text
+core/implementation
+→ specialists/code-quality-testing runs ./scripts/test.sh and ./scripts/lint.sh
+→ failing stdout/stderr is returned to core/implementation
+→ core/implementation corrects the issue
+→ specialists/code-quality-testing reruns validation
+```
+
+Default maximum: **3 loops**.
+
+After 3 failed loops, pause the task and produce a human review packet with the changed files, commands run, last failing command, exit code, actionable failure output, and suggested review focus.
+
+Do not send known-broken code to human review before this loop runs unless validation cannot run or human approval is required before execution.
+
+---
+
 ## 14. Human approval required
 
 Ask for explicit approval before:
@@ -500,7 +592,7 @@ Ask for explicit approval before:
 
 This runtime intentionally consolidates many small specialists into fewer stronger gates to reduce token use and avoid theatrical agent switching. The old specialist responsibilities are still covered as follows:
 
-| Legacy responsibility | Covered by v3.1 gate/skill | Notes |
+| Legacy responsibility | Covered by v3.5 gate/skill | Notes |
 |---|---|---|
 | create-intent | `core/task-triage` | Converts the request into intent, level, scope and triggered gates. |
 | create-prd / requirement-refiner | `core/task-triage` + task file | Level 2 uses a Mini PRD. Level 3 uses a fuller PRD section. |
@@ -607,6 +699,9 @@ Files changed:
 Validation:
 - ...
 
+Reflection loop:
+- ...
+
 Risks / pending items:
 - ...
 
@@ -627,6 +722,9 @@ Files changed:
 - ...
 
 Validation:
+- ...
+
+Reflection loop:
 - ...
 
 Architecture / UML:

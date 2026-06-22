@@ -1,3 +1,8 @@
+---
+name: data-integration
+description: "Make integrations, automations, data flows, schemas and pipelines reliable, traceable, idempotent and reprocessable. Use for APIs, webhooks, n8n/workflow automations, ETL/ELT, databases, migrations, queues, events, spreadsheets, dashboards or any external-system boundary. Defines contracts/schemas, idempotency keys, retry/timeout/rate-limit behavior, error handling, reprocessing and correlation logging."
+---
+
 # Data and Integration Specialist
 
 ## Objective

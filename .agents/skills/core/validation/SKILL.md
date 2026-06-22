@@ -1,3 +1,8 @@
+---
+name: validation
+description: "Prove a change actually works or honestly state what could not be validated, with depth proportional to task risk. Use on every task to run the smallest relevant set of project validation commands, add UI/integration/data/rollback checks when relevant, and report only validations that genuinely ran. Never claims validation passed unless it did."
+---
+
 # Validation
 
 ## Objective

@@ -3,11 +3,13 @@ Leia AGENTS.md e CLAUDE.md.
 Este projeto já existe. Não reestruture nada ainda.
 
 Faça apenas uma leitura inicial e atualize, quando necessário:
+- docs/ai/constitution.md, somente se houver princípio duradouro ou restrição inegociável real
 - docs/ai/project-profile.md
 - docs/ai/commands.md
 - docs/ai/conventions.md
 - docs/ai/shared-context.md
 - docs/ai/risks.md
+- docs/ai/decision-log.md, somente se houver decisão duradoura real ou lição reutilizável
 
 Valide especialmente:
 - contexto atual do projeto;
@@ -15,10 +17,33 @@ Valide especialmente:
 - padrões existentes;
 - arquivos que podem ser manipulados por mais de uma ferramenta;
 - riscos técnicos, segurança, custo e operação;
-- lacunas de documentação que podem fazer outro agente perder contexto.
+- lacunas de documentação que podem fazer outro agente perder contexto;
+- regras antigas que foram supersedidas e devem ser compactadas/removidas com registro no decision-log.
 
 Regras:
 - não altere código de produto;
 - não crie documentação genérica;
 - não rode migrations;
-- não confie em memória mental. Se algo precisa ser lembrado, documente em docs/ai.
+- não confie em memória mental. Se algo precisa ser lembrado, documente em docs/ai;
+- mantenha project-profile.md enxuto e focado no estado atual.
+
+Formato obrigatório da resposta:
+
+## Estado Atual do Projeto
+- O que foi confirmado:
+- O que mudou desde a documentação anterior:
+
+## Memória Atualizada
+- Arquivos alterados:
+- Decisões duradouras registradas:
+- Regras antigas removidas/compactadas:
+
+## Comandos e Validação
+- Comandos verificados:
+- Comandos não encontrados ou não executados:
+
+## Riscos / Lacunas
+- Riscos novos:
+- Lacunas ainda abertas:
+
+Se alguma seção obrigatória não se aplicar, mantenha a seção e escreva `Não aplicável — motivo:`.

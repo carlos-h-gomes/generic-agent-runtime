@@ -1,3 +1,8 @@
+---
+name: observability-release
+description: "Ensure production-impacting changes can be deployed, monitored, diagnosed and rolled back safely. Use for production changes, public/internal endpoints, jobs, automations, customer-impacting flows, SLAs, deployments and incident-prone systems. Defines success/error signals, safe logs, metrics, alert paths, deployment and rollback plans, post-release monitoring window and incident response path."
+---
+
 # Observability and Release Specialist
 
 ## Objective

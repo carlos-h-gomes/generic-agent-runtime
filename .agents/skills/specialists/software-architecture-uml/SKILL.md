@@ -1,3 +1,8 @@
+---
+name: software-architecture-uml
+description: "Define sound architecture and produce lightweight C4/UML models BEFORE implementation for Level 2/3 work that changes module boundaries, data models, public contracts, integrations, workflows, queues, jobs, deployment topology or other cross-cutting concerns. Use when a refactor touches multiple modules or a new API/event/schema/business workflow is introduced. Implementation must wait for this artifact; it must not invent architecture itself."
+---
+
 # Software Architecture and UML Specialist
 
 ## Objective
