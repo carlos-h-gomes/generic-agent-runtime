@@ -65,11 +65,18 @@ Use this loop for spec-driven implementation work:
 
 The default maximum is 3 attempts unless `docs/ai/quality-gates.md` defines a different value for the project.
 
+When validation runs through an output-compressing proxy (e.g. rtk), the loop must diagnose from the full tee'd failure output, not the compact summary — fixing code against a truncated test view risks chasing the wrong failure. Treat the filtered output as an index, the tee'd file as the source.
+
+## Over-engineering review (delete-list)
+
+As part of the quality pass, scan the changed diff (or the whole repo on an explicit audit) for over-engineering and produce a delete-list: speculative options nobody asked for, premature abstraction, re-implemented standard-library or native-platform behavior, unused parameters, and dependencies a lower rung would cover. For each item, say which rung of the `core/minimalism` ladder it failed and what replaces it. Never propose deleting validation, security, accessibility or data-loss handling — those stay regardless of line count. The output is a list of safe reductions, not code.
+
 ## Deliverables
 
 - Code quality review notes.
 - Test plan.
 - Edge-case list.
+- Over-engineering delete-list (safe reductions only).
 - Validation outcome.
 - Commands run with pass/fail status.
 - Failure packet for implementation when validation fails.
@@ -125,6 +132,7 @@ For Level 2/3 work, record durable findings, assumptions, risks, validation outc
 
 - [ ] Behavior identified.
 - [ ] Edge cases identified.
+- [ ] Over-engineering delete-list produced (safe reductions only).
 - [ ] Existing patterns respected.
 - [ ] Tests considered/updated.
 - [ ] Validation command identified.

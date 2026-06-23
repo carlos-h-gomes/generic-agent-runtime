@@ -1,6 +1,6 @@
 # CLAUDE.md — Agent Entry Point
 
-Read `AGENTS.md` first and follow it as the source of truth. This is Generic Agent Runtime v3.5.
+Read `AGENTS.md` first and follow it as the source of truth. This is Generic Agent Runtime v3.7.
 
 Important behavior:
 
@@ -10,6 +10,8 @@ Important behavior:
 - Use Bootstrap mode when project memory is missing or incomplete.
 - Use Harness mode after project memory exists.
 - Use adaptive task levels.
+- Apply the minimalism ladder (`core/minimalism`) when writing code: the smallest solution that meets the acceptance criteria, never cutting validation, security, accessibility or data-loss handling, and never used to skip a gate or approval boundary.
+- When an output-compressing command proxy (e.g. rtk) is configured, prefer it for validation, git and test commands, and diagnose failures from its full tee'd output rather than the compact summary. It is optional: fall back to plain commands when absent.
 - Start implementation only after `core/task-triage` produces a structured task specification with acceptance criteria and affected files/discovery plan.
 - Clarify ambiguities before planning Level 2/3 work; if acceptance criteria or safe file discovery cannot be defined, return `needs_clarification`.
 - For user-facing features, use UX/Product before implementation.

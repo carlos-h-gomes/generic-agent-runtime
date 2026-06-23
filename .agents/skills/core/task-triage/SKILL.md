@@ -50,6 +50,10 @@ Use at the beginning of any non-trivial task.
 9. Identify what context must be written before implementation.
 10. Route the task to the next skill only after the task specification is valid.
 
+## Minimalism at triage
+
+Apply the first rung of the minimalism ladder to scope: does each requested piece need to exist, or does a standard-library, native-platform, or already-present feature already cover it? Drop or defer anything the acceptance criteria do not require, and load `.agents/skills/core/minimalism/SKILL.md` for any task that writes or changes code. This sizes the *solution*, never the governance process — triggered gates, task files, written memory and approval boundaries are not optional. See `core/minimalism`.
+
 ## Required output contract
 
 Task triage must output structured data before implementation. Prefer JSON. YAML is acceptable only when the target agent cannot handle JSON well.

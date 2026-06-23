@@ -69,6 +69,10 @@ Implementation may make local code-organization decisions inside the approved de
 
 When a task changes architecture, workflows, data models, integrations, deployment, or cross-cutting concerns, implementation must wait for `specialists/software-architecture-uml` to define the Markdown/Mermaid architecture artifact and implementation constraints.
 
+## Minimalism ladder
+
+Before adding code, a dependency, or an abstraction, walk the ladder in `core/minimalism` and stop at the first rung that solves the need: skip it (YAGNI) → standard library → native platform feature → already-installed dependency → one line → the minimum that works. Prefer the lowest rung that works and existing patterns over new abstractions. Never trade away validation, security, accessibility or data-loss handling to cut lines; if a smaller version drops one of those, it is not smaller, it is broken. Tag any intentional shortcut with a `minimal:` marker and reason so it can be harvested later.
+
 ## Reflection loop participation
 
 After implementation, do not stop at “ready for approval” if validation commands are available. Hand the task to `specialists/code-quality-testing` to run the quality loop:
@@ -108,6 +112,7 @@ Implementation must use the exact failure output as feedback. Do not hide or sum
 - [ ] Required architecture/UX artifacts respected.
 - [ ] Existing pattern followed.
 - [ ] Minimal change made.
+- [ ] Minimalism ladder walked before new code/dependency/abstraction.
 - [ ] Errors considered.
 - [ ] Shared files coordinated.
 - [ ] Acceptance criteria mapped to changes/validation.

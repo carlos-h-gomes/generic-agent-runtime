@@ -32,6 +32,10 @@ Prove the change works, or honestly state what could not be validated.
 7. Report only validations actually performed.
 8. Record unvalidated areas in the task file for Level 2/3.
 
+## Output-compressing proxies
+
+Validation commands may run through an output-compressing proxy (e.g. rtk) that filters and shrinks tool output. This is fine for token cost, with one rule: never report a pass — or send a fix back to implementation — based only on a filtered or truncated view. When a command fails under such a proxy, read the full tee'd output it saves on failure before concluding anything. A green summary is not evidence on its own.
+
 ## Quality criteria
 
 - No fake validation claims.

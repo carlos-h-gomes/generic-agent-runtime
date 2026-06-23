@@ -1,6 +1,6 @@
 # AGENTS.md — Generic Agent Runtime
 
-Version: 3.5
+Version: 3.7
 Runtime language: English, to maximize compatibility with coding agents.
 User-facing responses may use the user's language.
 
@@ -361,6 +361,7 @@ Use robust software engineering standards, proportional to task level.
 
 Default principles:
 
+- YAGNI and minimalism: prefer the smallest solution that meets the acceptance criteria; stop at the first rung that solves the need (skip it → stdlib → native platform → existing dependency → one line → minimum). Never cut validation, security, accessibility or data-loss handling to reduce code. See `.agents/skills/core/minimalism/SKILL.md`.
 - Clean Code.
 - SOLID.
 - Separation of concerns.
@@ -412,6 +413,7 @@ Core skills:
 .agents/skills/core/task-triage/SKILL.md
 .agents/skills/core/context-memory/SKILL.md
 .agents/skills/core/implementation/SKILL.md
+.agents/skills/core/minimalism/SKILL.md
 .agents/skills/core/validation/SKILL.md
 .agents/skills/core/documentation/SKILL.md
 ```
@@ -533,6 +535,8 @@ Prefer existing project commands. If available, run the relevant subset:
 ./scripts/security-check.sh
 ./scripts/cost-check.sh
 ```
+
+Optionally, an output-compressing CLI proxy such as rtk (https://github.com/rtk-ai/rtk) can wrap these commands to cut tool-output tokens (e.g. `rtk test ./scripts/test.sh`, `rtk pytest`, `rtk cargo test`, `rtk git status`). This is a tooling-layer optimization, not a dependency: if it is absent, run the plain commands. When a wrapped command fails, diagnose from rtk's full tee'd output (saved on failure), never from the compact summary alone, and never report a pass off a filtered view.
 
 If commands cannot run, explain why and provide a manual validation checklist.
 

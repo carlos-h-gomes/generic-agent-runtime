@@ -31,6 +31,19 @@ Only document commands verified from repository files such as package files, Mak
 # Cost/usage check
 ```
 
+## RTK-aware validation (optional)
+
+If this project uses an output-compressing CLI proxy (rtk), record the wrapped forms of the verified commands here, e.g.:
+
+```bash
+# rtk test ./scripts/test.sh
+# rtk pytest        # or rtk cargo test / rtk go test
+# rtk lint          # or rtk ruff check / rtk tsc
+# rtk git status / rtk git diff
+```
+
+Notes: the proxy is optional and degrades gracefully to the plain commands; its auto-rewrite hook only covers Bash tool calls (built-in Read/Grep/Glob bypass it); on failure it tees the full output to a file — diagnose from that, not the compact summary.
+
 ## Safe commands
 
 Commands agents may run without approval:

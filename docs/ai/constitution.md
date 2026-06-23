@@ -12,7 +12,7 @@ List 5–12 non-negotiable principles. Examples (replace with the real ones):
 
 - All external/user input is validated before use; model and tool output is treated as untrusted.
 - Human approval is required before production, destructive, or cost-increasing actions.
-- Prefer the smallest safe change and existing patterns over new abstractions.
+- Prefer the smallest safe change and existing patterns over new abstractions; apply the minimalism ladder (YAGNI → stdlib → native → existing dependency → one line → minimum) from `core/minimalism`, but never cut validation, security, accessibility or data-loss handling to reduce code.
 - Secure-by-design defaults; least-privilege credentials; no secrets in code or logs.
 - Durable context is written to `docs/ai`, never kept as mental notes.
 - (Add project-specific principles, e.g. preferred stack, self-hosted vs managed, no per-client forks, accessibility baseline, data-residency rules.)
