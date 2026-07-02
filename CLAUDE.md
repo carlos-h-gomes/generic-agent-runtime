@@ -1,6 +1,6 @@
 # CLAUDE.md — Agent Entry Point
 
-Read `AGENTS.md` first and follow it as the source of truth. This is Generic Agent Runtime v3.7.
+Read `AGENTS.md` first and follow it as the source of truth. This is Generic Agent Runtime v3.9.
 
 Important behavior:
 
@@ -19,11 +19,13 @@ Important behavior:
 - Before implementing Level 2/3 work, run the read-only cross-artifact consistency check (analyze) across the task spec, UX artifact and architecture artifact.
 - After implementation, use the code-quality/testing reflection loop with `./scripts/test.sh` and `./scripts/lint.sh` when available, up to 3 attempts before human review.
 - For security-sensitive or agent/tool/LLM features, apply the OWASP ASI Top 10 (2026) review in `specialists/risk-security-compliance`.
+- In multi-agent repositories (Codex, local models, humans in parallel), follow `core/agent-bridge`: boot with `./scripts/bridge.sh board`, `tail 15` and `claims`; claim shared files before editing; log `done`/`blocked`/`handoff` events with pointers (notes ≤140 chars) — details go in the task file, never in the ledger.
 - Write durable context to `docs/ai` before it can be lost. Capture reusable lessons in `docs/ai/decision-log.md`.
 - For Level 2/3 work, create or update a task file under `docs/ai/tasks/`.
 - For UX work, load `.agents/skills/specialists/ux-product/SKILL.md`.
 - For architecture or cross-file work, load `.agents/skills/specialists/software-architecture-uml/SKILL.md`.
 - For critical work, use the required gates from `AGENTS.md` and complete the Level 3 checklist.
+- For production launches and deploys, complete the applicable parts of `docs/ai/release-checklist.md` (Part A launch readiness once and on major changes; Part B on every deploy). Blocker items gate the release.
 - If a gate is skipped, mark it as not applicable with a reason.
 - Do not remove gates, approval boundaries, or memory requirements without a documented decision.
 - Do not produce long final reports for small tasks.
@@ -38,6 +40,7 @@ docs/ai/conventions.md
 docs/ai/risks.md
 docs/ai/shared-context.md
 docs/ai/decision-log.md
+docs/ai/release-checklist.md
 ```
 
 Do not duplicate project details here unless they are essential for every session.

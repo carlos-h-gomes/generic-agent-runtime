@@ -147,3 +147,4 @@ Pass conditions:
 - Alert path considered.
 - Rollback path clear for risky changes.
 - Post-release monitoring considered.
+- For production launches/deploys: applicable items of `docs/ai/release-checklist.md` completed (Blockers) or marked not applicable with a reason; deferred Recommended items have an owner.

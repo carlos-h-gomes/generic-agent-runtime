@@ -1,6 +1,6 @@
 # AGENTS.md — Generic Agent Runtime
 
-Version: 3.7
+Version: 3.9
 Runtime language: English, to maximize compatibility with coding agents.
 User-facing responses may use the user's language.
 
@@ -55,6 +55,8 @@ docs/ai/conventions.md           Code, architecture, UX, testing, docs conventio
 docs/ai/risks.md                 Security, privacy, cost, operational, UX/product risks
 docs/ai/decision-log.md          Decisions, rejected alternatives, and reasons
 docs/ai/shared-context.md        Cross-session and cross-tool context that must not be lost
+docs/ai/release-checklist.md     Launch readiness (Part A) and per-release (Part B) checklist for production
+docs/ai/bridge/                  Multi-agent coordination: board.md (current state) + ledger.jsonl (append-only events)
 docs/ai/tasks/                   Task-specific context, plan, gates, validation and handoff
 ```
 
@@ -138,6 +140,8 @@ Before implementation, verify that enough context is written down to resume the 
 ## 4. Multi-tool and shared-file coordination
 
 When Codex, Claude, a human, or another tool may manipulate the same files, agents must maintain a shared understanding through text files, not memory.
+
+The concrete protocol is the **agent bridge** (`core/agent-bridge`): an append-only event ledger (`docs/ai/bridge/ledger.jsonl`) plus a one-page current-state board (`docs/ai/bridge/board.md`), operated via `./scripts/bridge.sh` (board / tail / log / claims / compact). Fixed session boot: read the board, the last ~15 ledger events, and only the task file(s) at hand. Events carry pointers, never payloads: notes are capped at 140 characters and details live in task files. Claim shared files before editing (`claim` event), release on completion, and log `done`/`blocked`/`handoff` at milestones. Compact the ledger past ~200 lines. Restricted lane for local/small models: `prompt-templates/04-bridge-worker.txt` (Level 0/1 execution only, same event schema, governance files off-limits).
 
 For Level 2 or Level 3 tasks, the task file must include:
 
@@ -412,6 +416,7 @@ Core skills:
 .agents/skills/core/project-profiling/SKILL.md
 .agents/skills/core/task-triage/SKILL.md
 .agents/skills/core/context-memory/SKILL.md
+.agents/skills/core/agent-bridge/SKILL.md
 .agents/skills/core/implementation/SKILL.md
 .agents/skills/core/minimalism/SKILL.md
 .agents/skills/core/validation/SKILL.md
@@ -486,6 +491,8 @@ Use when there are paid APIs, LLMs, embeddings, OCR, scraping, recurring jobs, c
 ### Observability/Release gate
 
 Use when the change affects production, jobs, endpoints, automations, customer impact, SLAs, deployment, rollback, monitoring, or alerts.
+
+This gate owns `docs/ai/release-checklist.md`: Part A (launch readiness) before the first production launch and after major changes; Part B (per-release) on every production deploy. Blocker items must be true or explicitly marked `Not applicable — reason: ...` per §16; Recommended items may be deferred with a written reason and owner.
 
 ### AI/LLM gate
 
@@ -656,6 +663,7 @@ For Level 3 tasks, the final validation must explicitly cover:
 - Operational impact.
 - Observability impact: logs, metrics, alerts, correlation IDs, dashboards or runbooks.
 - Release plan.
+- Release checklist status (`docs/ai/release-checklist.md`) when a production launch or deploy is involved.
 - Rollback plan.
 - Incident criteria and response path when production/customer impact exists.
 - Human approval status.

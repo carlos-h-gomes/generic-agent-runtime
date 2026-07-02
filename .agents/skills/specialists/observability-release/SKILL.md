@@ -35,7 +35,7 @@ Ensure production-impacting changes can be deployed, monitored, diagnosed and ro
 ## Deliverables
 
 - Observability checklist.
-- Release checklist.
+- Release checklist: this gate owns `docs/ai/release-checklist.md`. Run Part A (launch readiness) before the first production launch and re-audit on major changes; run Part B (per-release) on every production deploy. Record how each Blocker was verified; mark inapplicable items `Not applicable — reason: ...`.
 - Rollback plan.
 - Incident notes when relevant.
 
@@ -60,3 +60,4 @@ For Level 2/3 work, record durable findings, assumptions, risks, and handoff not
 - [ ] Alerts considered.
 - [ ] Rollback defined.
 - [ ] Post-release monitoring considered.
+- [ ] `docs/ai/release-checklist.md` Part A/B applied when this is a production launch or deploy.

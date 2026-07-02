@@ -105,3 +105,71 @@ Adopt rtk at the tooling layer as an optional, recommended wrapper for validatio
 
 - Optional: add `rtk gain`/`discover` to a periodic cost review if rtk is adopted across projects.
 - Revisit caveman only if sessions become conversation-heavy and artifact-light.
+
+## 2026-07-02 — Release checklist as a first-class artifact (v3.8)
+Status: active
+Supersedes: (none)
+
+### Context
+
+Launch/deploy readiness knowledge lived in chat and in each engineer's head. A user-provided 8-section production-readiness draft (deployment, auth, secrets, database, payments, observability, cost, incidents) was evaluated for adoption.
+
+### Decision
+
+Adopt the draft as `docs/ai/release-checklist.md`, restructured: Part A (launch readiness — run once, re-audit on major change or quarterly) vs Part B (per-release, <10 min); [B]locker/[R]ecommended tiering; conditional sections; N/A handling per §16; blockers require recorded verification evidence. Ownership assigned to the Observability/Release gate. Added sections missing from the draft for this stack: external integrations/inbound webhooks, privacy/LGPD, AI/LLM & agents; supply-chain items under Secrets. De-branded vendor-specific wording. Version bumped 3.7 → 3.8.
+
+### Alternatives considered
+
+- New specialist skill `launch-readiness`: rejected — duplicates the Observability/Release gate and contradicts the consolidation philosophy (§15).
+- Keep as external doc outside `docs/ai`: rejected — violates the written-memory rule and would not be discovered by agents.
+- Single flat checklist per release: rejected — mixes prove-once items with per-deploy items, causing checklist rot.
+
+### Consequences
+
+- New memory file plus light wiring in `AGENTS.md` (§1, §11, §17), `CLAUDE.md`, `specialists/observability-release`, `docs/ai/quality-gates.md`.
+- Level 3 completion checklist now includes release-checklist status for production launches/deploys.
+
+### Risks
+
+- Checklist theater if items are ticked without evidence — mitigated by the verification-evidence rule for blockers.
+- Rot if Part A is never re-audited — mitigated by explicit re-audit triggers.
+
+### Follow-ups
+
+- Optional `./scripts/release-check.sh` to automate mechanical Part B items.
+- Consider per-project overrides (e.g. dropping the payments section permanently in projects that will never bill).
+
+## 2026-07-02 — Agent bridge: file-based multi-agent coordination protocol (v3.9)
+Status: active
+Supersedes: (none — makes AGENTS.md §4 concrete)
+
+### Context
+
+AGENTS.md §4 required cross-tool coordination "through text files" but defined no protocol: no fixed file, no schema, no read budget. In practice each agent re-read broad context, and handoffs between Claude Code, Codex and local models were prose-heavy and token-expensive.
+
+### Decision
+
+Adopt an event-log + materialized-view pattern: `docs/ai/bridge/ledger.jsonl` (append-only JSONL events, short keys, notes ≤140 chars, pointers not payloads) plus `docs/ai/bridge/board.md` (one-page overwritten current-state snapshot). Mechanics via `scripts/bridge.sh` (board/tail/log/claims/compact — pure bash, python3 optional). Fixed session boot: board + tail 15 + claims + only the relevant task file (~≤600 tokens). File claims are ledger events; `done`/`release` frees them. Compaction past 200 lines into `ledger-archive.jsonl`. New core skill `core/agent-bridge`; restricted lane for local/small models via `prompt-templates/04-bridge-worker.txt` (Level 0/1 execution only). Version bumped 3.8 → 3.9. The distribution zip now extracts at repository root (no nested folder).
+
+### Alternatives considered
+
+- Git-only coordination (branches + commit messages): authoritative for code but invisible to uncommitted/in-flight work and unreadable cheaply mid-task. Kept as the code layer, not the coordination layer.
+- One markdown "conversation" file agents append prose to: token growth is unbounded and unparseable; exactly the failure mode to avoid. Rejected.
+- MCP/socket-based live coordination: not portable across Codex/local models, adds infrastructure. Rejected; files are the lowest common denominator.
+- Lockfiles per path (`.lock` files): litter the tree and leak into commits. Claims-in-ledger keep coordination data in one place. Rejected.
+
+### Consequences
+
+- New skill (16 core+specialist skills), new script, new `docs/ai/bridge/` memory surface, template for local models; §4 now has teeth.
+- Reads stay flat as history grows (tail + compaction); writes cost ~50–80 tokens/event.
+
+### Risks
+
+- Stale claims from crashed sessions block others — mitigation: claims are advisory + humans/planners may log `release` on behalf of a dead session, with a note.
+- Agents pasting payloads despite the cap — mitigated by the 140-char hard cap in `bridge.sh` and the pointer rule in the skill.
+- Board drift vs ledger — board declares the ledger authoritative for claims; `claims` recomputes from events.
+
+### Follow-ups
+
+- Optional: `bridge.sh stale` to flag claims older than N hours.
+- Optional: git hook appending a `note` event per commit for human commits.
