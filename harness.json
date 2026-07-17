@@ -1,0 +1,62 @@
+{
+  "$schema": "schemas/harness.schema.json",
+  "name": "generic-agent-runtime",
+  "display_name": "Generic Agent Runtime",
+  "version": "4.2.0",
+  "released": "2026-07-17",
+  "runtime_language": "English",
+  "adapters": [
+    "CLAUDE.md",
+    "GEMINI.md"
+  ],
+  "contract_versions": {
+    "task": "1.0",
+    "gate_result": "1.0",
+    "bridge_event": "2.0"
+  },
+  "instruction_budget": {
+    "agents_md_max_bytes": 8192,
+    "agents_md_max_lines": 170
+  },
+  "core_skills": [
+    "agent-bridge",
+    "agent-orchestration",
+    "context-memory",
+    "documentation",
+    "implementation",
+    "minimalism",
+    "project-profiling",
+    "task-triage",
+    "validation"
+  ],
+  "specialist_skills": [
+    "ai-llm",
+    "code-quality-testing",
+    "data-integration",
+    "finops-cost",
+    "observability-release",
+    "risk-security-compliance",
+    "software-architecture-uml",
+    "ux-product"
+  ],
+  "schemas": {
+    "task": "schemas/task-contract.schema.json",
+    "gate_result": "schemas/gate-result.schema.json",
+    "bridge_event": "schemas/bridge-event.schema.json"
+  },
+  "distribution": {
+    "archive": "agent-runtime-v4.2.zip",
+    "manifest": "MANIFEST.sha256",
+    "scaffold_root": "scaffold",
+    "exclude_maintainer_tasks": true,
+    "empty_bridge": true,
+    "maintainer_marker": ".harness-source"
+  },
+  "execution_limits": {
+    "default_command_timeout_seconds": 300,
+    "runtime_command_timeout_seconds": 120,
+    "kill_grace_seconds": 5,
+    "failure_tail_lines": 120,
+    "validation_attempts": 2
+  }
+}

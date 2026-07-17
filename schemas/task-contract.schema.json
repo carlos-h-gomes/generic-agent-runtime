@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/task-contract-v1.json",
+  "title": "Harness task contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "status",
+    "mode",
+    "work_level",
+    "outcome",
+    "acceptance_criteria",
+    "scope",
+    "risk",
+    "authorization",
+    "files",
+    "gates",
+    "skills",
+    "approvals",
+    "context",
+    "coordination",
+    "validation",
+    "next_action"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": "1.0" },
+    "task_id": { "$ref": "#/$defs/non_placeholder" },
+    "status": {
+      "enum": [
+        "draft",
+        "ready",
+        "needs_input",
+        "awaiting_approval",
+        "in_progress",
+        "validation_failed",
+        "blocked_external",
+        "paused_for_review",
+        "ready_for_review",
+        "done"
+      ]
+    },
+    "mode": { "enum": ["answer", "inspect", "diagnose", "review", "change", "monitor"] },
+    "work_level": { "type": "integer", "minimum": 0, "maximum": 3 },
+    "outcome": { "$ref": "#/$defs/non_placeholder" },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/non_placeholder" }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["size", "in", "out"],
+      "properties": {
+        "size": { "enum": ["micro", "local", "multi_file", "cross_boundary", "system"] },
+        "in": { "$ref": "#/$defs/string_list" },
+        "out": { "$ref": "#/$defs/string_list" }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "reversibility", "external_effect", "triggers"],
+      "properties": {
+        "level": { "enum": ["low", "medium", "high", "critical"] },
+        "reversibility": { "enum": ["easy", "partial", "hard", "irreversible"] },
+        "external_effect": { "enum": ["none", "local", "shared", "production"] },
+        "triggers": { "$ref": "#/$defs/string_list" }
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["writes", "external_actions"],
+      "properties": {
+        "writes": { "$ref": "#/$defs/action_authorization" },
+        "external_actions": { "$ref": "#/$defs/action_authorization" }
+      }
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owned", "shared", "do_not_touch", "discover"],
+      "properties": {
+        "owned": { "$ref": "#/$defs/string_list" },
+        "shared": { "$ref": "#/$defs/string_list" },
+        "do_not_touch": { "$ref": "#/$defs/string_list" },
+        "discover": { "$ref": "#/$defs/string_list" }
+      }
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "reason", "artifact"],
+        "properties": {
+          "id": { "$ref": "#/$defs/gate_id" },
+          "status": {
+            "enum": ["required", "passed", "passed_with_conditions", "not_applicable", "deferred", "blocked"]
+          },
+          "reason": { "$ref": "#/$defs/non_placeholder" },
+          "artifact": { "type": ["string", "null"] },
+          "owner": { "type": ["string", "null"] },
+          "approval_ref": { "type": ["string", "null"] }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "status": { "const": "deferred" } }, "required": ["status"] },
+            "then": { "required": ["owner"], "properties": { "owner": { "type": "string", "minLength": 1 } } }
+          }
+        ]
+      }
+    },
+    "skills": { "$ref": "#/$defs/string_list" },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action", "required", "status", "reason"],
+        "properties": {
+          "action": { "$ref": "#/$defs/non_placeholder" },
+          "required": { "type": "boolean" },
+          "status": { "enum": ["not_required", "pending", "approved", "rejected"] },
+          "reason": { "$ref": "#/$defs/non_placeholder" },
+          "granted_by": { "type": ["string", "null"] },
+          "scope": { "$ref": "#/$defs/string_list" }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "required": { "const": true } }, "required": ["required"] },
+            "then": { "properties": { "status": { "enum": ["pending", "approved", "rejected"] } } }
+          },
+          {
+            "if": { "properties": { "required": { "const": false } }, "required": ["required"] },
+            "then": { "properties": { "status": { "const": "not_required" } } }
+          },
+          {
+            "if": { "properties": { "status": { "const": "approved" } }, "required": ["status"] },
+            "then": { "required": ["granted_by"], "properties": { "granted_by": { "type": "string", "minLength": 1 } } }
+          }
+        ]
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task_file", "references", "assumptions", "missing_information"],
+      "properties": {
+        "task_file": { "type": ["string", "null"] },
+        "references": { "$ref": "#/$defs/string_list" },
+        "assumptions": { "$ref": "#/$defs/string_list" },
+        "missing_information": { "$ref": "#/$defs/string_list" }
+      }
+    },
+    "coordination": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "run_id", "claims", "max_depth", "max_concurrency"],
+      "properties": {
+        "strategy": { "enum": ["single_agent", "native_subagents", "file_bridge", "hybrid"] },
+        "run_id": { "type": ["string", "null"] },
+        "claims": { "$ref": "#/$defs/string_list" },
+        "max_depth": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "max_concurrency": { "type": "integer", "minimum": 1, "maximum": 32 }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commands", "manual_checks", "max_attempts", "evidence", "not_validated"],
+      "properties": {
+        "commands": { "$ref": "#/$defs/string_list" },
+        "manual_checks": { "$ref": "#/$defs/string_list" },
+        "max_attempts": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "evidence": { "$ref": "#/$defs/string_list" },
+        "not_validated": { "type": "array", "items": { "$ref": "#/$defs/validation_gap" } }
+      }
+    },
+    "next_action": { "$ref": "#/$defs/non_placeholder" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "enum": ["answer", "inspect", "diagnose", "review"] } }, "required": ["mode"] },
+      "then": {
+        "properties": {
+          "authorization": {
+            "properties": {
+              "writes": { "properties": { "allowed": { "const": false } } },
+              "external_actions": { "properties": { "allowed": { "const": false } } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "scope": { "properties": { "size": { "enum": ["cross_boundary", "system"] } } } } },
+      "then": { "properties": { "context": { "properties": { "task_file": { "type": "string", "minLength": 1 } } } } }
+    },
+    {
+      "if": { "properties": { "work_level": { "enum": [2, 3] } }, "required": ["work_level"] },
+      "then": { "properties": { "context": { "properties": { "task_file": { "type": "string", "minLength": 1 } } } } }
+    },
+    {
+      "if": { "properties": { "risk": { "properties": { "level": { "enum": ["high", "critical"] } } } } },
+      "then": { "properties": { "context": { "properties": { "task_file": { "type": "string", "minLength": 1 } } } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "done" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "validation": { "properties": { "evidence": { "minItems": 1 } } },
+          "gates": {
+            "items": {
+              "properties": {
+                "status": { "enum": ["passed", "passed_with_conditions", "not_applicable"] }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": { "status": { "enum": ["passed", "passed_with_conditions"] } },
+                    "required": ["status"]
+                  },
+                  "then": { "properties": { "artifact": { "type": "string", "minLength": 1 } } }
+                }
+              ]
+            }
+          },
+          "approvals": {
+            "items": { "properties": { "status": { "enum": ["not_required", "approved"] } } }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "non_placeholder": {
+      "type": "string",
+      "minLength": 1,
+      "not": { "pattern": "^(see above|SEE ABOVE|TBD|TODO|N/?A|placeholder|PLACEHOLDER)$" }
+    },
+    "string_list": { "type": "array", "items": { "$ref": "#/$defs/non_placeholder" } },
+    "action_authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed", "scope"],
+      "properties": {
+        "allowed": { "type": "boolean" },
+        "scope": { "$ref": "#/$defs/string_list" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "allowed": { "const": true } }, "required": ["allowed"] },
+          "then": { "properties": { "scope": { "minItems": 1 } } }
+        }
+      ]
+    },
+    "validation_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["area", "reason", "disposition", "acceptance_ref"],
+      "properties": {
+        "area": { "$ref": "#/$defs/non_placeholder" },
+        "reason": { "$ref": "#/$defs/non_placeholder" },
+        "disposition": { "enum": ["out_of_scope", "accepted_residual", "blocked"] },
+        "acceptance_ref": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "disposition": { "const": "accepted_residual" } }, "required": ["disposition"] },
+          "then": { "properties": { "acceptance_ref": { "type": "string", "minLength": 1 } } }
+        }
+      ]
+    },
+    "gate_id": {
+      "enum": [
+        "architecture_uml",
+        "code_quality_testing",
+        "ux_product",
+        "security_compliance",
+        "data_integration",
+        "finops",
+        "observability_release",
+        "ai_llm"
+      ]
+    }
+  }
+}

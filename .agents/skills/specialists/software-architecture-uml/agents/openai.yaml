@@ -1,0 +1,5 @@
+interface:
+  display_name: "Software Architecture Uml"
+  short_description: "Explicit specialist review for Level 2/3 architecture, contracts, data ownership, workflows, queues, or deployment boundaries."
+policy:
+  allow_implicit_invocation: false

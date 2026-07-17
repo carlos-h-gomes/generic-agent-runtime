@@ -1,53 +1,31 @@
 ---
 name: documentation
-description: "Record durable project knowledge (architecture decisions, new integrations, endpoints/contracts, schemas/migrations, operational workflows, new cost/security/compliance risks, cross-tool handoffs) without creating noise. Use after Level 2/3 work or when a future agent must understand something to work safely. Prefers updating existing docs over creating new ones; skips trivial/cosmetic changes."
+description: "Use when a completed change creates durable architecture, contract, operating, migration, or user knowledge that maintainers need."
 ---
 
 # Documentation
 
-## Objective
+Own durable project and user documentation. `core/context-memory` owns active task continuity.
 
-Document durable project knowledge without creating noise.
+## Write only durable value
 
-## When to use
+Document a fact when its absence could cause misuse, unsafe changes, repeated investigation, or operational failure. Typical triggers:
 
-- Architecture decision.
-- New integration.
-- New endpoint/contract.
-- New data model/migration.
-- New operational workflow.
-- New cost/security/compliance risk.
-- Level 2 or 3 task that future agents must understand.
-- Cross-tool handoff or shared-file coordination.
+- a public/internal contract, schema, integration, business rule, or migration changed;
+- architecture or a rejected alternative matters later;
+- a new security, privacy, cost, or operational risk exists;
+- build, release, rollback, recovery, or support behavior changed;
+- users or maintainers need migration or usage instructions.
 
-## When not to use
+Prefer the existing authoritative document. Create the smallest new file only when no current home fits. Link to code and task evidence; do not paste discoverable file trees, generated output, or temporary debugging notes.
 
-- Trivial local changes.
-- Cosmetic-only edits.
-- Temporary notes that will not matter after the task.
+## Quality rules
 
-## Process
+- State current behavior first and date/version changing claims.
+- Separate verified fact, decision, assumption, and future work.
+- Record supersession instead of silently erasing important history.
+- Use synthetic examples and redacted evidence.
+- Never store secrets, personal/customer data, private prompts, chain-of-thought, or full logs.
+- Keep commands in `commands.md` only after they actually run or are verified from an authoritative project source.
 
-1. Decide whether documentation is genuinely needed.
-2. Prefer updating existing docs over creating new docs.
-3. Keep docs factual and concise.
-4. Put task-specific planning in `docs/ai/tasks/`.
-5. Put durable decisions in `docs/ai/decision-log.md`.
-6. Put cross-tool context in `docs/ai/shared-context.md`.
-7. Remove stale or contradictory notes when updating.
-
-## Quality criteria
-
-- Useful in future sessions.
-- No generic filler.
-- Easy to scan.
-- Accurate and current.
-- Enough context exists for another agent to continue safely.
-
-## Checklist
-
-- [ ] Documentation need justified.
-- [ ] Correct file updated.
-- [ ] Decision log updated if needed.
-- [ ] Shared context updated if needed.
-- [ ] No duplicate boilerplate.
+Documentation writes require task authorization. Finish by checking links, paths, version numbers, and consistency with the task contract, schemas, and actual implementation.

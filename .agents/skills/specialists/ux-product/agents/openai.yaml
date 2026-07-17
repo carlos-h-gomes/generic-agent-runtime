@@ -1,0 +1,5 @@
+interface:
+  display_name: "Ux Product"
+  short_description: "Explicit specialist review for material user-facing screens, forms, flows, states, notifications, accessibility, or product copy."
+policy:
+  allow_implicit_invocation: false

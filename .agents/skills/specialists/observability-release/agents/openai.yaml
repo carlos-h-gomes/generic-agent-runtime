@@ -1,0 +1,5 @@
+interface:
+  display_name: "Observability Release"
+  short_description: "Explicit specialist review for production rollout, telemetry, alerts, rollback, incident response, or operational readiness."
+policy:
+  allow_implicit_invocation: false

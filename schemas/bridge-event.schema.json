@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/bridge-event-v2.json",
+  "title": "Harness bridge event v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "id", "ts", "run", "a", "e", "t", "f", "n", "nx", "lease"],
+  "properties": {
+    "v": { "const": 2 },
+    "id": { "type": "string", "format": "uuid" },
+    "ts": { "type": "string", "format": "date-time" },
+    "run": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "a": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "e": { "enum": ["claim", "release", "start", "progress", "done", "blocked", "handoff", "note"] },
+    "t": { "type": "string", "minLength": 1, "maxLength": 160, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "f": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500,
+        "pattern": "^(?!/)(?!.*\\\\)(?!.*:)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^\\x00-\\x1F]+$"
+      }
+    },
+    "n": { "type": "string", "maxLength": 140, "pattern": "^[^\\x00-\\x1F]*$" },
+    "nx": { "type": "string", "maxLength": 140, "pattern": "^[^\\x00-\\x1F]*$" },
+    "lease": { "type": ["string", "null"], "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "e": { "const": "claim" } }, "required": ["e"] },
+      "then": {
+        "properties": {
+          "f": { "minItems": 1 },
+          "lease": { "type": "string", "format": "date-time" }
+        }
+      },
+      "else": { "properties": { "lease": { "type": "null" } } }
+    }
+  ]
+}

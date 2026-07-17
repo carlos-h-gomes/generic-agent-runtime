@@ -1,0 +1,5 @@
+interface:
+  display_name: "Risk Security Compliance"
+  short_description: "Explicit specialist review for auth, secrets, untrusted input, customer data, dependencies, production, privacy, or compliance."
+policy:
+  allow_implicit_invocation: false

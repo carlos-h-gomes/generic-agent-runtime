@@ -1,0 +1,5 @@
+interface:
+  display_name: "Agent Bridge"
+  short_description: "Use only for actual cross-tool or cross-session shared writers that need durable file claims and handoffs"
+policy:
+  allow_implicit_invocation: false

@@ -1,38 +1,8 @@
 # Project Risks
 
-Status: template. Fill during Project Profiling and update as risks become durable.
+Status: uninitialized. Keep material durable risks and their owners current.
 
-## Security risks
+| ID | Domain | Risk | Severity | Trigger | Mitigation/guardrail | Residual risk / owner |
+|---|---|---|---:|---|---|---|
 
-| Risk | Area | Severity | Trigger | Mitigation | Owner/status |
-|---|---|---:|---|---|---|
-
-## Compliance/privacy risks
-
-| Data | Purpose | Location | Third parties | Retention | Mitigation |
-|---|---|---|---|---|---|
-
-## Cost risks
-
-| Driver | Unit | Expected volume | Worst case | Limit/guardrail | Alert | Mitigation |
-|---|---|---:|---:|---:|---|---|
-
-## Operational risks
-
-| Workflow | Failure mode | Detection | Mitigation | Rollback |
-|---|---|---|---|---|
-
-## UX/product risks
-
-| Flow | Risk | Impact | Mitigation |
-|---|---|---|---|
-
-## Architecture risks
-
-| Area | Risk | Impact | Mitigation / decision needed |
-|---|---|---|---|
-
-## Context / handoff risks
-
-| File/path | Risk | Affected tools | Coordination rule |
-|---|---|---|---|
+Domains may include security, privacy/compliance, data, AI, cost, operations, UX, architecture, and coordination. Link sensitive evidence; never paste secrets, customer data, full logs, or private prompts.

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Minimalism"
+  short_description: "Review a proposed change for unnecessary concepts, dependencies, branches, and operational surface without weakening safeguards."
+policy:
+  allow_implicit_invocation: false

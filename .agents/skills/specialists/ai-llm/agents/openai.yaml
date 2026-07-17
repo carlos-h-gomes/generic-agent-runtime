@@ -1,0 +1,5 @@
+interface:
+  display_name: "Ai Llm"
+  short_description: "Explicit specialist review for changes where model, retrieval, prompt, tool, or memory behavior materially affects a system."
+policy:
+  allow_implicit_invocation: false

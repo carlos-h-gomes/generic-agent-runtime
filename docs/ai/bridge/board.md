@@ -1,27 +1,18 @@
-# Agent Board — current state
+# Agent Bridge Board
 
-> Materialized view of the bridge. **Overwrite in place; keep under one page.** History lives in `ledger.jsonl` (append-only, read with `./scripts/bridge.sh tail`). Reading this board must be enough to know who is doing what right now. Details never live here — they live in the task file each row points to.
+Generated from `ledger.jsonl`; manual edits are overwritten.
 
-Updated: (never) by (nobody)
+- Updated: never
+- Ledger events: 0
 
-## Active tasks
+## Active runs
 
-| Task file (docs/ai/tasks/) | Level | Owner (agent) | Status | Blocked on |
-|---|---|---|---|---|
-| _none_ | | | | |
+None.
 
-## File claims
+## Active claims
 
-Claims are derived from ledger `claim`/`release` events — refresh with `./scripts/bridge.sh claims`. Snapshot below is advisory; the ledger is authoritative.
+None.
 
-| Path / glob | Claimed by | Since | Task |
-|---|---|---|---|
-| _none_ | | | |
+## Blockers
 
-## Waiting on a human
-
-- _none_
-
-## Do not touch (global)
-
-- _none_
+None.

@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/gate-result-v1.json",
+  "title": "Harness GateResult v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "gate",
+    "phase",
+    "revision",
+    "status",
+    "applicability",
+    "summary",
+    "checks",
+    "findings",
+    "evidence",
+    "approval",
+    "generated_at"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": "1.0" },
+    "task_id": { "type": "string", "minLength": 1 },
+    "gate": { "$ref": "#/$defs/gate_id" },
+    "phase": { "enum": ["design", "implementation_review", "pre_release"] },
+    "revision": { "type": "integer", "minimum": 1 },
+    "status": { "enum": ["passed", "passed_with_conditions", "blocked", "not_applicable"] },
+    "applicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applicable", "reason"],
+      "properties": {
+        "applicable": { "type": "boolean" },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 1000 }
+      }
+    },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 1500 },
+    "checks": { "type": "array", "items": { "$ref": "#/$defs/check" } },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+    "acceptance_criteria_added": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "artifacts": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "sources": { "type": "array", "items": { "$ref": "#/$defs/source" } },
+    "approval": { "$ref": "#/$defs/approval" },
+    "handoff": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": ["string", "null"], "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "not_applicable" } }, "required": ["status"] },
+      "then": { "properties": { "applicability": { "properties": { "applicable": { "const": false } } } } },
+      "else": { "properties": { "applicability": { "properties": { "applicable": { "const": true } } } } }
+    },
+    {
+      "if": { "properties": { "status": { "enum": ["passed", "passed_with_conditions"] } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "checks": {
+            "minItems": 1,
+            "items": { "properties": { "status": { "enum": ["passed", "not_applicable"] } } }
+          },
+          "evidence": { "minItems": 1 },
+          "findings": {
+            "not": {
+              "contains": {
+                "type": "object",
+                "properties": { "blocking": { "const": true }, "state": { "const": "open" } },
+                "required": ["blocking", "state"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "passed" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "findings": {
+            "items": { "properties": { "state": { "enum": ["mitigated", "risk_accepted", "not_applicable"] } } }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "gate_id": {
+      "enum": [
+        "architecture_uml",
+        "code_quality_testing",
+        "ux_product",
+        "security_compliance",
+        "data_integration",
+        "finops",
+        "observability_release",
+        "ai_llm"
+      ]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "evidence_refs"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["passed", "failed", "not_verified", "not_applicable"] },
+        "evidence_refs": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "string", "maxLength": 1000 }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "severity", "state", "blocking", "required_action", "due_before"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "severity": { "enum": ["critical", "high", "medium", "low", "info"] },
+        "state": { "enum": ["open", "mitigated", "risk_accepted", "deferred", "not_applicable"] },
+        "blocking": { "type": "boolean" },
+        "evidence_refs": { "type": "array", "items": { "type": "string" } },
+        "required_action": { "type": "string", "minLength": 1, "maxLength": 1500 },
+        "owner": { "type": ["string", "null"] },
+        "due_before": { "enum": ["implementation", "merge", "release", "post_release", "not_applicable"] },
+        "risk_acceptance_ref": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "risk_accepted" } }, "required": ["state"] },
+          "then": { "properties": { "risk_acceptance_ref": { "type": "string", "minLength": 1 } }, "required": ["risk_acceptance_ref"] }
+        },
+        {
+          "if": { "properties": { "state": { "const": "deferred" } }, "required": ["state"] },
+          "then": {
+            "properties": {
+              "owner": { "type": "string", "minLength": 1 },
+              "due_before": { "enum": ["merge", "release", "post_release"] },
+              "blocking": { "const": false }
+            },
+            "required": ["owner", "due_before"]
+          }
+        }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "pointer", "summary", "sensitivity", "redacted"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["file", "command", "test", "diagram", "screenshot", "manual_check", "metric", "source", "other"] },
+        "pointer": { "type": "string", "minLength": 1, "maxLength": 1500 },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 2000 },
+        "redacted_excerpt": { "type": ["string", "null"], "maxLength": 3000 },
+        "sensitivity": { "enum": ["public", "internal", "confidential", "restricted"] },
+        "redacted": { "type": "boolean" },
+        "sha256": { "type": ["string", "null"], "pattern": "^[0-9a-fA-F]{64}$" },
+        "captured_at": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "url", "as_of"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" },
+        "version": { "type": ["string", "null"] },
+        "as_of": { "type": "string", "format": "date" }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "reason", "status"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "status": { "enum": ["not_required", "pending", "approved", "rejected"] },
+        "evidence_ref": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "required": { "const": true } }, "required": ["required"] },
+          "then": { "properties": { "status": { "enum": ["pending", "approved", "rejected"] } } }
+        },
+        {
+          "if": { "properties": { "required": { "const": false } }, "required": ["required"] },
+          "then": { "properties": { "status": { "const": "not_required" } } }
+        },
+        {
+          "if": { "properties": { "status": { "const": "approved" } }, "required": ["status"] },
+          "then": { "properties": { "evidence_ref": { "type": "string", "minLength": 1 } }, "required": ["evidence_ref"] }
+        }
+      ]
+    }
+  }
+}

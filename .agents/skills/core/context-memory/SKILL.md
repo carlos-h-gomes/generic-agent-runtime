@@ -1,86 +1,38 @@
 ---
 name: context-memory
-description: "Curate durable written project memory so context is never lost between sessions, tools or context resets. Use on any Level 2/3 task, any multi-session/multi-tool work, anything with business rules, integration contracts, architecture decisions or shared files, or whenever project memory files are growing stale, contradictory or bloated. Decides what to write, where (docs/ai/*), and prunes superseded notes."
+description: "Use for concise durable state in multi-session, multi-writer, or Level 2/3 work; skip for ordinary single-session tasks."
 ---
 
-# Context and Written Memory
+# Context memory
 
-## Objective
+Own continuity during work. `core/documentation` owns durable user/technical documentation after the change.
 
-Prevent context loss by turning important findings, assumptions, decisions, and handoff notes into concise repository documentation.
+## Memory map
 
-This skill is a context curator. It must keep the working memory useful, lean, and durable without letting project files grow into noisy chat transcripts.
+- `constitution.md`: stable non-negotiable project principles.
+- `project-profile.md`: current project facts and boundaries.
+- `commands.md`: verified commands only.
+- `conventions.md`: project-specific patterns.
+- `standards.md`: dated changing normative references.
+- `risks.md`: durable security, privacy, cost, operational, and UX risks.
+- `decision-log.md`: decisions, rejected options, supersession, and reasons.
+- `shared-context.md`: concise cross-session current state.
+- `tasks/`: task contract, notes, gate indexes, evidence pointers, status, and handoff.
+- `bridge/`: coordination pointers, not task payloads.
 
-## When to use
+## Procedure
 
-- Any Level 2 or Level 3 task.
-- Any task that spans multiple sessions or tools.
-- Any task where the agent says or implies it will “remember” something.
-- Any task with business rules, integration contracts, architecture decisions, or shared files.
-- Any task where project memory files are becoming too long, stale, contradictory, or expensive to load.
+1. Read the active task contract and only the referenced memory needed for the current step.
+2. Write facts that another agent must know to resume safely: acceptance criteria, ownership, material decisions, contract changes, unresolved risks, approvals, validation state, and next action.
+3. Link to source files or controlled evidence rather than copying large payloads.
+4. Mark facts as verified, inferred, historical, or superseded where ambiguity is possible.
+5. Replace stale summaries; append only where chronology matters, such as decisions and bridge events.
+6. Before compaction or handoff, ensure the task contract and notes can restore current status without chat history.
 
-## Process
+Never store chain-of-thought, secrets, raw customer data, full logs, unredacted screenshots, or private prompt payloads. Use bounded redacted summaries plus pointers/hashes.
 
-1. Identify what future agents must know.
-2. Separate durable knowledge from temporary execution noise.
-3. Decide the correct written location:
-   - `constitution.md` for durable, rarely-changing principles and hard constraints.
-   - `project-profile.md` for project identity, stack, architecture, paths.
-   - `commands.md` for verified commands.
-   - `conventions.md` for recurring implementation patterns.
-   - `risks.md` for durable risks.
-   - `shared-context.md` for cross-tool/session context.
-   - `decision-log.md` for durable decisions and reusable lessons learned.
-   - `docs/ai/tasks/` for task-specific plans and handoffs.
-4. Write concise facts, not generic filler.
-5. Mark unknowns explicitly.
-6. Append durable decisions to `decision-log.md` instead of burying them in chat or bloating `project-profile.md`.
-7. Compact or remove stale project-memory rules only when they are explicitly superseded by newer repository evidence, user instruction, or decision-log entry.
-8. When removing or replacing stale memory, record the replacement decision in `decision-log.md` or the active task file.
-9. Update handoff notes after changes.
+Memory writes require write authorization. In a read-only task, return a proposed handoff packet in the response instead.
 
-## Durable decision examples
+## Hygiene test
 
-Record decisions such as:
-
-- “Rendering moved to `MainHeader` because requirement X needs a single shared header boundary.”
-- “Webhook retries use idempotency key Y to avoid duplicate processing.”
-- “The project moved from framework A to framework B because deployment constraint Z made A unsuitable.”
-- “Architecture artifact X supersedes older flow Y.”
-
-Do not record temporary noise such as:
-
-- Every command attempted during exploration.
-- Full terminal logs unless the log is needed for a handoff.
-- Generic best practices.
-- Repeated summaries that duplicate existing docs.
-- Personal chat phrasing that does not change the project.
-
-## Memory pruning rules
-
-`docs/ai/project-profile.md` must stay concise. It should describe the project as it is now, not every historical path that was tried.
-
-When a rule, path, command, architecture note, or integration contract is outdated:
-
-1. Confirm it is superseded by a newer source.
-2. Replace it with the current fact.
-3. Keep only the durable reason in `decision-log.md` when the historical reason matters.
-4. If unsure, do not delete. Mark it as `Needs verification` with a short reason.
-
-## Hard rule
-
-Do not store important information only mentally, in hidden reasoning, or in chat history.
-
-If a future agent must rely on it, write it to the repository.
-
-## Checklist
-
-- [ ] Durable facts written to docs.
-- [ ] Temporary execution noise excluded.
-- [ ] Open assumptions recorded.
-- [ ] Durable decisions appended to `decision-log.md`.
-- [ ] Superseded rules removed or marked with reason.
-- [ ] `project-profile.md` kept lean.
-- [ ] Shared files identified.
-- [ ] Handoff notes updated.
-- [ ] No generic filler added.
+Keep an item only if its absence could cause rework, a wrong decision, a safety failure, or an unsafe handoff. Delete duplicate prose, resolve contradictions, and retain the authoritative pointer.

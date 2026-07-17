@@ -1,121 +1,36 @@
 ---
 name: implementation
-description: "Execute the smallest safe code/config/docs change that satisfies an already-approved structured task specification, respecting project conventions and architecture/UX artifacts. Use only AFTER core/task-triage returns ready_for_implementation. Must not invent product scope, architecture, data contracts or deployment topology; returns the task to triage or a specialist when preconditions are missing."
+description: "Implement an authorized repository change with the smallest coherent diff while preserving existing work and established boundaries."
 ---
 
 # Implementation
 
-## Objective
-
-Implement the requested change with the smallest safe modification while respecting project conventions, written context, and the structured task specification produced by `core/task-triage`.
-
-Implementation is an execution role. It must not invent product scope, acceptance criteria, architecture, data contracts, integration behavior, or deployment topology.
-
-## When to use
-
-- Any code/config/docs change after task triage has produced a valid task specification.
-
-## Inputs expected
-
-- Structured task specification from `core/task-triage`.
-- User request.
-- Task level.
-- Relevant project memory.
-- Existing patterns.
-- Acceptance criteria.
-- Architecture/UML artifact when triggered.
-- UX/Product artifact when triggered.
-- File coordination notes for shared files.
-- Validation plan.
+Implementation follows the user request and established repository evidence. Fast-path work may use an inline plan; managed work follows its task contract.
 
 ## Preconditions
 
-Before implementing, verify that:
+Confirm:
 
-- `triage_status` is `ready_for_implementation`.
-- Acceptance criteria are present.
-- Owned/shared/do-not-touch files or a file discovery plan are present.
-- Required architecture/UML and UX/Product artifacts exist when their gates are triggered.
-- Human approval has been granted when the task crosses an approval boundary.
+- mode is `change` and local writes are authorized;
+- the intended outcome, affected area, and validation approach are sufficiently clear;
+- for managed work only, the task contract and required design gates permit implementation;
+- approvals cover the next action, not merely a related one;
+- working-tree and active-claim checks reveal no overlapping undocumented work.
 
-If a precondition fails, stop and return the task to `core/task-triage` or the missing specialist. Do not compensate by guessing.
+If a precondition is missing, return to task triage or the owning specialist. Do not fill a boundary decision by guesswork.
 
-## Process
+## Execution
 
-1. Read relevant files first.
-2. Confirm no shared-file conflict exists.
-3. Confirm implementation constraints from architecture/UML and UX/Product artifacts, when present.
-4. Prefer existing patterns over new abstractions.
-5. Make the smallest coherent change.
-6. Keep boundaries clear: UI, application, domain, infrastructure, integrations.
-7. Handle errors explicitly.
-8. Avoid hidden side effects.
-9. Avoid new dependencies unless clearly justified.
-10. Do not introduce secrets.
-11. Preserve backward compatibility unless the task requires otherwise.
-12. Update tests or validation checklist.
-13. Hand off changed files, commands, and assumptions to `specialists/code-quality-testing` for the reflection loop.
-14. Update task/handoff notes for Level 2/3.
+1. Inspect the narrow code path and existing conventions.
+2. Apply `core/minimalism`: prefer no new concept, then platform/standard library, then an existing dependency/pattern, then the smallest coherent new implementation.
+3. Keep one writer per file. Read-only workers may research or review; the root integrates and verifies.
+4. Validate all external input and model/tool output. Preserve authorization, privacy, accessibility, compatibility, and data-loss controls.
+5. Handle expected failures explicitly. Add tests at the lowest useful level for changed behavior and boundaries.
+6. Avoid unrelated cleanup, dependency additions, generated artifacts, commits, pushes, deployments, or external actions unless explicitly in scope.
+7. Update task status and material handoff facts without copying logs or sensitive payloads.
 
-## Spec-driven development rule
+Use `apply_patch` or the repository's safe edit mechanism. Preserve pre-existing user changes. Never use destructive reset, checkout, or recursive delete to simplify integration.
 
-Implementation must code against the task specification, not against vague chat intent.
+## Handoff to testing
 
-For every acceptance criterion, map the implementation change or validation path that proves it. If an acceptance criterion cannot be implemented or validated, mark the task as blocked before making speculative changes.
-
-## Architecture boundary rule
-
-Implementation may make local code-organization decisions inside the approved design, but it must not create architecture for a new feature.
-
-When a task changes architecture, workflows, data models, integrations, deployment, or cross-cutting concerns, implementation must wait for `specialists/software-architecture-uml` to define the Markdown/Mermaid architecture artifact and implementation constraints.
-
-## Minimalism ladder
-
-Before adding code, a dependency, or an abstraction, walk the ladder in `core/minimalism` and stop at the first rung that solves the need: skip it (YAGNI) → standard library → native platform feature → already-installed dependency → one line → the minimum that works. Prefer the lowest rung that works and existing patterns over new abstractions. Never trade away validation, security, accessibility or data-loss handling to cut lines; if a smaller version drops one of those, it is not smaller, it is broken. Tag any intentional shortcut with a `minimal:` marker and reason so it can be harvested later.
-
-## Reflection loop participation
-
-After implementation, do not stop at “ready for approval” if validation commands are available. Hand the task to `specialists/code-quality-testing` to run the quality loop:
-
-```text
-Implementation → code-quality-testing runs ./scripts/test.sh and ./scripts/lint.sh → failures with stderr return to implementation → implementation fixes → repeat up to the configured attempt limit.
-```
-
-Implementation must use the exact failure output as feedback. Do not hide or summarize away actionable terminal errors.
-
-## Quality criteria
-
-- Change is scoped.
-- Code is readable.
-- Failure modes are handled.
-- Existing behavior is preserved unless intentionally changed.
-- Validation path exists.
-- Each acceptance criterion maps to implementation or validation evidence.
-- Important context is not left only in chat.
-
-## Common risks
-
-- Overengineering.
-- Creating parallel patterns.
-- Silent error handling.
-- Unbounded loops or retries.
-- Adding dependency for a small problem.
-- Editing shared files without handoff notes.
-- Inventing architecture during implementation.
-- Treating failed tests as a human review problem before the reflection loop runs.
-
-## Checklist
-
-- [ ] Structured task specification read.
-- [ ] Preconditions verified.
-- [ ] Relevant files inspected.
-- [ ] Required architecture/UX artifacts respected.
-- [ ] Existing pattern followed.
-- [ ] Minimal change made.
-- [ ] Minimalism ladder walked before new code/dependency/abstraction.
-- [ ] Errors considered.
-- [ ] Shared files coordinated.
-- [ ] Acceptance criteria mapped to changes/validation.
-- [ ] Tests or manual validation updated.
-- [ ] Quality loop handoff prepared.
-- [ ] Handoff notes updated if needed.
+Return changed paths, behavior mapped to acceptance criteria, assumptions resolved, known risks, and the smallest relevant validation commands. `specialists/code-quality-testing` owns the corrective loop; `core/validation` owns final proof.

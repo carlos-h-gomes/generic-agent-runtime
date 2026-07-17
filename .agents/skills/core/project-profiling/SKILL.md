@@ -1,76 +1,39 @@
 ---
 name: project-profiling
-description: "Build a concise, accurate written profile of an unfamiliar or under-documented repository: stack, verified commands, architecture boundaries, important paths, integrations and risks. Use this FIRST on a new project, when docs/ai/project-profile.md is missing/empty/stale, or whenever the agent is unsure how to build, test, run or validate the project. Does not implement features."
+description: "Profile an unfamiliar repository only when commands, boundaries, or project facts are materially unknown or stale."
 ---
 
-# Project Profiling
+# Project profiling
 
-## Objective
+Profile only enough of the repository to work safely. Do not scan everything by default.
 
-Create a compact, accurate written profile of the repository so future agent work is cheaper, safer, and more consistent.
+## Procedure
 
-## When to use
+1. Find the repository root, applicable instruction chain, version-control state, and local capability constraints.
+2. Read high-signal manifests and entrypoints: README, package/runtime manifests, lockfiles, CI, build files, deployment configuration, and main source directories.
+3. Inspect existing `docs/ai/` summaries before source details. Follow pointers progressively.
+4. Derive commands only from repository evidence. Run safe discovery flags or existing validation commands when authorized and practical; record exact command, outcome, and environment.
+5. Identify stack, package manager, module and data boundaries, external integrations, important paths, generated artifacts, and material security/cost/operational risks.
+6. Distinguish current fact, inference, and unknown. Add an evidence pointer for every non-obvious claim.
 
-- First run in a new project.
-- Existing `docs/ai/project-profile.md` is missing, empty, or stale.
-- The agent is unsure how to run, test, build, validate, or understand the project.
+## Write policy
 
-## When not to use
+Inspection is read-only. Write or refresh project memory only when profiling/bootstrap was requested or repository writes are otherwise authorized.
 
-- The task is small and project conventions are already clear.
-- The user explicitly asked for a direct small edit.
+When authorized, prefer these focused files:
 
-## Inputs to collect
+- `project-profile.md`: current identity, stack, boundaries, and important paths;
+- `commands.md`: commands that were actually verified, including platform assumptions;
+- `conventions.md`: project-specific patterns that are not cheaply discoverable;
+- `risks.md`: durable material risks;
+- `shared-context.md`: current cross-session facts.
 
-- Product purpose and users.
-- Stack and runtime.
-- Important paths and modules.
-- Verified commands.
-- Architecture boundaries and data flows.
-- External integrations and contracts.
-- Security/privacy/cost/operational risks.
-- Existing code conventions.
-- Files likely to be shared across tools.
+Do not copy README prose or file trees. Do not overwrite unresolved user or agent notes. Mark stale entries as superseded or replace them with verified current facts.
 
-## Process
+## Bootstrap boundary
 
-1. Inspect root files: README, package manager files, Python files, Docker files, CI files, scripts.
-2. Inspect targeted source folders only as needed.
-3. Identify stack, commands, architecture, important paths, integrations, and risk areas.
-4. Do not implement features.
-5. Update only:
-   - `docs/ai/constitution.md` (only the durable principles/hard constraints; leave as template if none are clear yet)
-   - `docs/ai/project-profile.md`
-   - `docs/ai/commands.md`
-   - `docs/ai/conventions.md`
-   - `docs/ai/shared-context.md`
-   - `docs/ai/risks.md`
-6. Keep all documents concise and factual.
-7. Mark unknowns explicitly instead of guessing.
+If the repository lacks a usable memory layer, propose the smallest bootstrap. Do not create governance, validation scripts, or product changes automatically unless authorized. Profiling can precede a separately requested implementation, but it does not silently broaden the task.
 
-## Orientation, not a directory dump
+## Output
 
-Empirical studies of agent-context files (Chatlatanagulchai et al. 2025; Lulla et al. 2026) find that verified commands, constraints and non-standard patterns improve agent behavior and lower cost, while generic architecture overviews and file-tree maps do not measurably help delivery and can inflate token use. Therefore:
-
-- Favor commands, constraints, conventions, and the few non-obvious patterns a new agent could not infer.
-- Keep the architecture map high-level (boundaries and data flow), not a file-by-file inventory the agent can discover itself.
-- Do not copy README prose or directory trees into project memory.
-
-## Quality criteria
-
-- Commands are copied from real project files, not invented.
-- Risk notes are specific.
-- The profile is short enough to be loaded every session.
-- No generic boilerplate.
-- Enough context exists to resume after a context reset.
-
-## Checklist
-
-- [ ] Stack identified.
-- [ ] Commands identified.
-- [ ] Important paths identified.
-- [ ] Architecture/data flow summarized.
-- [ ] Known risks identified.
-- [ ] Shared files identified.
-- [ ] Unknowns marked.
-- [ ] No feature implementation performed.
+Return the evidence-backed profile or changed memory paths, verified commands, unknowns, and whether the project is ready for triage/implementation.

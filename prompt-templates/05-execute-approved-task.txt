@@ -1,0 +1,1 @@
+Apply AGENTS.md. For fast-path work, execute the authorized request directly with targeted validation. For managed work, execute only the active task contract whose authorization, status, gates, and claims permit the next change.

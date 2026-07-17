@@ -1,54 +1,13 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
-run_if_exists() {
-  local cmd="$1"
-  local label="$2"
-  if eval "$cmd" >/dev/null 2>&1; then
-    echo "==> $label"
-    eval "$cmd"
-  fi
-}
-
-echo "Generic Agent Runtime validation runner"
-
-# 1. Validação Node.js
-if [ -f package.json ]; then
-  if command -v npm >/dev/null 2>&1; then
-    echo "==> Executando lint e testes (Node)"
-    npm run lint --if-present
-    npm run typecheck --if-present
-    npm test --if-present
-    npm run build --if-present
-  fi
+set -u -o pipefail
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"; cd "$ROOT"; source "$ROOT/scripts/common.sh"
+PYTHON="$(harness_python)" || exit $?; export HARNESS_PYTHON="$PYTHON"; full=0; [ "${1:-}" = "--full" ] && full=1; status=0; incomplete=0
+run_stage(){ "$@"; local code=$?; if [ "$code" -eq 3 ]; then incomplete=1; return 0; fi; if [ "$code" -ne 0 ]; then status="$code"; return "$code"; fi; }
+run_stage bash scripts/lint.sh || exit "$status"
+run_stage bash scripts/test.sh || exit "$status"
+if [ -d scaffold ] && [ -f scripts/package_runtime.py ]; then
+ timeout="$HARNESS_RUNTIME_TIMEOUT_SECONDS"; harness_run "strict runtime validation" "$timeout" "$PYTHON" -B scripts/runtime_check.py --strict || exit $?; harness_run "deterministic package validation" "$timeout" "$PYTHON" -B scripts/package_runtime.py --check || exit $?
 fi
-
-# 2. Validação Python
-if [ -f pyproject.toml ] || [ -f requirements.txt ]; then
-  if command -v ruff >/dev/null 2>&1; then 
-    echo "==> Executando lint (Ruff)"
-    ruff check .
-  fi
-  if command -v pytest >/dev/null 2>&1; then 
-    echo "==> Executando testes (Pytest)"
-    pytest
-  fi
-fi
-
-# 3. Infraestrutura e Orquestração
-if [ -f docker-compose.yml ] || [ -f compose.yml ]; then
-  if command -v docker >/dev/null 2>&1; then 
-    echo "==> Validando sintaxe do Docker Compose"
-    docker compose config >/dev/null
-  fi
-  
-  if command -v trivy >/dev/null 2>&1; then
-    echo "==> Varredura de configurações (Trivy)"
-    # Analisa o manifesto em busca de más práticas de privilégio em containers
-    trivy config . || true
-  else
-    echo "[Aviso] Trivy não encontrado. Fortemente recomendado para auditar configurações de containers."
-  fi
-fi
-
-echo "Validation completed."
+if [ "$full" -eq 1 ]; then run_stage "$PYTHON" -B scripts/project_checks.py build || exit "$status"; run_stage "$PYTHON" -B scripts/project_checks.py security || exit "$status"; fi
+if [ "$incomplete" -ne 0 ]; then echo "INCOMPLETE validation: one or more applicable checks were unavailable"; exit 3; fi
+echo "PASS validation completed ($([ "$full" -eq 1 ] && echo full || echo standard))"

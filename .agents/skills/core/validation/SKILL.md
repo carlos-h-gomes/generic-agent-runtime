@@ -1,52 +1,26 @@
 ---
 name: validation
-description: "Prove a change actually works or honestly state what could not be validated, with depth proportional to task risk. Use on every task to run the smallest relevant set of project validation commands, add UI/integration/data/rollback checks when relevant, and report only validations that genuinely ran. Never claims validation passed unless it did."
+description: "Validate an authorized change with the smallest relevant evidence set, bounded commands, honest skips, and no automatic repeated failures."
 ---
 
 # Validation
 
-## Objective
+Validation certifies the task outcome; it does not redesign the solution or rerun every possible command.
 
-Prove the change works, or honestly state what could not be validated.
+## Procedure
 
-## When to use
+1. Read the request or managed task contract, current diff/state, applicable specialist results, and verified commands.
+2. Map each acceptance criterion to a code/config/document pointer, automated command, or explicit manual check.
+3. Run the smallest relevant test, lint, typecheck, build, security, integration, and package checks in risk order.
+4. Record command, environment or revision/state, exit code, and a bounded result. A trusted zero exit code is sufficient evidence unless output is filtered, truncated, suspicious, or the command itself has weak coverage.
+5. On failure, preserve a redacted actionable excerpt and controlled full-artifact pointer/hash. Never paste secrets, raw customer data, private prompts, or full terminal logs into project memory.
+6. Classify unavailable checks as `skipped`, not passed. Record a typed gap as out of scope, blocked, or accepted residual risk; accepted residual risk needs a scoped human reference.
+7. Confirm triggered gate results are fresh and no blocking condition or unapproved external action remains.
 
-- Every task, with depth proportional to risk.
+Allow at most two implementation/validation attempts by default, including the initial run. Never repeat the same failure without a change or new evidence; then stop and report the blocker.
 
-## Inputs expected
+## Completion rule
 
-- `docs/ai/commands.md`.
-- Changed files.
-- Acceptance criteria.
-- Triggered gates.
-- Risk notes.
+Use `done` only when all acceptance criteria are met or every unvalidated portion is explicitly accepted by the task's authorization model. A green generic script that found no applicable checks is a skip, not proof of behavior.
 
-## Process
-
-1. Identify available validation commands from `docs/ai/commands.md` or project files.
-2. Run the smallest relevant set.
-3. For UI changes, include responsive/accessibility/state checks.
-4. For integrations, include payload, timeout, retry, idempotency, and error checks.
-5. For data changes, include schema and migration safety checks.
-6. For critical changes, include rollback and monitoring checks.
-7. Report only validations actually performed.
-8. Record unvalidated areas in the task file for Level 2/3.
-
-## Output-compressing proxies
-
-Validation commands may run through an output-compressing proxy (e.g. rtk) that filters and shrinks tool output. This is fine for token cost, with one rule: never report a pass — or send a fix back to implementation — based only on a filtered or truncated view. When a command fails under such a proxy, read the full tee'd output it saves on failure before concluding anything. A green summary is not evidence on its own.
-
-## Quality criteria
-
-- No fake validation claims.
-- Failed validation is surfaced clearly.
-- Manual validation is specific enough to execute.
-- Residual risk is stated.
-
-## Checklist
-
-- [ ] Relevant commands identified.
-- [ ] Commands run or reason documented.
-- [ ] Manual checks documented if needed.
-- [ ] Failures reported.
-- [ ] Remaining risks stated.
+Return acceptance-criterion status, commands and exit codes, manual checks, skipped areas, gate/approval state, residual risks, and handoff.

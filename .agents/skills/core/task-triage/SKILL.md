@@ -1,162 +1,68 @@
 ---
 name: task-triage
-description: "Supervise and route every non-trivial task. Use at the START of any task to convert a vague request into a strict structured task specification (intent, acceptance criteria, affected files, task level 0-3, triggered gates, approval needs, validation plan) BEFORE any implementation begins. Returns needs_clarification or blocked when the request is too ambiguous or unsafe to implement. Always load this before core/implementation."
+description: "Create a formal task contract only for Level 2/3, multi-session, multi-writer, high-risk, or explicitly governed work; skip ordinary local changes."
 ---
 
-# Task Triage
+# Task triage
 
-## Objective
+Own formal managed-task intake. Do not create a contract for fast-path work and do not implement the work.
 
-Act as the task supervisor. Convert the user's request into a clear, validated, structured task specification before any specialist or implementation agent starts work.
+## 1. Classify independently
 
-This skill owns orchestration and routing. It does not only organize a queue; it applies a Plan-Act pattern:
+Record each axis without inferring one from another:
 
-1. **Plan:** clarify intent, scope, acceptance criteria, affected files, risks, gates, and required specialists.
-2. **Act:** route the task only when the structured task specification is complete enough for the next agent to execute without guessing.
+- `mode`: `answer`, `inspect`, `diagnose`, `review`, `change`, or `monitor`;
+- `work_level`: 0 micro, 1 local, 2 multi-file/cross-boundary, or 3 broad system/program scope;
+- `scope.size`: `micro`, `local`, `multi_file`, `cross_boundary`, or `system`;
+- risk, reversibility, and external effect;
+- local-write and external-action authorization.
 
-## When to use
+Answer, inspect, diagnose, and review are read-only unless the user separately authorizes a change. A change request authorizes only the local reversible work reasonably required; it does not authorize commits, pushes, deployments, messages, production actions, or destructive effects.
 
-Use at the beginning of any non-trivial task.
+## 2. Build the contract
 
-## Inputs expected
+Use `schemas/task-contract.schema.json`. The minimum useful contract states:
 
-- User request.
-- Current project profile.
-- Known constraints.
-- Files or systems likely to be touched.
-- Risk triggers.
-- Available project commands.
-- Any prior task file or decision log entry that may affect the work.
+- observable outcome and acceptance criteria;
+- affected files or a bounded discovery plan;
+- owned, shared, and do-not-touch paths;
+- scope, risk, assumptions, and explicit exclusions;
+- triggered skills and gates, each with a concrete reason;
+- scoped approval requirements;
+- coordination strategy and limits;
+- validation commands, manual checks, evidence plan, and attempt limit;
+- one next action.
 
-## Process
+Reject placeholders such as `see above`, `TBD`, or copied boilerplate. Ask only when missing information materially changes outcome, risk, cost, or authority. Safe read-only discovery may resolve file and command unknowns first.
 
-1. Restate the user's intent in one sentence.
-2. Convert abstract intent into a strict task specification.
-3. Validate whether the task has, at minimum:
-   - clear description;
-   - acceptance criteria;
-   - affected files or file discovery plan;
-   - out-of-scope boundaries;
-   - validation expectations.
-4. If any required field is missing, return the task as `needs_clarification` or `blocked`, instead of sending an ambiguous request to implementation.
-5. Classify the task:
-   - Level 0: micro.
-   - Level 1: simple.
-   - Level 2: medium.
-   - Level 3: critical.
-6. Identify gates triggered by the actual work, not by fear.
-7. Choose skills to load.
-8. Decide whether a task document is needed.
-9. Identify what context must be written before implementation.
-10. Route the task to the next skill only after the task specification is valid.
+## 3. Choose persistence
 
-## Minimalism at triage
+- Level 0: a compact working contract may remain in the response.
+- Level 1: use a compact inline or scratch contract unless continuity requires a file.
+- Level 2/3, cross-boundary/system, high/critical risk, multi-session, or multi-writer: create `docs/ai/tasks/YYYY-MM-DD-slug.task.json` plus concise Markdown notes when explanation or diagrams help.
 
-Apply the first rung of the minimalism ladder to scope: does each requested piece need to exist, or does a standard-library, native-platform, or already-present feature already cover it? Drop or defer anything the acceptance criteria do not require, and load `.agents/skills/core/minimalism/SKILL.md` for any task that writes or changes code. This sizes the *solution*, never the governance process — triggered gates, task files, written memory and approval boundaries are not optional. See `core/minimalism`.
+Creating project memory is itself a write. In read-only modes, return the contract in the response and name the proposed path instead.
 
-## Required output contract
+## 4. Route gates
 
-Task triage must output structured data before implementation. Prefer JSON. YAML is acceptable only when the target agent cannot handle JSON well.
+Trigger gates from actual scope and risk, using the canonical IDs in the schema. Design-phase UX, architecture, data, security, and AI artifacts must exist before implementation when applicable. Record `not_applicable` only with a specific reason; do not use it to bypass a control.
 
-The output must follow this shape:
+Use `docs/ai/quality-gates.md` for result semantics. A specialist is a procedure, not automatically a separate agent.
 
-```json
-{
-  "triage_status": "ready_for_implementation | needs_clarification | blocked",
-  "intent": "One-sentence user intent.",
-  "task_level": "0 | 1 | 2 | 3",
-  "description": "Clear implementation-oriented description.",
-  "acceptance_criteria": [
-    "Observable condition that proves the task is complete."
-  ],
-  "affected_files": {
-    "owned": ["path/or/pattern"],
-    "shared": ["path/or/pattern"],
-    "do_not_touch": ["path/or/pattern"],
-    "discovery_needed": ["path/or/question"]
-  },
-  "scope": {
-    "in_scope": ["What must be done."],
-    "out_of_scope": ["What must not be done."]
-  },
-  "gates_triggered": [
-    "architecture_uml",
-    "code_quality_testing",
-    "ux_product",
-    "security_compliance",
-    "data_integration",
-    "finops",
-    "observability_release",
-    "ai_llm"
-  ],
-  "skills_to_load": [
-    ".agents/skills/core/implementation/SKILL.md"
-  ],
-  "context_packet_required": true,
-  "task_file_required": true,
-  "human_approval_required": {
-    "required": false,
-    "reason": "Explain approval boundary."
-  },
-  "validation_plan": {
-    "commands": ["./scripts/test.sh", "./scripts/lint.sh"],
-    "manual_checks": ["Specific manual check if needed."],
-    "quality_loop_max_attempts": 3
-  },
-  "missing_information": [],
-  "routing_decision": "Where the task goes next and why."
-}
+## 5. Set a typed state
+
+Use the schema states. Typical transitions:
+
+```text
+draft -> ready -> in_progress -> ready_for_review -> done
+       -> needs_input
+       -> awaiting_approval
+       -> blocked_external
+       -> validation_failed -> paused_for_review
 ```
 
-## Return rules
+Pending approval blocks only the protected action. Continue safe, authorized planning or local validation when useful. Use `blocked_external` only when no meaningful in-scope progress remains.
 
-Return as `needs_clarification` when the agent cannot define clear acceptance criteria or safe affected-file discovery from repository context.
+## Handoff
 
-Return as `blocked` when the task requires human approval before proceeding, conflicts with a documented constraint, or depends on unavailable secrets, environments, production access, or missing files.
-
-Do not send a task to `core/implementation` when:
-
-- acceptance criteria are empty;
-- affected files are unknown and no discovery plan exists;
-- a required architecture/UML artifact is missing for a feature that changes architecture, data, integrations, deployment, or cross-cutting workflows;
-- a required UX/Product artifact is missing for a user-facing flow;
-- human approval is required and not yet granted.
-
-## Escalation triggers
-
-Escalate to Level 3 when the task involves production, auth, customer/personal data, destructive migration, public endpoints, external LLMs with user/customer context, variable cost increase, infrastructure, billing, bulk messaging, or secrets.
-
-## Deliverables
-
-- Strict task specification JSON/YAML.
-- Task level.
-- Gates triggered.
-- Skills required.
-- Minimal workflow.
-- Written context requirement.
-- Approval requirement.
-- Validation plan.
-- Routing decision.
-
-## Quality criteria
-
-- No over-processing.
-- No skipped critical gates.
-- Clear reason for level selection.
-- Abstract intent converted into executable structured data.
-- Specialists receive enough context to avoid guessing.
-- Token use proportional to risk.
-
-## Checklist
-
-- [ ] Intent clear.
-- [ ] Structured task specification produced.
-- [ ] Description clear.
-- [ ] Acceptance criteria present.
-- [ ] Affected files or discovery plan present.
-- [ ] Level selected.
-- [ ] Gates selected.
-- [ ] Skills selected.
-- [ ] Written context need identified.
-- [ ] Human approval need identified.
-- [ ] Routing decision safe.
+For managed work, return the contract path, mode/level/risk, applicable gates, approval boundaries, and next authorized action. For fast-path work, return only a compact plan and proceed without a persisted contract.

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Task Triage"
+  short_description: "Create a formal task contract only for Level 2/3, multi-session, multi-writer, high-risk, or explicitly governed work"
+policy:
+  allow_implicit_invocation: false

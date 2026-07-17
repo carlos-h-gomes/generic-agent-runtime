@@ -1,0 +1,5 @@
+interface:
+  display_name: "Documentation"
+  short_description: "Use when a completed change creates durable architecture, contract, operating, migration, or user knowledge that maintainers need."
+policy:
+  allow_implicit_invocation: false

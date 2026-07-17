@@ -1,86 +1,36 @@
 # Project Profile
 
-Status: template. Fill during Project Profiling. Keep concise enough to load every session.
+Status: uninitialized. Fill only from repository evidence.
 
-## Project summary
+## Purpose and users
 
-- Name:
-- Product / domain:
+- Product/domain:
 - Primary users:
-- Business goal:
-- Current maturity: prototype / internal / production / critical production
-- Current owner(s):
+- Maturity/owner:
 
-## Stack
+## Stack and boundaries
 
-- Frontend:
-- Backend:
-- Database:
-- Infra/runtime:
-- Auth:
-- Background jobs / queues:
+- Languages/frameworks:
+- Package/runtime:
+- Storage/data ownership:
+- Auth/permissions:
+- Jobs/queues:
 - External integrations:
-- AI/LLM usage:
-- Observability:
-
-## Architecture map
-
-Use text, Mermaid, PlantUML, or concise bullets. Prefer only the views that matter.
-
-### C4 / system context
-
-```text
-External users/systems → application boundaries → external dependencies
-```
-
-### Containers / modules
-
-```text
-Main modules, services, jobs, workers, routes, integrations
-```
-
-### Critical data flows
-
-```text
-Input → validation → business logic → persistence/integration → output
-```
+- AI/LLM:
+- Deployment/observability:
 
 ## Important paths
 
-```text
-src/
-app/
-server/
-docs/
-scripts/
-```
+| Path | Responsibility | Evidence |
+|---|---|---|
 
-## Environment assumptions
+## Critical flows and rules
 
-- Local dev:
-- Test:
-- Staging:
-- Production:
-- Secrets/config location:
+| Flow/rule | Source of truth | Failure/compatibility notes |
+|---|---|---|
 
-## Durable business rules
+## Environment constraints and unknowns
 
-- Rule:
-- Source:
-- Files affected:
-
-## Known constraints
-
-- Technical:
-- Business:
-- Security:
-- Compliance/privacy:
-- Cost:
-- Operational:
-
-## Agent notes
-
-- Prefer existing patterns over new abstractions.
-- Ask for approval before destructive or production-impacting work.
-- Keep documentation proportional to task level.
-- Do not rely on mental notes; write durable context to `docs/ai`.
+- Local/test/staging/production:
+- Secrets/config location (never values):
+- Unknowns:

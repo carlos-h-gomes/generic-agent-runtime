@@ -1,0 +1,5 @@
+interface:
+  display_name: "Agent Orchestration"
+  short_description: "Use only when at least two independent bounded workstreams justify native subagents"
+policy:
+  allow_implicit_invocation: false

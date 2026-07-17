@@ -1,66 +1,29 @@
 ---
 name: finops-cost
-description: "Prevent avoidable variable-cost growth and runaway spend while preserving quality. Use whenever a change involves LLMs, embeddings, OCR, paid APIs, cloud compute/storage/networking, queues, recurring or high-volume jobs, scraping, or high-cardinality logs/dashboards. Ties cost to billing unit and volume, models worst case, and defines guardrails, caching/batching/dedup, fallback behavior and alert thresholds."
+description: "Explicit specialist review for paid APIs, models, compute, storage, network, recurring jobs, or high-volume variable cost."
 ---
 
-# FinOps and Cost Specialist
+# FinOps and cost gate
 
-## Objective
+Return a `GateResult` conforming to `schemas/gate-result.schema.json`.
 
-Prevent avoidable cost growth and variable-cost surprises while preserving product quality.
+## Cost model
 
-## When to use
+Record an authoritative pricing source, currency, region, version/date checked, and billing units. Estimate expected, burst, and worst-case volume with an explicit formula and uncertainty. Include applicable:
 
-- LLMs.
-- Embeddings.
-- OCR.
-- Paid APIs.
-- Cloud resources.
-- Storage.
-- Queues.
-- High-volume jobs.
-- Recurring workflows.
-- Scraping.
-- Dashboards or logs with high cardinality.
+- input/output/cached tokens, requests, tool steps, retries, and parallel agents;
+- compute duration, concurrency, storage, retention, egress, queues, and log cardinality;
+- loops, fan-out, duplicate work, replay, and failure amplification;
+- per-request/user/job cost plus daily/monthly exposure.
 
-## Process
+Do not guess current prices. Mark unknown pricing or volume and show the formula needed once known.
 
-1. Identify cost drivers.
-2. Identify unit of billing.
-3. Estimate expected and worst-case volume if possible.
-4. Check limits, quotas and rate limits.
-5. Identify loop/explosion risks.
-6. Consider caching, batching, deduplication and backoff.
-7. Define fallback/degradation behavior.
-8. Define alert threshold.
-9. Document assumptions for level 2/3 tasks.
+## Guardrails
 
-## Deliverables
+Define hard caps separately from provider quotas and alert thresholds. Assign each alert an owner and automatic action. Prefer prevention: request and token limits, bounded concurrency/retries, cache with correct keys/expiry, batching, deduplication, sampling/cardinality controls, storage lifecycle, circuit breakers, degradation, and a kill switch.
 
-- Cost-driver list.
-- Guardrails.
-- Alert/fallback plan.
-- Open assumptions.
+For multi-agent work, estimate total root plus worker tokens and tool calls; parallelism must earn its additional cost through evaluated speed or coverage.
 
-## Quality criteria
+Evidence may include dated pricing links, formulas, aggregate usage, and cost regression results. Never record account IDs, invoices, billing credentials, or customer-level usage.
 
-- Cost is tied to units and volume.
-- Worst-case behavior is considered.
-- Guardrails are practical.
-- No vague “monitor costs” statements without thresholds when thresholds are possible.
-
-
-## Written memory rule
-
-For Level 2/3 work, record durable findings, assumptions, risks, and handoff notes in the active task file or the appropriate `docs/ai` file. Do not rely on mental notes.
-
-## Checklist
-
-- [ ] Cost drivers identified.
-- [ ] Billing unit known or marked unknown.
-- [ ] Volume estimated or marked unknown.
-- [ ] Loop risk considered.
-- [ ] Limits/quotas considered.
-- [ ] Cache/batch/dedupe considered.
-- [ ] Alerts considered.
-- [ ] Fallback considered.
+Block cost-increasing execution when worst-case exposure is unbounded, a material increase lacks approval, or no owner/kill switch exists. Security and product constraints take precedence over savings.

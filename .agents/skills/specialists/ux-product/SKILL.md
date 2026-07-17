@@ -1,191 +1,27 @@
 ---
 name: ux-product
-description: "Raise the quality of any user-facing work by combining product framing, information architecture, interaction and visual design, responsive behavior, accessibility and heuristic review, then produce concrete implementation handoff and acceptance criteria. Use BEFORE implementation for any screen, page, modal, form, dashboard, onboarding, pricing, settings, empty/loading/error/success state, notification or user-facing copy."
+description: "Explicit specialist review for material user-facing screens, forms, flows, states, notifications, accessibility, or product copy."
 ---
 
-# UX Product Specialist
+# UX and product gate
 
-## Objective
+Return a `GateResult` conforming to `schemas/gate-result.schema.json`; use status semantics and evidence rules from `docs/ai/quality-gates.md`.
 
-Raise the quality of user-facing work by combining product thinking, UX architecture, UI craft, accessibility, responsive behavior, and practical implementation constraints.
+## Own
 
-This skill is intentionally robust because weak UX review often produces technically correct but mediocre products.
+- target user, job, desired outcome, primary action, and scope;
+- information hierarchy, interaction model, and existing design-system fit;
+- loading, empty, success, failure, disabled, destructive, undo, retry, and permission states;
+- responsive behavior and content stress cases;
+- user-facing copy, localization implications, and recovery guidance;
+- accessibility acceptance criteria. Default to WCAG 2.2 AA for web only when project policy does not set another target.
 
-## When to use
+Check keyboard order and traps, visible focus, semantic names/roles, status announcements, zoom/reflow, contrast, reduced motion, pointer/touch targets, and error association as applicable.
 
-Use for any:
+## Deliver
 
-- Screen, page, modal, form, dashboard, guided tour, onboarding, pricing, settings, admin UI, flow, empty state, loading state, error state, success state, notification, user-facing copy, or design-system decision.
+A concise product/UX artifact containing user outcome, flow/state inventory, layout/interaction decisions, copy, responsive rules, accessibility requirements, edge cases, and observable acceptance criteria. Add a diagram or wireframe only when it materially reduces ambiguity.
 
-## When not to use
+Evidence may point to component/token paths, redacted renders, keyboard/manual checks, and automated accessibility summaries. Never store real user records or unredacted screenshots.
 
-- Pure backend task with no user-facing impact.
-- Internal refactor with no UI behavior change.
-
-## Inputs expected
-
-- User goal.
-- Business goal.
-- Target users.
-- Current screen or flow.
-- Brand/design constraints.
-- Device targets.
-- Existing components/design system.
-- Technical constraints.
-
-If inputs are missing, infer carefully from repository context and mark assumptions.
-
-## Process
-
-### 1. Product framing
-
-Answer:
-
-- Who is the user?
-- What job are they trying to complete?
-- What is the single most important action?
-- What decision must the screen make easier?
-- What should the user understand in the first 5 seconds?
-
-### 2. Information architecture
-
-Check:
-
-- Is the hierarchy obvious?
-- Are related items grouped?
-- Are labels user-centered instead of internal jargon?
-- Is the order natural?
-- Is there unnecessary cognitive load?
-
-### 3. Interaction design
-
-Check:
-
-- Primary action clear.
-- Secondary actions visually subordinate.
-- Destructive actions protected.
-- Cancel/undo/retry paths available where needed.
-- Form validation close to the field.
-- Error messages explain what happened and how to fix it.
-- Loading, empty, success, disabled, and failure states considered.
-
-### 4. Visual design quality
-
-Check:
-
-- Spacing scale is consistent.
-- Typography hierarchy is clear.
-- Cards/containers have consistent radius, borders, shadows and padding.
-- Alignment is intentional.
-- Density matches the use case.
-- Color is used for meaning, not decoration only.
-- The result feels modern without reducing clarity.
-
-### 5. Responsive behavior
-
-Define behavior for:
-
-- Small mobile.
-- Large mobile.
-- Tablet.
-- Desktop.
-- Wide desktop.
-
-Check wrapping, overflow, stacked layouts, fixed heights, long text, tables, sidebars, modals and cards.
-
-### 6. Accessibility baseline
-
-Check:
-
-- Keyboard path.
-- Focus states.
-- Text contrast.
-- Non-color indicators.
-- Semantic headings.
-- Label/input association.
-- Touch target size.
-- Reduced motion when relevant.
-- Screen reader-friendly status/error messages.
-
-### 7. Heuristic review
-
-Evaluate against:
-
-- Visibility of system status.
-- Match with real-world language.
-- User control and freedom.
-- Consistency and standards.
-- Error prevention.
-- Recognition over recall.
-- Flexibility and efficiency.
-- Aesthetic and minimalist design.
-- Error recognition/recovery.
-- Help and documentation where needed.
-
-### 8. Implementation handoff
-
-Produce concrete guidance:
-
-- Component structure.
-- State model.
-- Layout rules.
-- Responsive rules.
-- Copy suggestions.
-- Acceptance criteria.
-
-## Deliverables
-
-For small UI work:
-
-- UX issues found.
-- Specific changes to make.
-- States/responsive/accessibility checklist.
-
-For medium/critical UI work:
-
-- UX intent.
-- Flow structure.
-- IA recommendation.
-- UI layout recommendation.
-- State inventory.
-- Responsive rules.
-- Accessibility notes.
-- Acceptance criteria.
-
-## Quality criteria
-
-- The main action is obvious.
-- The user understands the screen quickly.
-- The interface handles edge cases.
-- The design works on target screen sizes.
-- Accessibility is not an afterthought.
-- The design improves clarity, not just aesthetics.
-- Recommendations are implementable in the current stack.
-
-## Common risks
-
-- Pretty but unclear UI.
-- Desktop-only thinking.
-- Missing empty/error/loading states.
-- Inconsistent spacing and card sizing.
-- Too many competing CTAs.
-- Copy written from the system's perspective.
-- Accessibility ignored until the end.
-- Over-custom UI that breaks the existing design system.
-
-
-## Written memory rule
-
-For Level 2/3 work, record durable findings, assumptions, risks, and handoff notes in the active task file or the appropriate `docs/ai` file. Do not rely on mental notes.
-
-## Checklist final
-
-- [ ] User goal clear.
-- [ ] Primary action clear.
-- [ ] IA reviewed.
-- [ ] Visual hierarchy reviewed.
-- [ ] States reviewed.
-- [ ] Responsive behavior reviewed.
-- [ ] Accessibility baseline reviewed.
-- [ ] Copy reviewed.
-- [ ] Acceptance criteria defined.
+Do not own module architecture, security risk acceptance, or implementation. Block implementation when the primary flow, destructive behavior, recovery, or applicable accessibility requirement remains materially undefined.

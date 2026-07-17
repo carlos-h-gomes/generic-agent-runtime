@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://generic-agent-runtime.local/schemas/harness-v1.json",
+  "title": "Generic Agent Runtime manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "display_name",
+    "version",
+    "released",
+    "runtime_language",
+    "adapters",
+    "contract_versions",
+    "instruction_budget",
+    "execution_limits",
+    "core_skills",
+    "specialist_skills",
+    "schemas",
+    "distribution"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "name": {
+      "const": "generic-agent-runtime"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "released": {
+      "type": "string",
+      "format": "date"
+    },
+    "runtime_language": {
+      "type": "string"
+    },
+    "adapters": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_-]*\\.md$"
+      }
+    },
+    "contract_versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task",
+        "gate_result",
+        "bridge_event"
+      ],
+      "properties": {
+        "task": {
+          "type": "string"
+        },
+        "gate_result": {
+          "type": "string"
+        },
+        "bridge_event": {
+          "type": "string"
+        }
+      }
+    },
+    "instruction_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agents_md_max_bytes",
+        "agents_md_max_lines"
+      ],
+      "properties": {
+        "agents_md_max_bytes": {
+          "type": "integer",
+          "minimum": 4096,
+          "maximum": 32768
+        },
+        "agents_md_max_lines": {
+          "type": "integer",
+          "minimum": 50,
+          "maximum": 500
+        }
+      }
+    },
+    "core_skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "specialist_skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "schemas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task",
+        "gate_result",
+        "bridge_event"
+      ],
+      "properties": {
+        "task": {
+          "type": "string"
+        },
+        "gate_result": {
+          "type": "string"
+        },
+        "bridge_event": {
+          "type": "string"
+        }
+      }
+    },
+    "distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "archive",
+        "manifest",
+        "scaffold_root",
+        "exclude_maintainer_tasks",
+        "empty_bridge",
+        "maintainer_marker"
+      ],
+      "properties": {
+        "archive": {
+          "type": "string",
+          "pattern": "^agent-runtime-v[0-9]+\\.[0-9]+\\.zip$"
+        },
+        "manifest": {
+          "const": "MANIFEST.sha256"
+        },
+        "scaffold_root": {
+          "const": "scaffold"
+        },
+        "exclude_maintainer_tasks": {
+          "const": true
+        },
+        "empty_bridge": {
+          "const": true
+        },
+        "maintainer_marker": {
+          "const": ".harness-source"
+        }
+      }
+    },
+    "execution_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "default_command_timeout_seconds",
+        "runtime_command_timeout_seconds",
+        "kill_grace_seconds",
+        "failure_tail_lines",
+        "validation_attempts"
+      ],
+      "properties": {
+        "default_command_timeout_seconds": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 3600
+        },
+        "runtime_command_timeout_seconds": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 600
+        },
+        "kill_grace_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "failure_tail_lines": {
+          "type": "integer",
+          "minimum": 20,
+          "maximum": 500
+        },
+        "validation_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        }
+      }
+    }
+  }
+}
