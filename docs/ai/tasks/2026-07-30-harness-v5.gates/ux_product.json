@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-07-30-harness-v5",
+  "gate": "ux_product",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "The Harness adds a product and UI quality release contract for downstream web projects."},
+  "summary": "The UI contract requires journeys, design-system fit, twelve state classes, responsive stress, WCAG evidence, deterministic visual baselines, and reviewer approval.",
+  "checks": [{"id": "ui_release_contract", "status": "passed", "evidence_refs": ["ui_contract"], "notes": "A malformed approved review is rejected by the functional suite."}],
+  "findings": [],
+  "evidence": [{"id": "ui_contract", "kind": "file", "pointer": "docs/harness/UI-QUALITY.md", "summary": "Machine-enforced UI review workflow and claim boundary.", "redacted_excerpt": null, "sensitivity": "public", "redacted": false, "sha256": null, "captured_at": "2026-07-30T02:30:00-03:00"}],
+  "acceptance_criteria_added": [],
+  "artifacts": ["schemas/ui-review.schema.json", "scripts/ui_quality.py", "docs/harness/UI-QUALITY.md"],
+  "sources": [{"title": "WCAG 2.2", "url": "https://www.w3.org/TR/WCAG22/", "version": "2.2", "as_of": "2026-07-30"}],
+  "approval": {"required": false, "reason": "This gate validates the local reusable UI contract.", "status": "not_required", "evidence_ref": null},
+  "handoff": [],
+  "generated_at": "2026-07-30T02:30:00-03:00",
+  "expires_at": null
+}

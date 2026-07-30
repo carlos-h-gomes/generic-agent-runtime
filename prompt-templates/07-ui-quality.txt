@@ -1,0 +1,3 @@
+Apply AGENTS.md and specialists/ux-product. Treat docs/ai/ui-review.json as the material web UI release contract.
+
+Define users, outcomes, critical journeys, tokens/components, the full state matrix, compact and wide behavior, content stress, WCAG 2.2 AA evidence, and deterministic visual baselines/diffs. Do not mark approved until every evidence pointer resolves and the release profile passes. Automated accessibility checks supplement rather than replace manual review.

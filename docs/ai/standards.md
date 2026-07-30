@@ -1,24 +1,18 @@
 # Dated Standards Registry
 
-Living references must be re-checked for each Harness release. A URL alone is not a frozen requirement.
+Living references must be rechecked for every Harness release. Policy floors are recorded in `security-policy.json` and expire.
 
 | Domain | Reference | Version/date | Checked | Harness use |
-|---|---|---|---|---|
-| Agentic security | [OWASP Top 10 for Agentic Applications](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) | 2026 edition, published 2025-12 | 2026-07-15 | Canonical ASI01–ASI10 mapping for tool, retrieval, memory, and multi-agent threat reviews. |
-| Web accessibility | [W3C Web Content Accessibility Guidelines](https://www.w3.org/TR/WCAG22/) | WCAG 2.2 | 2026-07-15 | Default AA target only when a web project has no stricter/different declared policy. |
-| JSON Schema | [JSON Schema specification](https://json-schema.org/draft/2020-12/json-schema-core) | Draft 2020-12 | 2026-07-15 | Machine contracts in `schemas/`. |
+|---|---|---:|---:|---|
+| Application security | [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/) | 5.0.0 | 2026-07-30 | Verification-control vocabulary and security test planning. |
+| Agentic security | [OWASP Top 10 for Agentic Applications](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) | 2026 | 2026-07-30 | Tool, identity, supply-chain, execution, memory, communication, cascading-failure, trust, and rogue-agent threats. |
+| Secure development | [NIST SSDF](https://csrc.nist.gov/pubs/sp/800/218/final) | SP 800-218 v1.1 | 2026-07-30 | Secure preparation, protection, production, and response practices. |
+| Secure by design | [CISA Secure by Design](https://www.cisa.gov/securebydesign) | Living guidance | 2026-07-30 | Safe defaults, ownership, transparency, and reduction of systemic classes of defect. |
+| Web framework | [Next.js support policy](https://nextjs.org/support-policy) and [July 2026 security release](https://nextjs.org/blog/july-2026-security-release) | 16.2.11 active LTS; 15.5.21 maintenance LTS | 2026-07-30 | Dated supported-major and minimum-patch gate. |
+| Runtime | [Node.js releases](https://nodejs.org/en/about/previous-releases) | LTS majors 24 and 22 | 2026-07-30 | Deployment pin gate. |
+| Accessibility | [W3C WCAG 2.2](https://www.w3.org/TR/WCAG22/) | 2.2 | 2026-07-30 | Default AA target for applicable web UI. |
+| Supply chain | [SLSA specification](https://slsa.dev/spec/v1.2/) | 1.2 | 2026-07-30 | Provenance shape and explicit authenticity boundary. |
+| SBOM | [CycloneDX](https://cyclonedx.org/specification/overview/) | 1.7 | 2026-07-30 | Release component inventory. |
+| Contracts | [JSON Schema 2020-12](https://json-schema.org/draft/2020-12/json-schema-core) | 2020-12 | 2026-07-30 | Machine-readable contracts. |
 
-OWASP 2026 canonical categories used by the security skill:
-
-1. ASI01 Agent Goal Hijack
-2. ASI02 Tool Misuse and Exploitation
-3. ASI03 Identity and Privilege Abuse
-4. ASI04 Agentic Supply Chain Vulnerabilities
-5. ASI05 Unexpected Code Execution
-6. ASI06 Memory and Context Poisoning
-7. ASI07 Insecure Inter-Agent Communication
-8. ASI08 Cascading Failures
-9. ASI09 Human-Agent Trust Exploitation
-10. ASI10 Rogue Agents
-
-Check the authoritative page before relying on names in a later release. Standards identify review scope; they do not prove compliance or eliminate residual risk.
+References scope review; they do not prove compliance. Recheck before relying on these versions after the policy expiry date.

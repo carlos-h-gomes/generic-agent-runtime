@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../schemas/task-contract.schema.json",
+  "schema_version": "1.0",
+  "task_id": "YYYY-MM-DD-short-slug",
+  "status": "draft",
+  "mode": "inspect",
+  "work_level": 1,
+  "outcome": "Observable desired outcome.",
+  "acceptance_criteria": ["Observable condition proving completion."],
+  "scope": { "size": "local", "in": ["Required outcome."], "out": ["Explicit exclusion."] },
+  "risk": { "level": "low", "reversibility": "easy", "external_effect": "local", "triggers": [] },
+  "authorization": {
+    "writes": { "allowed": false, "scope": [] },
+    "external_actions": { "allowed": false, "scope": [] }
+  },
+  "files": { "owned": [], "shared": [], "do_not_touch": [], "discover": ["Bounded file discovery plan."] },
+  "gates": [],
+  "skills": ["core/task-triage"],
+  "approvals": [],
+  "context": { "task_file": null, "references": ["AGENTS.md"], "assumptions": [], "missing_information": [] },
+  "coordination": { "strategy": "single_agent", "run_id": null, "claims": [], "max_depth": 0, "max_concurrency": 1 },
+  "validation": { "commands": [], "manual_checks": [], "max_attempts": 2, "evidence": [], "not_validated": [] },
+  "next_action": "Complete triage and set the contract to ready before implementation."
+}

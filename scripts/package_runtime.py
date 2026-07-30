@@ -11,6 +11,7 @@ import os
 import stat
 import sys
 import tempfile
+import unicodedata
 import zipfile
 from pathlib import Path, PurePosixPath
 
@@ -19,13 +20,50 @@ class PackageError(RuntimeError):
     pass
 
 
-SENSITIVE_SUFFIXES = {".env", ".key", ".pem", ".p12", ".pfx", ".crt", ".cer", ".log", ".har", ".pcap", ".sqlite", ".db", ".jsonl"}
-SENSITIVE_NAMES = {"id_rsa", "id_ed25519", "credentials", "credentials.json", "secrets.json"}
+SENSITIVE_SUFFIXES = {
+    ".db",
+    ".env",
+    ".har",
+    ".jsonl",
+    ".kdbx",
+    ".key",
+    ".log",
+    ".ovpn",
+    ".p12",
+    ".pcap",
+    ".pem",
+    ".pfx",
+    ".sqlite",
+    ".tfstate",
+}
+SENSITIVE_NAMES = {
+    ".dockerconfigjson",
+    ".netrc",
+    ".npmrc",
+    ".pypirc",
+    "auth.json",
+    "credentials",
+    "credentials.json",
+    "id_ed25519",
+    "id_rsa",
+    "kubeconfig",
+    "secrets.json",
+    "terraform.tfstate",
+    "terraform.tfstate.backup",
+}
 
 
 def portable_name(path: Path) -> str:
     name = PurePosixPath(*path.parts).as_posix()
-    if not name or name.startswith("/") or ".." in PurePosixPath(name).parts or "\\" in name:
+    if (
+        not name
+        or name.startswith("/")
+        or ".." in PurePosixPath(name).parts
+        or "\\" in name
+        or len(name) > 240
+        or name != unicodedata.normalize("NFC", name)
+        or any(ord(char) < 32 for char in name)
+    ):
         raise PackageError(f"unsafe package path: {name!r}")
     return name
 
@@ -55,7 +93,7 @@ def add_file(payload: dict[str, bytes], root: Path, name: str, source: Path) -> 
             raise PackageError(f"symlink/junction sources are not packaged: {candidate}")
         if candidate.resolve() == resolved_root:
             break
-    if sensitive_path(name):
+    if sensitive_path(name) and name != "docs/ai/bridge/ledger.jsonl":
         raise PackageError(f"sensitive file class is not packaged: {name}")
     if name in payload:
         raise PackageError(f"duplicate package path: {name}")
@@ -98,9 +136,9 @@ def build_payload(root: Path) -> tuple[dict[str, bytes], dict]:
     manifest = json.loads((root / "harness.json").read_text(encoding="utf-8"))
     payload: dict[str, bytes] = {}
 
-    for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md", "harness.json"):
+    for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md", "harness.json", "security-policy.json"):
         add_file(payload, root, name, root / name)
-    for directory in (".agents", "schemas", "prompt-templates", "scripts", "docs/harness"):
+    for directory in (".agents", "schemas", "prompt-templates", "scripts", "security", "docs/harness"):
         add_tree(payload, root, root / directory, directory)
 
     scaffold = root / manifest["distribution"]["scaffold_root"]
@@ -115,9 +153,86 @@ def build_payload(root: Path) -> tuple[dict[str, bytes], dict]:
         add_file(payload, root, f"docs/ai/{name}", root / "docs" / "ai" / name)
     for path in sorted((root / "docs" / "ai" / "tasks").glob("_*")):
         if path.is_file():
-            add_file(payload, root, f"docs/ai/tasks/{path.name}", path)
+            target = f"docs/ai/tasks/{path.name}"
+            if target in payload:
+                candidate: dict[str, bytes] = {}
+                add_file(candidate, root, target, path)
+                if candidate[target] != payload[target]:
+                    raise PackageError(
+                        f"scaffold and maintainer task templates differ: {target}"
+                    )
+            else:
+                add_file(payload, root, target, path)
 
     payload["docs/ai/bridge/ledger.jsonl"] = b""
+    release_time = f"{manifest['released']}T00:00:00Z"
+    sbom = {
+        "bomFormat": "CycloneDX",
+        "specVersion": "1.7",
+        "version": 1,
+        "metadata": {
+            "timestamp": release_time,
+            "component": {
+                "type": "application",
+                "bom-ref": f"generic-agent-runtime@{manifest['version']}",
+                "group": "generic-agent-runtime",
+                "name": manifest["name"],
+                "version": manifest["version"],
+                "properties": [
+                    {"name": "gar:harness:runtime-dependencies", "value": "Python standard library only"},
+                    {"name": "gar:harness:distribution", "value": "portable governance and validation runtime"},
+                ],
+            },
+        },
+        "components": [],
+        "dependencies": [
+            {"ref": f"generic-agent-runtime@{manifest['version']}", "dependsOn": []}
+        ],
+    }
+    payload["SBOM.cdx.json"] = (
+        json.dumps(sbom, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+    tree_lines = [
+        f"{hashlib.sha256(payload[name]).hexdigest()}  {name}\n"
+        for name in sorted(payload)
+    ]
+    tree_digest = hashlib.sha256("".join(tree_lines).encode("utf-8")).hexdigest()
+    baseline = manifest["source_baseline"]
+    provenance = {
+        "_type": "https://in-toto.io/Statement/v1",
+        "subject": [
+            {
+                "name": f"{manifest['name']}-{manifest['version']}-payload-tree",
+                "digest": {"sha256": tree_digest},
+            }
+        ],
+        "predicateType": "https://slsa.dev/provenance/v1",
+        "predicate": {
+            "buildDefinition": {
+                "buildType": "https://generic-agent-runtime.local/harness/deterministic-zip/v1",
+                "externalParameters": {
+                    "version": manifest["version"],
+                    "releaseDate": manifest["released"],
+                },
+                "internalParameters": {},
+                "resolvedDependencies": [
+                    {
+                        "uri": f"file:{baseline['name']}",
+                        "digest": {"sha256": baseline["sha256"]},
+                    }
+                ],
+            },
+            "runDetails": {
+                "builder": {
+                    "id": "https://generic-agent-runtime.local/harness/package-runtime/v5"
+                },
+                "metadata": {"invocationId": "deterministic-local-build"},
+            },
+        },
+    }
+    payload["PROVENANCE.intoto.json"] = (
+        json.dumps(provenance, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
     manifest_name = manifest["distribution"]["manifest"]
     if manifest_name in payload:
         raise PackageError(f"manifest path collides with source: {manifest_name}")
@@ -133,19 +248,38 @@ def validate_payload(payload: dict[str, bytes], manifest: dict) -> None:
         "GEMINI.md",
         "harness.json",
         "MANIFEST.sha256",
+        "SBOM.cdx.json",
+        "PROVENANCE.intoto.json",
+        "security-policy.json",
         "schemas/task-contract.schema.json",
         "schemas/gate-result.schema.json",
         "schemas/bridge-event.schema.json",
+        "schemas/security-policy.schema.json",
+        "schemas/authorized-target.schema.json",
+        "schemas/security-test-plan.schema.json",
+        "schemas/ui-review.schema.json",
         ".agents/skills/core/agent-orchestration/SKILL.md",
         "docs/ai/constitution.md",
         "docs/ai/quality-gates.md",
+        "docs/ai/ui-review.json",
+        "docs/ai/threat-model.md",
+        "docs/ai/incident-response.md",
         "docs/ai/tasks/_TASK_TEMPLATE.md",
         "docs/ai/bridge/board.md",
         "docs/ai/bridge/ledger.jsonl",
         "docs/harness/INSTALL.md",
         "docs/harness/CHANGELOG.md",
+        "docs/harness/MIGRATION-4.2-5.0.md",
+        "docs/harness/SECURITY-MODEL.md",
+        "docs/harness/SECURITY-OPERATIONS.md",
+        "docs/harness/ADVERSARIAL-TESTING.md",
+        "docs/harness/UI-QUALITY.md",
+        "docs/harness/QUALIFICATION-5.0.md",
         "scripts/bridge.py",
         "scripts/run.ps1",
+        "scripts/security_assurance.py",
+        "scripts/adversarial_lab.py",
+        "scripts/ui_quality.py",
     }
     missing = required - payload.keys()
     if missing:
@@ -162,6 +296,20 @@ def validate_payload(payload: dict[str, bytes], manifest: dict) -> None:
         raise PackageError(f"maintainer/live/generated files in payload: {forbidden}")
     if payload["docs/ai/bridge/ledger.jsonl"]:
         raise PackageError("packaged bridge ledger must be empty")
+    if len(payload) > manifest["archive_limits"]["max_entries"]:
+        raise PackageError("package exceeds archive entry limit")
+    if any(len(name) > manifest["archive_limits"]["max_name_length"] for name in payload):
+        raise PackageError("package contains an overlong path")
+    if len({name.casefold() for name in payload}) != len(payload):
+        raise PackageError("package contains case-insensitive path aliases")
+    total_size = sum(len(content) for content in payload.values())
+    if total_size > manifest["archive_limits"]["max_total_uncompressed_bytes"]:
+        raise PackageError("package exceeds aggregate uncompressed size limit")
+    if any(
+        len(content) > manifest["archive_limits"]["max_member_uncompressed_bytes"]
+        for content in payload.values()
+    ):
+        raise PackageError("package contains an oversized member")
     expected_skills = len(manifest["core_skills"]) + len(manifest["specialist_skills"])
     packaged_skills = sum(1 for name in payload if name.endswith("/SKILL.md"))
     if packaged_skills != expected_skills:
@@ -180,7 +328,24 @@ def archive_bytes(payload: dict[str, bytes], manifest: dict) -> bytes:
             info.external_attr = (stat.S_IFREG | permissions) << 16
             info.compress_type = zipfile.ZIP_DEFLATED
             package.writestr(info, payload[name], compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
-    return buffer.getvalue()
+    content = buffer.getvalue()
+    with zipfile.ZipFile(io.BytesIO(content)) as package:
+        infos = [item for item in package.infolist() if not item.is_dir()]
+        ratio_limit = manifest["archive_limits"]["max_compression_ratio"]
+        offenders = [
+            item.filename
+            for item in infos
+            if item.file_size
+            and (
+                item.compress_size == 0
+                or item.file_size / item.compress_size > ratio_limit
+            )
+        ]
+        if offenders:
+            raise PackageError(
+                f"package compression ratio exceeds {ratio_limit}: {offenders[:10]}"
+            )
+    return content
 
 
 def safe_output(root: Path, requested: Path, manifest: dict) -> Path:
@@ -220,7 +385,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
     result.add_argument("--out", type=Path, help="output path within the repository root")
     result.add_argument("--check", action="store_true", help="validate and hash the proposed package without writing it")
-    result.add_argument("--replace", action="store_true", help="replace the canonical v4 archive if it already exists")
+    result.add_argument("--replace", action="store_true", help="replace the canonical v5 archive if it already exists")
     return result
 
 

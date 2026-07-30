@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-07-30-harness-v5",
+  "gate": "ai_llm",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed_with_conditions",
+  "applicability": {"applicable": true, "reason": "The Harness governs tool-using agents and changes their authority and evidence contracts."},
+  "summary": "Authority, untrusted context/tool output, skill provenance, project-code trust, side-effect approval, and synthetic behavioral cases are specified; host/model-specific execution remains a rollout condition.",
+  "checks": [{"id": "agent_contract", "status": "passed", "evidence_refs": ["evaluation"], "notes": "The suite pins 22 synthetic cases, repeats, hard assertions, and thresholds."}],
+  "findings": [{"id": "AI-01", "title": "Behavioral suite has not been executed on every target model and host", "severity": "medium", "state": "deferred", "blocking": false, "evidence_refs": ["evaluation"], "required_action": "Run the pinned suite before broad rollout on each model, reasoning setting, and tool host.", "owner": "Harness rollout owner", "due_before": "post_release", "risk_acceptance_ref": null}],
+  "evidence": [{"id": "evaluation", "kind": "file", "pointer": "docs/harness/evaluation-cases.json", "summary": "Pinned synthetic behavioral qualification specification; no remote-model execution is claimed.", "redacted_excerpt": null, "sensitivity": "public", "redacted": false, "sha256": null, "captured_at": "2026-07-30T02:30:00-03:00"}],
+  "acceptance_criteria_added": [],
+  "artifacts": ["AGENTS.md", "docs/harness/evaluation-cases.json", "docs/harness/evaluation-fixtures.json"],
+  "sources": [{"title": "OWASP Top 10 for Agentic Applications", "url": "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/", "version": "2026", "as_of": "2026-07-30"}],
+  "approval": {"required": false, "reason": "The source release may ship with a clearly disclosed host/model rollout condition.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Run model-specific behavioral qualification before broad rollout."],
+  "generated_at": "2026-07-30T02:30:00-03:00",
+  "expires_at": null
+}

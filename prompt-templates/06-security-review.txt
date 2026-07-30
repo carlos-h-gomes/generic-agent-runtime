@@ -1,0 +1,3 @@
+Apply AGENTS.md and specialists/risk-security-compliance. Review this project without executing project-owned code.
+
+Build a threat model from source evidence; check authorization, untrusted input, SSRF/RCE, secrets, dependency lifecycle, runtime/framework policy, deployment containment, monitoring, and incident response. Use current authoritative sources where versions can change. Report blockers, incomplete scanner coverage, residual risk, and bounded evidence pointers. Do not send attack traffic or claim the host is clean.

@@ -15,6 +15,8 @@ import unicodedata
 import zipfile
 from pathlib import Path, PurePosixPath
 
+import schema_lite
+
 PLACEHOLDERS = {"see above", "tbd", "todo", "n/a", "na", "placeholder"}
 GATE_IDS = {
     "architecture_uml",
@@ -243,31 +245,63 @@ def validate_json_schemas(
     report: Report,
     strict: bool,
 ) -> None:
+    schemas: dict[str, dict] = {}
+    try:
+        for path in schema_paths:
+            schema = json.loads(path.read_text(encoding="utf-8"))
+            schemas[path.name] = schema
+            schema_lite.check_schema(schema)
+        security_policy = json.loads((root / "security-policy.json").read_text(encoding="utf-8"))
+        ui_review = json.loads((root / "docs" / "ai" / "ui-review.json").read_text(encoding="utf-8"))
+        target_example = json.loads(
+            (root / "security" / "examples" / "authorized-target.example.json").read_text(encoding="utf-8")
+        )
+        plan_example = json.loads(
+            (root / "security" / "examples" / "loopback-plan.json").read_text(encoding="utf-8")
+        )
+        for _path, task in tasks:
+            schema_lite.validate(task, schemas["task-contract.schema.json"])
+        for _path, gate in gates:
+            schema_lite.validate(gate, schemas["gate-result.schema.json"])
+        schema_lite.validate(manifest, schemas["harness.schema.json"])
+        schema_lite.validate(security_policy, schemas["security-policy.schema.json"])
+        schema_lite.validate(ui_review, schemas["ui-review.schema.json"])
+        schema_lite.validate(target_example, schemas["authorized-target.schema.json"])
+        schema_lite.validate(plan_example, schemas["security-test-plan.schema.json"])
+        template = json.loads((root / "docs" / "ai" / "tasks" / "_GATE_RESULT_TEMPLATE.json").read_text(encoding="utf-8"))
+        schema_lite.validate(template, schemas["gate-result.schema.json"])
+    except Exception as exc:
+        report.failures.append(f"bundled JSON Schema validation: {exc}")
+        return
+    report.passes.append(
+        f"bundled contract validation ({len(schema_paths)} schemas, {len(tasks)} tasks, "
+        f"{len(gates)} gate results, policy, UI, target, plan, manifest, template)"
+    )
+
     try:
         import jsonschema  # type: ignore
     except ImportError:
-        message = "jsonschema package absent; built-in semantic contract checks ran"
-        (report.failures if strict else report.skips).append(message)
+        report.skip("optional jsonschema meta-schema validator absent; bundled contract validator passed")
         return
-    schemas: dict[str, dict] = {}
     try:
         format_checker = jsonschema.FormatChecker()
-        for path in schema_paths:
-            schema = json.loads(path.read_text(encoding="utf-8"))
+        for schema in schemas.values():
             jsonschema.Draft202012Validator.check_schema(schema)
-            schemas[path.name] = schema
         for path, task in tasks:
             jsonschema.Draft202012Validator(schemas["task-contract.schema.json"], format_checker=format_checker).validate(task)
         for path, gate in gates:
             jsonschema.Draft202012Validator(schemas["gate-result.schema.json"], format_checker=format_checker).validate(gate)
         jsonschema.Draft202012Validator(schemas["harness.schema.json"], format_checker=format_checker).validate(manifest)
-        template = json.loads((root / "docs" / "ai" / "tasks" / "_GATE_RESULT_TEMPLATE.json").read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator(schemas["security-policy.schema.json"], format_checker=format_checker).validate(security_policy)
+        jsonschema.Draft202012Validator(schemas["ui-review.schema.json"], format_checker=format_checker).validate(ui_review)
+        jsonschema.Draft202012Validator(schemas["authorized-target.schema.json"], format_checker=format_checker).validate(target_example)
+        jsonschema.Draft202012Validator(schemas["security-test-plan.schema.json"], format_checker=format_checker).validate(plan_example)
         jsonschema.Draft202012Validator(schemas["gate-result.schema.json"], format_checker=format_checker).validate(template)
     except Exception as exc:  # jsonschema exposes several validation exception types
         report.failures.append(f"JSON Schema validation: {exc}")
     else:
         report.passes.append(
-            f"JSON Schema 2020-12 validation ({len(schema_paths)} schemas, {len(tasks)} tasks, {len(gates)} gate results, manifest, template)"
+            f"optional JSON Schema 2020-12 meta-validation ({len(schema_paths)} schemas and instances)"
         )
 
 
@@ -292,8 +326,24 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "scripts/bridge.py",
         "scripts/safe_exec.py",
         "scripts/project_checks.py",
-        "docs/harness/MIGRATION-4.0-4.1.md",
-        "docs/harness/MIGRATION-4.1-4.2.md",
+        "scripts/security_assurance.py",
+        "scripts/adversarial_lab.py",
+        "scripts/ui_quality.py",
+        "scripts/schema_lite.py",
+        "security-policy.json",
+        "schemas/security-policy.schema.json",
+        "schemas/authorized-target.schema.json",
+        "schemas/security-test-plan.schema.json",
+        "schemas/ui-review.schema.json",
+        "docs/ai/ui-review.json",
+        "docs/ai/threat-model.md",
+        "docs/ai/incident-response.md",
+        "docs/harness/MIGRATION-4.2-5.0.md",
+        "docs/harness/SECURITY-MODEL.md",
+        "docs/harness/SECURITY-OPERATIONS.md",
+        "docs/harness/ADVERSARIAL-TESTING.md",
+        "docs/harness/UI-QUALITY.md",
+        "docs/harness/QUALIFICATION-5.0.md",
         "docs/harness/evaluation-suite.md",
         "docs/harness/evaluation-cases.json",
         "docs/harness/evaluation-fixtures.json",
@@ -308,7 +358,12 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         return manifest
 
     report.check(bool(re.fullmatch(r"\d+\.\d+\.\d+", str(manifest.get("version", "")))), "manifest uses semantic version")
-    report.check(manifest.get("contract_versions") == {"task": "1.0", "gate_result": "1.0", "bridge_event": "2.0"}, "manifest contract versions are canonical")
+    report.check(manifest.get("contract_versions") == {"task": "1.0", "gate_result": "1.0", "bridge_event": "2.0"}, "manifest contract versions preserve v4.2 compatibility")
+    report.check(
+        manifest.get("policy_versions")
+        == {"security": "1.0", "authorized_target": "1.0", "security_test_plan": "1.0", "ui_review": "1.0"},
+        "manifest policy versions are canonical",
+    )
 
     evaluation = load_json(root / "docs" / "harness" / "evaluation-cases.json", report)
     fixtures_path = root / "docs" / "harness" / "evaluation-fixtures.json"
@@ -317,7 +372,8 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         evaluation
         and fixtures
         and evaluation.get("execution_status") == "specification_only_not_executed"
-        and len(evaluation.get("cases") or []) >= 17
+        and evaluation.get("suite_id") == "harness-v5-behavior-1"
+        and len(evaluation.get("cases") or []) >= 22
         and evaluation.get("fixture", {}).get("revision") == fixtures.get("fixture_revision")
         and evaluation.get("fixture", {}).get("sha256") == hashlib.sha256(fixtures_path.read_bytes()).hexdigest()
     )
@@ -328,13 +384,25 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
     budget = manifest.get("instruction_budget") or {}
     report.check(len(agents) <= budget.get("agents_md_max_bytes", 0), f"AGENTS.md byte budget ({len(agents)}/{budget.get('agents_md_max_bytes')})")
     report.check(line_count <= budget.get("agents_md_max_lines", 0), f"AGENTS.md line budget ({line_count}/{budget.get('agents_md_max_lines')})")
-    report.check(b"Version: 4.2" in agents, "AGENTS.md version matches release family")
+    report.check(b"Version: 5.0" in agents, "AGENTS.md version matches release family")
     claude = (root / "CLAUDE.md").read_text(encoding="utf-8")
     report.check("@AGENTS.md" in claude and len(claude.encode("utf-8")) <= 4096, "CLAUDE.md is a thin AGENTS adapter")
     gemini = (root / "GEMINI.md").read_text(encoding="utf-8")
     report.check("@AGENTS.md" in gemini and len(gemini.encode("utf-8")) <= 4096, "GEMINI.md is a thin AGENTS adapter")
 
-    schema_paths = [root / "schemas" / name for name in ("harness.schema.json", "task-contract.schema.json", "gate-result.schema.json", "bridge-event.schema.json")]
+    schema_paths = [
+        root / "schemas" / name
+        for name in (
+            "harness.schema.json",
+            "task-contract.schema.json",
+            "gate-result.schema.json",
+            "bridge-event.schema.json",
+            "security-policy.schema.json",
+            "authorized-target.schema.json",
+            "security-test-plan.schema.json",
+            "ui-review.schema.json",
+        )
+    ]
     schemas_ok = True
     for path in schema_paths:
         value = load_json(path, report)
@@ -447,6 +515,38 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
     try:
         with zipfile.ZipFile(archive) as package:
             infos = package.infolist()
+            limits = (manifest or {}).get("archive_limits") or {
+                "max_entries": 2048,
+                "max_name_length": 240,
+                "max_member_uncompressed_bytes": 8388608,
+                "max_total_uncompressed_bytes": 67108864,
+                "max_compression_ratio": 200,
+            }
+            regular_infos = [item for item in infos if not item.is_dir()]
+            total_size = sum(item.file_size for item in regular_infos)
+            resource_bounds_ok = (
+                len(infos) <= limits["max_entries"]
+                and all(len(item.filename) <= limits["max_name_length"] for item in infos)
+                and all(
+                    0 <= item.file_size <= limits["max_member_uncompressed_bytes"]
+                    for item in regular_infos
+                )
+                and total_size <= limits["max_total_uncompressed_bytes"]
+                and all(
+                    item.file_size == 0
+                    or (
+                        item.compress_size > 0
+                        and item.file_size / item.compress_size <= limits["max_compression_ratio"]
+                    )
+                    for item in regular_infos
+                )
+            )
+            report.check(
+                resource_bounds_ok,
+                "archive entry, name, member, aggregate, and compression-ratio bounds",
+            )
+            if not resource_bounds_ok:
+                return
             all_names = [item.filename for item in infos]
             names = [item.filename for item in infos if not item.is_dir()]
             entry_types_ok = True
@@ -475,15 +575,34 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
                 "GEMINI.md",
                 "harness.json",
                 "MANIFEST.sha256",
+                "SBOM.cdx.json",
+                "PROVENANCE.intoto.json",
+                "security-policy.json",
                 "docs/harness/INSTALL.md",
                 "docs/harness/CHANGELOG.md",
+                "docs/harness/MIGRATION-4.2-5.0.md",
+                "docs/harness/SECURITY-MODEL.md",
+                "docs/harness/SECURITY-OPERATIONS.md",
+                "docs/harness/ADVERSARIAL-TESTING.md",
+                "docs/harness/UI-QUALITY.md",
+                "docs/harness/QUALIFICATION-5.0.md",
                 "schemas/task-contract.schema.json",
+                "schemas/security-policy.schema.json",
+                "schemas/authorized-target.schema.json",
+                "schemas/security-test-plan.schema.json",
+                "schemas/ui-review.schema.json",
                 ".agents/skills/core/task-triage/SKILL.md",
                 "docs/ai/constitution.md",
                 "docs/ai/quality-gates.md",
+                "docs/ai/ui-review.json",
+                "docs/ai/threat-model.md",
+                "docs/ai/incident-response.md",
                 "docs/ai/tasks/_TASK_TEMPLATE.md",
                 "docs/ai/bridge/ledger.jsonl",
                 "scripts/bridge.py",
+                "scripts/security_assurance.py",
+                "scripts/adversarial_lab.py",
+                "scripts/ui_quality.py",
             }
             report.check(required.issubset(names), "archive contains the portable runtime and clean memory templates")
             report.check("README.md" not in names and "CHANGELOG.md" not in names, "archive does not overwrite a consumer project's root README or changelog")
@@ -526,6 +645,20 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
                 report.check(all(item.date_time[:3] == (year, month, day) for item in infos), "archive timestamps use the release date")
             package_manifest = json.loads(package.read("harness.json"))
             report.check(not manifest or package_manifest.get("version") == manifest.get("version"), "archive manifest version matches source")
+            sbom = json.loads(package.read("SBOM.cdx.json"))
+            report.check(
+                sbom.get("bomFormat") == "CycloneDX"
+                and sbom.get("specVersion") == "1.7"
+                and sbom.get("metadata", {}).get("component", {}).get("version") == package_manifest.get("version"),
+                "archive CycloneDX SBOM identifies the release",
+            )
+            provenance = json.loads(package.read("PROVENANCE.intoto.json"))
+            report.check(
+                provenance.get("_type") == "https://in-toto.io/Statement/v1"
+                and provenance.get("predicateType") == "https://slsa.dev/provenance/v1"
+                and bool(provenance.get("subject")),
+                "archive contains deterministic SLSA-shaped provenance",
+            )
     except (OSError, UnicodeError, json.JSONDecodeError, zipfile.BadZipFile, KeyError) as exc:
         report.failures.append(f"archive validation failed: {exc}")
 
@@ -534,7 +667,7 @@ def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
     result.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
     result.add_argument("--static", action="store_true", help="skip live bridge doctor")
-    result.add_argument("--strict", action="store_true", help="require the optional Draft 2020-12 validator")
+    result.add_argument("--strict", action="store_true", help="run release-grade bundled contract validation")
     result.add_argument("--archive", type=Path, help="also verify a built distribution archive")
     return result
 

@@ -1,51 +1,24 @@
 # Quality Gate Contract
 
-Version: 1.0. Machine shape: `schemas/gate-result.schema.json`.
+Version: 1.1. Machine shape: `schemas/gate-result.schema.json`.
 
-## Ownership and phases
+| Gate ID | Unique responsibility |
+|---|---|
+| `ux_product` | User outcome, information hierarchy, design system, full state matrix, responsive behavior, accessibility, and reviewed visual evidence. |
+| `architecture_uml` | Boundaries, responsibilities, contracts, failure isolation, and trade-offs. |
+| `data_integration` | Data semantics, trust boundaries, validation, replay, migration, and recovery. |
+| `ai_llm` | Model/context/output/tool contracts, evaluations, budgets, and agentic threats. |
+| `security_compliance` | Threat model, authentication/authorization, secret handling, dependency/SAST evidence, adversarial scope, privacy, and residual risk. |
+| `finops` | Quantified exposure, quotas, alerts, degradation, and kill switch. |
+| `code_quality_testing` | Diff quality, deterministic tests, regression coverage, and bounded corrective loop. |
+| `observability_release` | Artifact identity, rollout, rollback, containment, monitoring, and incident readiness. |
 
-| Gate ID | Unique owner | Usual phase |
-|---|---|---|
-| `ux_product` | User outcome, interaction, states, accessibility | design |
-| `architecture_uml` | Boundaries, responsibilities, contracts, trade-offs | design |
-| `data_integration` | Schema/flow semantics, reliability, replay/migration | design |
-| `ai_llm` | Model/context/output/tool contract and AI evals | design |
-| `security_compliance` | Independent security/privacy/compliance risk | design or implementation review |
-| `finops` | Quantified cost, caps, alerts, degradation | design or pre-release |
-| `code_quality_testing` | Diff quality, tests, corrective loop | implementation review |
-| `observability_release` | Operations, rollout, rollback, incident readiness | pre-release |
+`blocked` means a required check failed, is unavailable, has no evidence, or has an open critical/high finding. `passed_with_conditions` requires a named owner and due point for every non-blocking condition. `passed` requires current evidence. `not_applicable` requires a concrete absent trigger.
 
-The task contract declares applicable gates. Specialists return separate GateResult files so independent read-heavy reviews can run in parallel. The root/integrator maintains the compact gate index and verifies results.
+Skipped and unavailable checks are incomplete, never passed. An agent cannot accept critical/high risk. Human acceptance cannot override the constitution or external authorization.
 
-## Result derivation
+Gate results contain bounded, redacted summaries and evidence pointers—not credentials, raw customer data, private prompts, full response bodies, or exploit payloads.
 
-- `not_applicable`: the trigger is absent and a concrete reason is recorded.
-- `blocked`: a required check failed or is unverified at its due phase, an open blocking finding exists, or required input/approval/evidence is missing.
-- `passed_with_conditions`: no blocker remains; each non-blocking condition has an owner and due point.
-- `passed`: all applicable required checks have evidence and no unresolved condition remains.
+For material UI, `ux_product` requires an approved `docs/ai/ui-review.json`. For internet-facing web work, `security_compliance` requires an in-date policy, a threat model, incident response, supported pinned runtime/framework versions, and applicable scanner evidence.
 
-Severity describes impact, not workflow status:
-
-- `critical`: catastrophic/irreversible; blocking by default.
-- `high`: material security, customer, financial, privacy, integrity, or availability impact; blocking by default.
-- `medium`: meaningful bounded impact; may pass with an owner and deadline.
-- `low`: localized impact; normally non-blocking.
-- `info`: observation without current material risk.
-
-An agent cannot accept critical/high risk. `risk_accepted` requires an authorized human reference and cannot override the constitution or platform controls. Release cannot downgrade another gate's blocker.
-
-## Evidence safety
-
-GateResult stores pointers and bounded redacted summaries, not payloads. Never persist secrets, credentials, cookies, raw customer/production records, full logs, real webhook payloads, private model prompts/conversations, hidden reasoning, unredacted screenshots, or exploit detail beyond safe reproduction.
-
-Controlled full artifacts may be referenced with access-controlled path, retention, hash, exit code, and a short actionable excerpt. Synthetic or sanitized fixtures are the default.
-
-## Reflection loop
-
-Two total validation attempts include the first run:
-
-```text
-implementation -> attempt 1 -> correction -> attempt 2 -> correction -> attempt 3
-```
-
-Stop earlier on repeated failure without new evidence, required protected action, or scope expansion. After the limit, use `paused_for_review` and report changed files, commands, exit codes, bounded failure evidence, residual risk, and review focus. A skipped or unavailable check is `not_verified`, never a pass.
+Validation uses at most two corrective retries after the initial attempt. Repeated failure without new evidence pauses the task for review.

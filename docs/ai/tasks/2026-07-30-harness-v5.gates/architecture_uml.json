@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-07-30-harness-v5",
+  "gate": "architecture_uml",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "The release changes execution, network-test, evidence, and packaging trust boundaries."},
+  "summary": "Authority, project-code, child-process, target, evidence, and artifact boundaries are explicit and fail closed where the Harness can enforce them.",
+  "checks": [{"id": "boundary_contracts", "status": "passed", "evidence_refs": ["security_model"], "notes": "Machine schemas and documented trust boundaries agree."}],
+  "findings": [],
+  "evidence": [{"id": "security_model", "kind": "file", "pointer": "docs/harness/SECURITY-MODEL.md", "summary": "Trust boundaries, invariants, supply-chain evidence, and residual risks.", "redacted_excerpt": null, "sensitivity": "public", "redacted": false, "sha256": null, "captured_at": "2026-07-30T02:30:00-03:00"}],
+  "acceptance_criteria_added": [],
+  "artifacts": ["docs/harness/SECURITY-MODEL.md", "schemas/harness.schema.json"],
+  "sources": [],
+  "approval": {"required": false, "reason": "The gate reviews local architecture only.", "status": "not_required", "evidence_ref": null},
+  "handoff": [],
+  "generated_at": "2026-07-30T02:30:00-03:00",
+  "expires_at": null
+}

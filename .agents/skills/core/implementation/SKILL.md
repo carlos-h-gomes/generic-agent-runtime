@@ -16,6 +16,7 @@ Confirm:
 - for managed work only, the task contract and required design gates permit implementation;
 - approvals cover the next action, not merely a related one;
 - working-tree and active-claim checks reveal no overlapping undocumented work.
+- any project-owned command to be executed has been reviewed and explicit project-code trust is recorded.
 
 If a precondition is missing, return to task triage or the owning specialist. Do not fill a boundary decision by guesswork.
 
@@ -25,11 +26,11 @@ If a precondition is missing, return to task triage or the owning specialist. Do
 2. Apply `core/minimalism`: prefer no new concept, then platform/standard library, then an existing dependency/pattern, then the smallest coherent new implementation.
 3. Keep one writer per file. Read-only workers may research or review; the root integrates and verifies.
 4. Validate all external input and model/tool output. Preserve authorization, privacy, accessibility, compatibility, and data-loss controls.
-5. Handle expected failures explicitly. Add tests at the lowest useful level for changed behavior and boundaries.
+5. Handle expected failures explicitly. Add tests at the lowest useful level for changed behavior, authority boundaries, malicious inputs, and recovery.
 6. Avoid unrelated cleanup, dependency additions, generated artifacts, commits, pushes, deployments, or external actions unless explicitly in scope.
 7. Update task status and material handoff facts without copying logs or sensitive payloads.
 
-Use `apply_patch` or the repository's safe edit mechanism. Preserve pre-existing user changes. Never use destructive reset, checkout, or recursive delete to simplify integration.
+Use `apply_patch` or the repository's safe edit mechanism. Preserve pre-existing user changes. Never use destructive reset, checkout, or recursive delete to simplify integration. Do not pass the full host environment to project commands; use the Harness policy allowlist unless a separately reviewed command requires a named value.
 
 ## Handoff to testing
 

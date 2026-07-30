@@ -1,0 +1,137 @@
+{
+  "$schema": "../../../schemas/task-contract.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-07-30-harness-v5",
+  "status": "done",
+  "mode": "change",
+  "work_level": 3,
+  "outcome": "A deterministic Harness 5.0 release candidate with stronger execution, supply-chain, adversarial-testing, and UI quality boundaries.",
+  "acceptance_criteria": [
+    "The source and clean archive pass bundled strict structural validation.",
+    "Untrusted project code is never run without explicit trust and does not inherit secret-like environment variables by default.",
+    "External adversarial execution requires an exact bounded unexpired authorization and unsafe paths are rejected.",
+    "Applicable web UI cannot pass release review without accessibility, responsive, state, and visual evidence.",
+    "The package is reproducible and includes manifest, SBOM, and provenance metadata."
+  ],
+  "scope": {
+    "size": "system",
+    "in": [
+      "Governance, schemas, scripts, templates, documentation, synthetic tests, and deterministic v5 package."
+    ],
+    "out": [
+      "Production VPS access, incident cleanup, credential rotation, deployment, destructive security tests, and third-party target testing."
+    ]
+  },
+  "risk": {
+    "level": "critical",
+    "reversibility": "partial",
+    "external_effect": "local",
+    "triggers": [
+      "Security-control implementation",
+      "Child-process execution",
+      "Network-test guardrails",
+      "Release packaging"
+    ]
+  },
+  "authorization": {
+    "writes": {
+      "allowed": true,
+      "scope": [
+        "agent-runtime-v5.0 source candidate and a new versioned archive after successful validation"
+      ]
+    },
+    "external_actions": {
+      "allowed": false,
+      "scope": []
+    }
+  },
+  "files": {
+    "owned": [
+      "agent-runtime-v5.0/**"
+    ],
+    "shared": [
+      "Verified v4.2 baseline is read-only"
+    ],
+    "do_not_touch": [
+      "agent-runtime-v4.2/**",
+      "agent-runtime-v4.2.zip"
+    ],
+    "discover": [
+      "Bounded source, archive, schema, and test inspection"
+    ]
+  },
+  "gates": [
+    {"id": "architecture_uml", "status": "passed", "reason": "Security boundaries and release shape are explicit.", "artifact": "docs/ai/tasks/2026-07-30-harness-v5.gates/architecture_uml.json"},
+    {"id": "code_quality_testing", "status": "passed", "reason": "Runtime and packaging regressions passed.", "artifact": "docs/ai/tasks/2026-07-30-harness-v5.gates/code_quality_testing.json"},
+    {"id": "ux_product", "status": "passed", "reason": "UI quality is a machine-enforced release contract.", "artifact": "docs/ai/tasks/2026-07-30-harness-v5.gates/ux_product.json"},
+    {"id": "security_compliance", "status": "passed", "reason": "Security controls and negative boundaries passed local qualification.", "artifact": "docs/ai/tasks/2026-07-30-harness-v5.gates/security_compliance.json"},
+    {"id": "data_integration", "status": "passed", "reason": "Machine contracts and bundled validation are consistent.", "artifact": "docs/ai/tasks/2026-07-30-harness-v5.gates/data_integration.json"},
+    {"id": "finops", "status": "passed", "reason": "Execution, archive, HTTP, and evidence budgets are bounded.", "artifact": "docs/ai/tasks/2026-07-30-harness-v5.gates/finops.json"},
+    {"id": "observability_release", "status": "passed", "reason": "Artifact identity, recovery guidance, and clean extraction passed.", "artifact": "docs/ai/tasks/2026-07-30-harness-v5.gates/observability_release.json"},
+    {"id": "ai_llm", "status": "passed_with_conditions", "reason": "The behavioral suite is pinned; model/host-specific execution remains a rollout condition.", "artifact": "docs/ai/tasks/2026-07-30-harness-v5.gates/ai_llm.json"}
+  ],
+  "skills": [
+    "core/implementation",
+    "core/validation",
+    "specialists/risk-security-compliance",
+    "specialists/ux-product",
+    "specialists/observability-release"
+  ],
+  "approvals": [
+    {
+      "action": "Create project-specific Harness governance and a new local versioned candidate.",
+      "required": true,
+      "status": "approved",
+      "reason": "The user explicitly authorized a project-specific AGENTS and a more robust updated Harness.",
+      "granted_by": "workspace user",
+      "scope": [
+        "Local candidate and validation artifacts only"
+      ]
+    }
+  ],
+  "context": {
+    "task_file": "docs/ai/tasks/2026-07-30-harness-v5.md",
+    "references": [
+      "AGENTS.md",
+      "docs/harness/MIGRATION-4.2-5.0.md",
+      "docs/harness/SECURITY-MODEL.md",
+      "docs/harness/UI-QUALITY.md"
+    ],
+    "assumptions": [
+      "The v4.2 archive hash recorded in harness.json identifies the source baseline.",
+      "All adversarial validation during qualification uses local synthetic fixtures without external traffic."
+    ],
+    "missing_information": []
+  },
+  "coordination": {
+    "strategy": "single_agent",
+    "run_id": null,
+    "claims": [
+      "agent-runtime-v5.0"
+    ],
+    "max_depth": 0,
+    "max_concurrency": 1
+  },
+  "validation": {
+    "commands": [
+      "python -B scripts/test_runtime.py",
+      "python -B scripts/runtime_check.py --strict",
+      "python -B scripts/security_assurance.py --release",
+      "python -B scripts/ui_quality.py --release",
+      "python -B scripts/package_runtime.py --check"
+    ],
+    "manual_checks": [
+      "Review release contents, documentation claims, and v4.2 immutability."
+    ],
+    "max_attempts": 2,
+    "evidence": [
+      "29 functional tests passed with one optional jsonschema meta-validation skip.",
+      "Strict source and archive validation passed with 86 checks and one optional skip.",
+      "Fresh extracted archive passed strict runtime, release security, and release UI validation.",
+      "Archive SHA-256: a2df0c4dc057dd166e5f530ba76280796f03d3af63f4fc8f340281be5c5406ff.",
+      "v4.2 baseline remained byte-identical to its archive and retained SHA-256 74f04009b4b7612ed93027523e2a56bbd192795dd2c38db45030e302d85ded61."
+    ],
+    "not_validated": []
+  },
+  "next_action": "Run the pinned behavioral suite on each selected model/tool host before broad rollout and refresh security-policy.json before 2026-08-29."
+}

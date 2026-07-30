@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('validate', 'lint', 'test', 'security', 'cost', 'runtime', 'bridge', 'package')]
+    [ValidateSet('validate', 'lint', 'test', 'security', 'ui', 'assurance', 'adversarial', 'cost', 'runtime', 'bridge', 'package')]
     [string] $Command = 'validate',
 
     [Parameter(ValueFromRemainingArguments = $true)]
@@ -13,6 +13,7 @@ $script:PythonExe = $null
 $script:PythonPrefix = @()
 $Root = Split-Path $PSScriptRoot -Parent
 Set-Location $Root
+$ProjectArgs = @($RemainingArgs | Where-Object { $_ -ne '--full' })
 
 function Initialize-HarnessPython {
     $candidates = @(
@@ -36,7 +37,7 @@ function Initialize-HarnessPython {
 
 function Invoke-HarnessPython {
     param([string] $Script, [string[]] $Arguments)
-    & $script:PythonExe @script:PythonPrefix $Script @Arguments
+    & $script:PythonExe @script:PythonPrefix -B $Script @Arguments
     $script:HarnessExitCode = $LASTEXITCODE
 }
 
@@ -49,6 +50,7 @@ function Invoke-SafeCommand {
         '--timeout', [string]$config.execution_limits.runtime_command_timeout_seconds,
         '--grace', [string]$config.execution_limits.kill_grace_seconds,
         '--tail-lines', [string]$config.execution_limits.failure_tail_lines,
+        '--max-buffer-bytes', [string]$config.execution_limits.max_output_buffer_bytes,
         '--'
     ) + $CommandLine
     & $script:PythonExe @script:PythonPrefix @safeArgs
@@ -85,14 +87,14 @@ function Invoke-NativeLint {
         }
     }
 
-    Invoke-HarnessPython 'scripts/project_checks.py' @('lint')
+    Invoke-HarnessPython 'scripts/project_checks.py' (@('lint') + $ProjectArgs)
 }
 
 function Invoke-NativeTest {
     $commandLine = @($script:PythonExe) + $script:PythonPrefix + @('-B', 'scripts/test_runtime.py')
     Invoke-SafeCommand 'Harness functional tests' $commandLine
     if ($script:HarnessExitCode -ne 0) { return }
-    Invoke-HarnessPython 'scripts/project_checks.py' @('test')
+    Invoke-HarnessPython 'scripts/project_checks.py' (@('test') + $ProjectArgs)
 }
 
 function Invoke-NativeValidate {
@@ -106,9 +108,18 @@ function Invoke-NativeValidate {
     if ($script:HarnessExitCode -eq 3) { $incomplete = $true }
     elseif ($script:HarnessExitCode -ne 0) { return }
 
+    if ((Test-Path (Join-Path $Root '.harness-source')) -and (Test-Path (Join-Path $Root 'scripts/package_runtime.py'))) {
+        Invoke-HarnessPython 'scripts/runtime_check.py' @('--strict')
+        if ($script:HarnessExitCode -ne 0) { return }
+        Invoke-HarnessPython 'scripts/package_runtime.py' @('--check')
+        if ($script:HarnessExitCode -ne 0) { return }
+    }
+
     if ($RemainingArgs -contains '--full') {
-        foreach ($mode in @('build', 'security')) {
-            Invoke-HarnessPython 'scripts/project_checks.py' @($mode)
+        foreach ($mode in @('build', 'security', 'ui')) {
+            $modeArgs = @($mode) + $ProjectArgs
+            if ($mode -eq 'ui') { $modeArgs += '--release' }
+            Invoke-HarnessPython 'scripts/project_checks.py' $modeArgs
             if ($script:HarnessExitCode -eq 3) { $incomplete = $true }
             elseif ($script:HarnessExitCode -ne 0) { return }
         }
@@ -130,7 +141,10 @@ switch ($Command) {
     'runtime'  { Invoke-HarnessPython 'scripts/runtime_check.py' $RemainingArgs }
     'package'  { Invoke-HarnessPython 'scripts/package_runtime.py' $RemainingArgs }
     'cost'     { Invoke-HarnessPython 'scripts/cost_check.py' $RemainingArgs }
-    'security' { Invoke-HarnessPython 'scripts/project_checks.py' @('security') }
+    'security' { Invoke-HarnessPython 'scripts/project_checks.py' (@('security') + $ProjectArgs) }
+    'ui'       { Invoke-HarnessPython 'scripts/project_checks.py' (@('ui') + $ProjectArgs) }
+    'assurance' { Invoke-HarnessPython 'scripts/security_assurance.py' $RemainingArgs }
+    'adversarial' { Invoke-HarnessPython 'scripts/adversarial_lab.py' $RemainingArgs }
     'lint'     { Invoke-NativeLint }
     'test'     { Invoke-NativeTest }
     default    { Invoke-NativeValidate }

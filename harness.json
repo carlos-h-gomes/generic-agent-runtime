@@ -2,9 +2,13 @@
   "$schema": "schemas/harness.schema.json",
   "name": "generic-agent-runtime",
   "display_name": "Generic Agent Runtime",
-  "version": "4.2.0",
-  "released": "2026-07-17",
+  "version": "5.0.0",
+  "released": "2026-07-30",
   "runtime_language": "English",
+  "source_baseline": {
+    "name": "agent-runtime-v4.2.zip",
+    "sha256": "74f04009b4b7612ed93027523e2a56bbd192795dd2c38db45030e302d85ded61"
+  },
   "adapters": [
     "CLAUDE.md",
     "GEMINI.md"
@@ -14,9 +18,15 @@
     "gate_result": "1.0",
     "bridge_event": "2.0"
   },
+  "policy_versions": {
+    "security": "1.0",
+    "authorized_target": "1.0",
+    "security_test_plan": "1.0",
+    "ui_review": "1.0"
+  },
   "instruction_budget": {
-    "agents_md_max_bytes": 8192,
-    "agents_md_max_lines": 170
+    "agents_md_max_bytes": 12288,
+    "agents_md_max_lines": 210
   },
   "core_skills": [
     "agent-bridge",
@@ -42,10 +52,15 @@
   "schemas": {
     "task": "schemas/task-contract.schema.json",
     "gate_result": "schemas/gate-result.schema.json",
-    "bridge_event": "schemas/bridge-event.schema.json"
+    "bridge_event": "schemas/bridge-event.schema.json",
+    "security_policy": "schemas/security-policy.schema.json",
+    "authorized_target": "schemas/authorized-target.schema.json",
+    "security_test_plan": "schemas/security-test-plan.schema.json",
+    "ui_review": "schemas/ui-review.schema.json"
   },
+  "security_policy": "security-policy.json",
   "distribution": {
-    "archive": "agent-runtime-v4.2.zip",
+    "archive": "agent-runtime-v5.0.zip",
     "manifest": "MANIFEST.sha256",
     "scaffold_root": "scaffold",
     "exclude_maintainer_tasks": true,
@@ -57,6 +72,14 @@
     "runtime_command_timeout_seconds": 120,
     "kill_grace_seconds": 5,
     "failure_tail_lines": 120,
+    "max_output_buffer_bytes": 262144,
     "validation_attempts": 2
+  },
+  "archive_limits": {
+    "max_entries": 2048,
+    "max_name_length": 240,
+    "max_member_uncompressed_bytes": 8388608,
+    "max_total_uncompressed_bytes": 67108864,
+    "max_compression_ratio": 200
   }
 }

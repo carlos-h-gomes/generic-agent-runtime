@@ -1,0 +1,93 @@
+{
+  "$schema": "schemas/security-policy.schema.json",
+  "schema_version": "1.0",
+  "checked_at": "2026-07-30",
+  "expires_at": "2026-08-29",
+  "sources": [
+    {
+      "title": "Next.js July 2026 Security Release",
+      "url": "https://nextjs.org/blog/july-2026-security-release",
+      "as_of": "2026-07-30"
+    },
+    {
+      "title": "Next.js Support Policy",
+      "url": "https://nextjs.org/support-policy",
+      "as_of": "2026-07-30"
+    },
+    {
+      "title": "Node.js Releases",
+      "url": "https://nodejs.org/en/about/previous-releases",
+      "as_of": "2026-07-30"
+    },
+    {
+      "title": "OWASP ASVS",
+      "url": "https://owasp.org/www-project-application-security-verification-standard/",
+      "as_of": "2026-07-30"
+    }
+  ],
+  "execution": {
+    "require_explicit_project_trust": true,
+    "inherit_environment": false,
+    "allowed_environment": [
+      "APPDATA",
+      "CI",
+      "ComSpec",
+      "HOME",
+      "LANG",
+      "LC_ALL",
+      "LOCALAPPDATA",
+      "NODE_ENV",
+      "PATH",
+      "PATHEXT",
+      "PROGRAMDATA",
+      "SystemRoot",
+      "TEMP",
+      "TERM",
+      "TMP",
+      "TMPDIR",
+      "USERPROFILE",
+      "WINDIR",
+      "XDG_CACHE_HOME"
+    ],
+    "secret_name_pattern": "(?i)(secret|token|password|passwd|credential|private[_-]?key|api[_-]?key|access[_-]?key|session|cookie|authorization)"
+  },
+  "runtimes": {
+    "node": {
+      "allowed_lts_majors": [22, 24],
+      "require_deployment_pin": true,
+      "source": "https://nodejs.org/en/about/previous-releases"
+    }
+  },
+  "frameworks": {
+    "next": {
+      "block_prerelease": true,
+      "supported": [
+        {
+          "major": 15,
+          "minimum": "15.5.21",
+          "support": "maintenance_lts"
+        },
+        {
+          "major": 16,
+          "minimum": "16.2.11",
+          "support": "active_lts"
+        }
+      ],
+      "source": "https://nextjs.org/blog/july-2026-security-release"
+    }
+  },
+  "release": {
+    "block_high_or_critical": true,
+    "require_lockfile": true,
+    "required_web_artifacts": [
+      "docs/ai/threat-model.md",
+      "docs/ai/incident-response.md",
+      "docs/ai/ui-review.json"
+    ],
+    "required_scanner_classes": [
+      "dependency",
+      "secret",
+      "sast"
+    ]
+  }
+}

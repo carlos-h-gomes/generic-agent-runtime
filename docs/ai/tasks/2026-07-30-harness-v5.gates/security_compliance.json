@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-07-30-harness-v5",
+  "gate": "security_compliance",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "The release responds to a reported framework-to-host compromise and changes security controls."},
+  "summary": "Explicit project trust, minimized environment, process cleanup, dated lifecycle policy, archive limits, authorized-target contracts, source checks, and incident boundaries are implemented and tested.",
+  "checks": [
+    {"id": "local_assurance", "status": "passed", "evidence_refs": ["qualification"], "notes": "Built-in security assurance reported no failure or incomplete applicable check."},
+    {"id": "adversarial_boundary", "status": "passed", "evidence_refs": ["adversarial"], "notes": "Plan mode is network-free; unsafe paths and unscoped external targets are rejected."}
+  ],
+  "findings": [],
+  "evidence": [
+    {"id": "qualification", "kind": "test", "pointer": "docs/harness/QUALIFICATION-5.0.md", "summary": "Security regression and claim-boundary results.", "redacted_excerpt": null, "sensitivity": "public", "redacted": false, "sha256": null, "captured_at": "2026-07-30T02:30:00-03:00"},
+    {"id": "adversarial", "kind": "file", "pointer": "docs/harness/ADVERSARIAL-TESTING.md", "summary": "Controlled defensive-test authorization and stop conditions.", "redacted_excerpt": null, "sensitivity": "public", "redacted": false, "sha256": null, "captured_at": "2026-07-30T02:30:00-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["security-policy.json", "scripts/security_assurance.py", "scripts/adversarial_lab.py", "docs/harness/SECURITY-OPERATIONS.md"],
+  "sources": [
+    {"title": "Next.js July 2026 Security Release", "url": "https://nextjs.org/blog/july-2026-security-release", "version": "16.2.11 and 15.5.21", "as_of": "2026-07-30"},
+    {"title": "OWASP ASVS", "url": "https://owasp.org/www-project-application-security-verification-standard/", "version": "5.0.0", "as_of": "2026-07-30"}
+  ],
+  "approval": {"required": false, "reason": "Qualification used only local source and synthetic plan mode; no external target was contacted.", "status": "not_required", "evidence_ref": null},
+  "handoff": [],
+  "generated_at": "2026-07-30T02:30:00-03:00",
+  "expires_at": "2026-08-29T23:59:59-03:00"
+}

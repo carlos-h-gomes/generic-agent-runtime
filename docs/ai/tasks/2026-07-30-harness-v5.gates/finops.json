@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-07-30-harness-v5",
+  "gate": "finops",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "The threat includes cryptomining/compute abuse and scanners can create unbounded cost."},
+  "summary": "Commands, output, archive expansion, HTTP requests, response bytes, and test time are bounded; VPS resource quotas and alerts remain an operational responsibility.",
+  "checks": [{"id": "resource_budgets", "status": "passed", "evidence_refs": ["limits"], "notes": "Machine limits are present and negative archive/request tests pass."}],
+  "findings": [],
+  "evidence": [{"id": "limits", "kind": "file", "pointer": "harness.json", "summary": "Execution and archive budgets plus controlled HTTP plan limits.", "redacted_excerpt": null, "sensitivity": "public", "redacted": false, "sha256": null, "captured_at": "2026-07-30T02:30:00-03:00"}],
+  "acceptance_criteria_added": [],
+  "artifacts": ["harness.json", "schemas/security-test-plan.schema.json", "docs/harness/SECURITY-OPERATIONS.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "The gate adds local limits and does not change billing or production resources.", "status": "not_required", "evidence_ref": null},
+  "handoff": [],
+  "generated_at": "2026-07-30T02:30:00-03:00",
+  "expires_at": null
+}

@@ -1,4 +1,4 @@
-# CLAUDE.md — Generic Agent Runtime adapter
+# CLAUDE.md - Generic Agent Runtime adapter
 
 @AGENTS.md
 
@@ -6,5 +6,5 @@
 
 - Use native subagents for bounded independent work; keep the parent as integrator and default writer.
 - Treat `docs/ai/` as project memory and `.agents/skills/` as on-demand procedures.
-- On Windows, use the PowerShell adapter documented in `README.md`; on POSIX, use the shell entrypoints.
+- On Windows, use `scripts/run.ps1`; on POSIX, use the shell entrypoints documented in `docs/harness/INSTALL.md`.
 - Do not duplicate the kernel here. If this file and `AGENTS.md` appear to conflict, follow `AGENTS.md` and report the adapter drift.

@@ -1,4 +1,4 @@
-# GEMINI.md — Generic Agent Runtime adapter
+# GEMINI.md - Generic Agent Runtime adapter
 
 @AGENTS.md
 

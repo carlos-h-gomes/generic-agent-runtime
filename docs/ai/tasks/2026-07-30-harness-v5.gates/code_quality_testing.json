@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-07-30-harness-v5",
+  "gate": "code_quality_testing",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "Security-critical Python and PowerShell runtime code changed."},
+  "summary": "Functional, negative, syntax, structural, and deterministic package regressions passed.",
+  "checks": [{"id": "functional_regression", "status": "passed", "evidence_refs": ["qualification"], "notes": "29 test methods passed; the optional external jsonschema meta-validator was a reported skip."}],
+  "findings": [],
+  "evidence": [{"id": "qualification", "kind": "test", "pointer": "docs/harness/QUALIFICATION-5.0.md", "summary": "Bounded qualification summary including trust, lifecycle, UI, adversarial, and archive regressions.", "redacted_excerpt": null, "sensitivity": "public", "redacted": false, "sha256": null, "captured_at": "2026-07-30T02:30:00-03:00"}],
+  "acceptance_criteria_added": [],
+  "artifacts": ["scripts/test_runtime.py", "docs/harness/QUALIFICATION-5.0.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "No protected external action belongs to local regression testing.", "status": "not_required", "evidence_ref": null},
+  "handoff": [],
+  "generated_at": "2026-07-30T02:30:00-03:00",
+  "expires_at": null
+}

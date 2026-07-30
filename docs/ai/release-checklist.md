@@ -1,65 +1,52 @@
 # Profile-Driven Release Checklist
 
-Owned by `specialists/observability-release`. Copy an evidence index into the active Level 3 task; do not check boxes without proof.
+`[B]` blocks an applicable release. `[R]` may be deferred only with reason, owner, and due point. Every `not applicable` entry needs a project-specific reason.
 
-`[B]` blocks an applicable release. `[R]` may be deferred with reason, owner, and due point. Every `Not applicable` entry needs a project-specific reason. Project-defined SLO, RTO/RPO, backup, rollback, and monitoring targets replace generic fixed numbers.
+## Identity and recovery
 
-## Part A — Launch or major-change readiness
+- [ ] [B] Revision, artifact digest, SBOM, provenance, environment, and owner are identified.
+- [ ] [B] Reproducible build/install mode and lockfile are evidenced.
+- [ ] [B] Rollback or restore was exercised against declared objectives.
+- [ ] [B] Configuration and migration compatibility order is documented.
 
-### Delivery and recovery
+## Security and containment
 
-- [ ] [B] Build/release identity and provenance are reproducible.
-- [ ] [B] Environments, credentials, and data stores are appropriately isolated.
-- [ ] [B] Forward and rollback/restore procedures were tested against the declared objectives.
-- [ ] [B] Configuration, schema, and compatibility order are documented.
-- [ ] [R] Staged/canary or feature-flag rollout limits blast radius where useful.
+- [ ] [B] Security policy is current; runtime/framework pins satisfy it.
+- [ ] [B] Fresh dependency, secret, and SAST results have no unresolved high/critical finding.
+- [ ] [B] Threat model covers public entrypoints, trust boundaries, authorization, upload/render paths, SSRF/RCE, dependency scripts, and agent tools where applicable.
+- [ ] [B] Secrets are absent from source/build/logs and have scoped rotation/revocation procedures.
+- [ ] [B] Production runs as non-root with minimum filesystem/process/network authority and resource quotas.
+- [ ] [B] Incident response names containment, credential rotation, rebuild, evidence, communication, and owner.
+- [ ] [B] Adversarial traffic, if any, used an exact, bounded, unexpired authorized target contract.
 
-### Security, privacy, and supply chain
+## Product and UI
 
-- [ ] [B] Fresh `security_compliance` result has no blocker; auth/resource isolation and public entrypoints were tested when applicable.
-- [ ] [B] Secrets are outside code/build output/logs and have scoped rotation/revocation procedures.
-- [ ] [B] Dependencies, tools, skills, and deployment inputs have recorded provenance and applicable scan evidence.
-- [ ] [B] Personal/customer data purpose, minimization, access, retention, deletion, and third-party transfers are recorded when applicable.
-- [ ] [R] Legal/compliance owner reviewed jurisdiction-specific obligations when triggered.
+- [ ] [B] Critical journeys and the full interaction-state matrix are evidenced.
+- [ ] [B] Narrow and wide responsive evidence and content stress were reviewed.
+- [ ] [B] Automated accessibility plus keyboard, focus, semantics, reflow/zoom, error, and motion checks are recorded.
+- [ ] [B] Visual baselines/diffs were reviewed by someone authorized to approve the change.
 
-### Data, integrations, payments, and AI
+## Data, AI, operations, and cost
 
-- [ ] [B] Fresh `data_integration` result covers contracts, validation, idempotency/retries/replay, migrations, and recovery where applicable.
-- [ ] [B] Inbound authenticity and replay protection are tested with synthetic or provider-sanitized fixtures.
-- [ ] [B] Payment/money flows verify authenticity, idempotency, auditability, and failure handling.
-- [ ] [B] A production financial smoke transaction is used only when the provider permits it and an authorized human explicitly approves scope; reversal/refund/void and sanitized evidence are recorded.
-- [ ] [B] Fresh `ai_llm` result covers schema validation, grounding/fallback, tool policy, eval thresholds, memory, budgets, and residual injection risk when applicable.
-
-### Operations and cost
-
-- [ ] [B] Success/failure SLIs and applicable SLO/RTO/RPO targets are defined.
-- [ ] [B] Safe logs, metrics, traces/correlation, alerts, owners, escalation, and runbook exist.
-- [ ] [B] Fresh `finops` result defines worst-case exposure, hard caps, alert actions, degradation, and kill switch for variable-cost paths.
-- [ ] [B] Incident criteria, containment, communication, and post-incident ownership are known.
-- [ ] [R] Restore, rollback, and incident exercises are repeated at the project-defined cadence.
-
-## Part B — Every production release
-
-- [ ] [B] Target revision/artifact and change summary are identified.
-- [ ] [B] Relevant validation and required gate results passed on that state; skips and residual risks are accepted by the proper owner.
-- [ ] [B] Migrations/config/secrets and compatibility order were reviewed without exposing values.
-- [ ] [B] Scoped production approval is recorded before execution.
-- [ ] [B] Rollback trigger, procedure, and operator are named before deploy.
-- [ ] [B] Synthetic/sanitized smoke checks and restored-state checks are selected.
-- [ ] [R] Staging/canary/flag plan is ready.
-- [ ] [R] Monitoring window, signals, owner, and stakeholder communication are set.
+- [ ] [B] Data contracts, validation, migration, replay/idempotency, retention, and recovery are covered where applicable.
+- [ ] [B] AI output/tool policies, injection resistance, eval thresholds, memory, and fallback are covered where applicable.
+- [ ] [B] Logs are redacted; SLIs/SLOs, alerts, escalation, runbook, and monitoring window are defined.
+- [ ] [B] Variable-cost paths have quotas, worst-case exposure, alerts, degradation, and a kill switch.
+- [ ] [R] Staged/canary/feature-flag rollout limits blast radius.
 
 ## Evidence index
 
 ```text
-Release/artifact:
+Release/artifact/digest:
 Target environment:
-Approved action and approver reference:
-Required GateResult paths/revisions:
-Validation evidence pointers:
+Approver and scope:
+GateResult paths:
+Validation commands and exit codes:
+Security scanner evidence:
+UI/accessibility/visual evidence:
 Rollback/restore evidence:
 Monitoring window and owner:
-Not applicable items and reasons:
-Deferred recommended items, owner, due point:
+Not-applicable reasons:
+Deferred items, owner, due point:
 Residual risks:
 ```

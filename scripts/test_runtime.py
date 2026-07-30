@@ -26,6 +26,10 @@ ROOT = Path(__file__).resolve().parents[1]
 BRIDGE = ROOT / "scripts" / "bridge.py"
 SAFE_EXEC = ROOT / "scripts" / "safe_exec.py"
 PROJECT_CHECKS = ROOT / "scripts" / "project_checks.py"
+SECURITY_ASSURANCE = ROOT / "scripts" / "security_assurance.py"
+UI_QUALITY = ROOT / "scripts" / "ui_quality.py"
+ADVERSARIAL_LAB = ROOT / "scripts" / "adversarial_lab.py"
+GUARDRAILS = ROOT / "scripts" / "harnesslib" / "guardrails.py"
 BRIDGE_MODULE = None
 
 
@@ -210,7 +214,7 @@ class BridgeTests(unittest.TestCase):
 class ExecutionGuardTests(unittest.TestCase):
     def test_safe_exec_times_out_and_terminates(self) -> None:
         result = subprocess.run(
-            [sys.executable, str(SAFE_EXEC), "--label", "timeout-test", "--timeout", "0.2", "--grace", "0.1", "--", sys.executable, "-c", "import time; time.sleep(5)"],
+            [sys.executable, "-B", str(SAFE_EXEC), "--label", "timeout-test", "--timeout", "0.2", "--grace", "0.1", "--", sys.executable, "-B", "-c", "import time; time.sleep(5)"],
             text=True,
             capture_output=True,
             check=False,
@@ -222,7 +226,7 @@ class ExecutionGuardTests(unittest.TestCase):
 
     def test_safe_exec_bounds_failure_output(self) -> None:
         result = subprocess.run(
-            [sys.executable, str(SAFE_EXEC), "--label", "tail-test", "--tail-lines", "5", "--", sys.executable, "-c", "import sys; [print(i) for i in range(50)]; sys.exit(7)"],
+            [sys.executable, "-B", str(SAFE_EXEC), "--label", "tail-test", "--tail-lines", "5", "--", sys.executable, "-B", "-c", "import sys; [print(i) for i in range(50)]; sys.exit(7)"],
             text=True,
             capture_output=True,
             check=False,
@@ -232,6 +236,22 @@ class ExecutionGuardTests(unittest.TestCase):
         self.assertEqual(result.returncode, 7, result.stdout + result.stderr)
         self.assertIn("output truncated", result.stderr)
         self.assertNotIn("\n0\n", result.stderr)
+
+    def test_environment_sanitizer_removes_secret_named_values(self) -> None:
+        guardrails = load_module("guardrails_environment_test", GUARDRAILS)
+        sanitized = guardrails.sanitize_environment(
+            {
+                "PATH": "safe-path",
+                "SESSION_TOKEN": "synthetic-secret",
+                "UNRELATED": "not-forwarded",
+            },
+            ["PATH", "SESSION_TOKEN", "UNRELATED"],
+            r"(?i)(secret|token|password|session)",
+        )
+        self.assertEqual(sanitized["PATH"], "safe-path")
+        self.assertNotIn("SESSION_TOKEN", sanitized)
+        self.assertEqual(sanitized["UNRELATED"], "not-forwarded")
+        self.assertEqual(sanitized["CI"], "1")
 
 
 class ProjectChecksTests(unittest.TestCase):
@@ -282,17 +302,44 @@ class ProjectChecksTests(unittest.TestCase):
                 mock.patch.object(checks, "ROOT", root),
                 mock.patch.object(checks, "SAFE", root / "scripts" / "safe_exec.py"),
                 mock.patch.object(checks, "npm_executable", return_value="npm.cmd"),
+                mock.patch.object(
+                    checks,
+                    "limits",
+                    return_value={
+                        "default_command_timeout_seconds": 300,
+                        "kill_grace_seconds": 5,
+                        "failure_tail_lines": 120,
+                        "max_output_buffer_bytes": 262144,
+                    },
+                ),
                 mock.patch.object(checks, "run", return_value=0) as run,
                 mock.patch.dict(os.environ, {"HARNESS_NPM_TEST_FILTERS": "auth-plan discovery"}),
             ):
-                result = checks.check_test()
+                result = checks.check_test(trusted=True, allow_secret_env=False)
             self.assertEqual(result, (1, 0))
             self.assertEqual(
                 run.call_args.args[1],
                 ["npm.cmd", "--prefix", "api", "test", "--", "auth-plan", "discovery"],
             )
 
-    def test_security_includes_product_boundary_scripts(self) -> None:
+    def test_untrusted_project_test_is_not_executed(self) -> None:
+        checks = load_module("project_checks_trust_test", PROJECT_CHECKS)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "package.json").write_text(
+                json.dumps({"scripts": {"test": "node exfiltrate.js"}}),
+                encoding="utf-8",
+            )
+            with (
+                mock.patch.object(checks, "ROOT", root),
+                mock.patch.object(checks, "run", side_effect=AssertionError("must not run")),
+            ):
+                ran, incomplete = checks.check_test(
+                    trusted=False, allow_secret_env=False
+                )
+            self.assertEqual((ran, incomplete), (0, 1))
+
+    def test_security_uses_bundled_assurance_without_project_script_execution(self) -> None:
         checks = load_module("project_checks_security_test", PROJECT_CHECKS)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -302,17 +349,153 @@ class ProjectChecksTests(unittest.TestCase):
                 (scripts / name).write_text("", encoding="utf-8")
             with (
                 mock.patch.object(checks, "ROOT", root),
-                mock.patch.object(checks, "node_executable", return_value="node.exe"),
-                mock.patch.object(checks, "npm_executable", return_value=None),
-                mock.patch.object(checks.shutil, "which", return_value=None),
+                mock.patch.object(
+                    checks,
+                    "limits",
+                    return_value={
+                        "default_command_timeout_seconds": 300,
+                        "kill_grace_seconds": 5,
+                        "failure_tail_lines": 120,
+                        "max_output_buffer_bytes": 262144,
+                    },
+                ),
                 mock.patch.object(checks, "run", return_value=0) as run,
             ):
-                ran, incomplete = checks.check_security()
-            self.assertEqual(ran, 2)
-            self.assertGreater(incomplete, 0)
+                ran, incomplete = checks.check_security(external=False)
+            self.assertEqual((ran, incomplete), (1, 0))
             commands = [call.args[1] for call in run.call_args_list]
-            self.assertIn(["node.exe", str(scripts / "check-n8n-security.mjs")], commands)
-            self.assertIn(["node.exe", str(scripts / "check-systemd-security.mjs")], commands)
+            self.assertEqual(len(commands), 1)
+            self.assertIn(str(root / "scripts" / "security_assurance.py"), commands[0])
+            self.assertNotIn(str(scripts / "check-n8n-security.mjs"), commands[0])
+            self.assertNotIn(str(scripts / "check-systemd-security.mjs"), commands[0])
+
+
+class SecurityAndUiTests(unittest.TestCase):
+    def test_stale_next_and_node_are_release_blockers(self) -> None:
+        security = load_module("security_stale_runtime_test", SECURITY_ASSURANCE)
+        reporting = load_module(
+            "security_reporting_test", ROOT / "scripts" / "harnesslib" / "reporting.py"
+        )
+        policy = json.loads((ROOT / "security-policy.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "package.json").write_text(
+                json.dumps(
+                    {
+                        "dependencies": {"next": "14.2.1"},
+                        "engines": {"node": "20.x"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / "package-lock.json").write_text(
+                json.dumps(
+                    {
+                        "lockfileVersion": 3,
+                        "packages": {"node_modules/next": {"version": "14.2.1"}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / ".nvmrc").write_text("20\n", encoding="utf-8")
+            report = reporting.CheckReport("stale")
+            security.check_node_projects(root, policy, "release", report)
+        joined = "\n".join(report.failures)
+        self.assertIn("outside supported policy majors", joined)
+        self.assertIn("unsupported major", joined)
+
+    def test_current_next_and_node_meet_lifecycle_floor(self) -> None:
+        security = load_module("security_current_runtime_test", SECURITY_ASSURANCE)
+        reporting = load_module(
+            "security_current_reporting_test",
+            ROOT / "scripts" / "harnesslib" / "reporting.py",
+        )
+        policy = json.loads((ROOT / "security-policy.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "package.json").write_text(
+                json.dumps(
+                    {
+                        "dependencies": {"next": "16.2.11"},
+                        "engines": {"node": "24.x"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / "package-lock.json").write_text(
+                json.dumps(
+                    {
+                        "lockfileVersion": 3,
+                        "packages": {"node_modules/next": {"version": "16.2.11"}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / ".nvmrc").write_text("24\n", encoding="utf-8")
+            report = reporting.CheckReport("current")
+            security.check_node_projects(root, policy, "ci", report)
+        self.assertFalse(report.failures)
+        self.assertTrue(any("meets the dated security floor" in item for item in report.passes))
+
+    def test_incomplete_ui_contract_cannot_pass_release(self) -> None:
+        ui = load_module("ui_incomplete_contract_test", UI_QUALITY)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "schemas").mkdir()
+            shutil.copy2(
+                ROOT / "schemas" / "ui-review.schema.json",
+                root / "schemas" / "ui-review.schema.json",
+            )
+            (root / "docs" / "ai").mkdir(parents=True)
+            (root / "package.json").write_text(
+                json.dumps({"dependencies": {"next": "16.2.11"}}), encoding="utf-8"
+            )
+            (root / "docs" / "ai" / "ui-review.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "1.0",
+                        "status": "approved",
+                        "applicability": {"applicable": True, "reason": "web UI"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with contextlib.redirect_stderr(io.StringIO()):
+                result = ui.main(["--root", str(root), "--profile", "release"])
+        self.assertNotEqual(result, 0)
+
+    def test_adversarial_plan_rejects_ambiguous_and_external_unscoped_targets(self) -> None:
+        lab = load_module("adversarial_scope_test", ADVERSARIAL_LAB)
+        base = {
+            "target_origin": "http://127.0.0.1:8080",
+            "max_requests": 1,
+            "scenarios": [
+                {
+                    "id": "probe",
+                    "method": "GET",
+                    "path": "//attacker.invalid",
+                    "required_headers": [],
+                    "forbidden_body_markers": [],
+                }
+            ],
+        }
+        with self.assertRaises(ValueError):
+            lab.canonical_plan(base)
+        encoded = copy.deepcopy(base)
+        encoded["scenarios"][0]["path"] = "/allowed/%2e%2e/admin"
+        with self.assertRaises(ValueError):
+            lab.canonical_plan(encoded)
+        external = copy.deepcopy(base)
+        external["target_origin"] = "http://192.0.2.1"
+        external["scenarios"][0]["path"] = "/"
+        with self.assertRaises(ValueError):
+            lab.prepare_execution(ROOT, external, None)
+
+    def test_authorized_path_prefix_has_a_segment_boundary(self) -> None:
+        guardrails = load_module("guardrails_prefix_test", GUARDRAILS)
+        self.assertTrue(guardrails.path_is_allowed("/api/orders", ["/api"]))
+        self.assertTrue(guardrails.path_is_allowed("/api", ["/api"]))
+        self.assertFalse(guardrails.path_is_allowed("/api-evil", ["/api"]))
 
 
 class PackageTests(unittest.TestCase):
@@ -382,6 +565,23 @@ class PackageTests(unittest.TestCase):
             runtime.archive_checks(ROOT, archive, manifest, report)
             self.assertTrue(report.failures)
 
+    def test_archive_validator_rejects_extreme_compression_ratio(self) -> None:
+        runtime = load_module(
+            "runtime_for_ratio_test", ROOT / "scripts" / "runtime_check.py"
+        )
+        manifest = json.loads((ROOT / "harness.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as temp_name:
+            archive = Path(temp_name) / "ratio.zip"
+            with zipfile.ZipFile(
+                archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+            ) as handle:
+                handle.writestr("highly-repetitive.txt", b"A" * 1_048_576)
+            report = runtime.Report()
+            runtime.archive_checks(ROOT, archive, manifest, report)
+        self.assertTrue(
+            any("compression-ratio bounds" in item for item in report.failures)
+        )
+
     @unittest.skipUnless((ROOT / "scaffold").is_dir(), "maintainer-source package test")
     def test_clean_distribution_validates_with_unrelated_scaffold_directory(self) -> None:
         package = load_module("package_extract_test", ROOT / "scripts" / "package_runtime.py")
@@ -395,7 +595,7 @@ class PackageTests(unittest.TestCase):
                 handle.extractall(extracted)
             (extracted / "scaffold").mkdir()
             result = subprocess.run(
-                [sys.executable, str(extracted / "scripts" / "runtime_check.py"), "--root", str(extracted), "--static"],
+                [sys.executable, "-B", str(extracted / "scripts" / "runtime_check.py"), "--root", str(extracted), "--static"],
                 text=True,
                 capture_output=True,
                 check=False,
@@ -451,7 +651,7 @@ class PackageTests(unittest.TestCase):
 
     def test_static_runtime_check(self) -> None:
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts" / "runtime_check.py"), "--root", str(ROOT), "--static"],
+            [sys.executable, "-B", str(ROOT / "scripts" / "runtime_check.py"), "--root", str(ROOT), "--static"],
             text=True,
             capture_output=True,
             check=False,

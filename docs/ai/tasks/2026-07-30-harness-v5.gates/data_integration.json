@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-07-30-harness-v5",
+  "gate": "data_integration",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "The release adds versioned policy, target, test-plan, and UI contracts."},
+  "summary": "Eight schemas and representative valid/invalid instances pass the bundled deterministic validator while v4.2 task, gate, and bridge contract versions remain compatible.",
+  "checks": [{"id": "machine_contracts", "status": "passed", "evidence_refs": ["schemas"], "notes": "Strict runtime validation passed with bundled schema enforcement."}],
+  "findings": [],
+  "evidence": [{"id": "schemas", "kind": "command", "pointer": "python -B scripts/runtime_check.py --strict", "summary": "Bundled validation of eight schemas, policy, UI, target, plan, manifest, templates, tasks, and gates.", "redacted_excerpt": null, "sensitivity": "public", "redacted": false, "sha256": null, "captured_at": "2026-07-30T02:30:00-03:00"}],
+  "acceptance_criteria_added": [],
+  "artifacts": ["schemas/", "scripts/schema_lite.py"],
+  "sources": [{"title": "JSON Schema 2020-12", "url": "https://json-schema.org/draft/2020-12/json-schema-core", "version": "2020-12", "as_of": "2026-07-30"}],
+  "approval": {"required": false, "reason": "Contract validation has no protected external effect.", "status": "not_required", "evidence_ref": null},
+  "handoff": [],
+  "generated_at": "2026-07-30T02:30:00-03:00",
+  "expires_at": null
+}

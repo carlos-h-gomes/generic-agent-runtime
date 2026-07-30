@@ -1,0 +1,17 @@
+rules:
+  - id: harness-python-subprocess-shell
+    message: Use an argument array with shell disabled.
+    severity: ERROR
+    languages: [python]
+    patterns:
+      - pattern-either:
+          - pattern: subprocess.run(..., shell=True, ...)
+          - pattern: subprocess.Popen(..., shell=True, ...)
+          - pattern: subprocess.call(..., shell=True, ...)
+  - id: harness-javascript-dynamic-eval
+    message: Dynamic JavaScript evaluation crosses an unexpected-code-execution boundary.
+    severity: ERROR
+    languages: [javascript, typescript]
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)

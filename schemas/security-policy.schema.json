@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://generic-agent-runtime.local/schemas/security-policy-v1.json",
+  "title": "Harness security policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "checked_at",
+    "expires_at",
+    "sources",
+    "execution",
+    "runtimes",
+    "frameworks",
+    "release"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": "1.0" },
+    "checked_at": { "type": "string", "format": "date" },
+    "expires_at": { "type": "string", "format": "date" },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "url", "as_of"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "url": { "type": "string", "format": "uri" },
+          "as_of": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "require_explicit_project_trust",
+        "inherit_environment",
+        "allowed_environment",
+        "secret_name_pattern"
+      ],
+      "properties": {
+        "require_explicit_project_trust": { "const": true },
+        "inherit_environment": { "const": false },
+        "allowed_environment": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" }
+        },
+        "secret_name_pattern": { "type": "string", "minLength": 1 }
+      }
+    },
+    "runtimes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node"],
+      "properties": {
+        "node": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allowed_lts_majors", "require_deployment_pin", "source"],
+          "properties": {
+            "allowed_lts_majors": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "type": "integer", "minimum": 1 }
+            },
+            "require_deployment_pin": { "const": true },
+            "source": { "type": "string", "format": "uri" }
+          }
+        }
+      }
+    },
+    "frameworks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["next"],
+      "properties": {
+        "next": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["block_prerelease", "supported", "source"],
+          "properties": {
+            "block_prerelease": { "const": true },
+            "supported": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["major", "minimum", "support"],
+                "properties": {
+                  "major": { "type": "integer", "minimum": 1 },
+                  "minimum": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+                  "support": { "enum": ["active_lts", "maintenance_lts"] }
+                }
+              }
+            },
+            "source": { "type": "string", "format": "uri" }
+          }
+        }
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block_high_or_critical",
+        "require_lockfile",
+        "required_web_artifacts",
+        "required_scanner_classes"
+      ],
+      "properties": {
+        "block_high_or_critical": { "const": true },
+        "require_lockfile": { "const": true },
+        "required_web_artifacts": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "required_scanner_classes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["dependency", "secret", "sast", "infrastructure", "container", "dast"] }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-07-30-harness-v5",
+  "gate": "observability_release",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "A portable release archive and incident-ready operating guidance are deliverables."},
+  "summary": "The artifact is deterministic, self-verifying, bounded, excludes live state, includes SBOM/provenance, and documents safe installation, containment, rebuild, and rollback boundaries.",
+  "checks": [{"id": "release_artifact", "status": "passed", "evidence_refs": ["qualification"], "notes": "Repeated package plans and fresh extraction validation passed."}],
+  "findings": [],
+  "evidence": [{"id": "qualification", "kind": "file", "pointer": "docs/harness/QUALIFICATION-5.0.md", "summary": "Release qualification and explicit non-certification boundary.", "redacted_excerpt": null, "sensitivity": "public", "redacted": false, "sha256": null, "captured_at": "2026-07-30T02:30:00-03:00"}],
+  "acceptance_criteria_added": [],
+  "artifacts": ["scripts/package_runtime.py", "docs/harness/INSTALL.md", "docs/harness/SECURITY-OPERATIONS.md"],
+  "sources": [{"title": "SLSA specification", "url": "https://slsa.dev/spec/v1.2/", "version": "1.2", "as_of": "2026-07-30"}],
+  "approval": {"required": false, "reason": "Local artifact creation is within the approved task and no deployment occurs.", "status": "not_required", "evidence_ref": null},
+  "handoff": [],
+  "generated_at": "2026-07-30T02:30:00-03:00",
+  "expires_at": null
+}
