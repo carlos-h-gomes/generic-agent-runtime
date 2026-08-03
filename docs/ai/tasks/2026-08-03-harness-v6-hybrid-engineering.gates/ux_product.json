@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-03-harness-v6-hybrid-engineering",
+  "gate": "ux_product",
+  "phase": "pre_release",
+  "revision": 2,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "React is a mandatory product boundary and the user manual becomes a release artifact."},
+  "summary": "The design preserves the v5 UI evidence floor, separates reusable UI/layout/pages, and adds a user-manual lifecycle tied to user-visible impact and official releases.",
+  "checks": [
+    {"id": "product_boundary", "status": "passed", "evidence_refs": ["qualification"], "notes": "Frontend responsibility and user-manual release checks are encoded; no executable UI exists in the Harness source."}
+  ],
+  "findings": [
+    {"id": "UX-01", "title": "User-manual release contract implemented", "severity": "high", "state": "mitigated", "blocking": false, "evidence_refs": ["qualification"], "required_action": "Require downstream visual and accessibility evidence when an executable UI exists.", "owner": "primary agent", "due_before": "not_applicable", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "qualification", "kind": "test", "pointer": "docs/harness/QUALIFICATION-6.0.md", "summary": "User-manual placeholder rejection and initialized-document acceptance passed.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-03T18:00:00-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["docs/USER-MANUAL.md", "scripts/documentation_check.py", "docs/harness/QUALIFICATION-6.0.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "This phase defines policy and templates without approving a downstream UI.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Downstream UI releases still require project-specific visual and accessibility proof."],
+  "generated_at": "2026-08-03T18:00:00-03:00",
+  "expires_at": null
+}

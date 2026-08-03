@@ -29,6 +29,9 @@ PROJECT_CHECKS = ROOT / "scripts" / "project_checks.py"
 SECURITY_ASSURANCE = ROOT / "scripts" / "security_assurance.py"
 UI_QUALITY = ROOT / "scripts" / "ui_quality.py"
 ADVERSARIAL_LAB = ROOT / "scripts" / "adversarial_lab.py"
+ARCHITECTURE_CHECK = ROOT / "scripts" / "architecture_check.py"
+BOOTSTRAP_PROJECT = ROOT / "scripts" / "bootstrap_project.py"
+DOCUMENTATION_CHECK = ROOT / "scripts" / "documentation_check.py"
 GUARDRAILS = ROOT / "scripts" / "harnesslib" / "guardrails.py"
 BRIDGE_MODULE = None
 
@@ -498,6 +501,115 @@ class SecurityAndUiTests(unittest.TestCase):
         self.assertFalse(guardrails.path_is_allowed("/api-evil", ["/api"]))
 
 
+class HybridEngineeringTests(unittest.TestCase):
+    def run_script(self, script: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, "-B", str(script), *arguments],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=60,
+        )
+
+    def bootstrap(self, target: Path) -> None:
+        plan = self.run_script(BOOTSTRAP_PROJECT, "plan", "--target", str(target))
+        self.assertEqual(plan.returncode, 0, plan.stdout + plan.stderr)
+        applied = self.run_script(BOOTSTRAP_PROJECT, "apply", "--target", str(target))
+        self.assertEqual(applied.returncode, 0, applied.stdout + applied.stderr)
+
+    def test_bootstrap_is_plan_first_complete_and_non_overwriting(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            self.bootstrap(target)
+            self.assertTrue((target / "backend" / "app" / "services").is_dir())
+            self.assertTrue((target / "frontend" / "src" / "components" / "ui").is_dir())
+            self.assertTrue((target / "SOURCE-OF-TRUTH.md").is_file())
+            protected = target / "backend" / "README.md"
+            protected.write_text("user-owned\n", encoding="utf-8")
+            blocked = self.run_script(BOOTSTRAP_PROJECT, "apply", "--target", str(target))
+            self.assertEqual(blocked.returncode, 3, blocked.stdout + blocked.stderr)
+            self.assertEqual(protected.read_text(encoding="utf-8"), "user-owned\n")
+            merged = self.run_script(
+                BOOTSTRAP_PROJECT,
+                "apply",
+                "--target",
+                str(target),
+                "--skip-existing",
+            )
+            self.assertEqual(merged.returncode, 3, merged.stdout + merged.stderr)
+            self.assertEqual(protected.read_text(encoding="utf-8"), "user-owned\n")
+
+    def test_bootstrap_rejects_unsafe_template_path(self) -> None:
+        bootstrap = load_module("bootstrap_path_test", BOOTSTRAP_PROJECT)
+        with self.assertRaises(bootstrap.BootstrapError):
+            bootstrap.portable_path("../../escape.txt")
+        with self.assertRaises(bootstrap.BootstrapError):
+            bootstrap.portable_path("C:\\escape.txt")
+
+    def test_architecture_accepts_thin_entrypoints_and_documented_extensions(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            self.bootstrap(target)
+            valid = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--profile", "ci")
+            self.assertEqual(valid.returncode, 0, valid.stdout + valid.stderr)
+            extension = target / "frontend" / "src" / "features"
+            extension.mkdir()
+            invalid = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--profile", "ci")
+            self.assertEqual(invalid.returncode, 1, invalid.stdout + invalid.stderr)
+            directory_map = target / "docs" / "architecture" / "DIRECTORY-MAP.md"
+            directory_map.write_text(
+                directory_map.read_text(encoding="utf-8")
+                + "\n| `frontend/src/features/` | Feature modules | declared public layers |\n",
+                encoding="utf-8",
+            )
+            documented = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--profile", "ci")
+            self.assertEqual(documented.returncode, 0, documented.stdout + documented.stderr)
+
+    def test_architecture_rejects_backend_routes_and_frontend_transport_in_entrypoints(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            self.bootstrap(target)
+            (target / "backend" / "app" / "main.py").write_text(
+                "from fastapi import FastAPI\napp = FastAPI()\n@app.get('/orders')\ndef orders():\n    return []\n",
+                encoding="utf-8",
+            )
+            (target / "frontend" / "src" / "App.tsx").write_text(
+                "export function App(){ fetch('/api/orders'); return <main /> }\n",
+                encoding="utf-8",
+            )
+            result = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--profile", "ci")
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("defines HTTP route", result.stdout)
+            self.assertIn("feature or transport behavior", result.stdout)
+
+    def test_release_documentation_blocks_templates_and_accepts_initialized_contracts(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            self.bootstrap(target)
+            blocked = self.run_script(DOCUMENTATION_CHECK, "--root", str(target), "--profile", "release")
+            self.assertEqual(blocked.returncode, 1, blocked.stdout + blocked.stderr)
+            replacements = {
+                "Status: UNINITIALIZED": "Status: CURRENT",
+                "Status: DRAFT": "Status: CURRENT",
+                "uninitialized": "current",
+                "not set": "2026-08-03",
+                "<PROJECT_NAME>": "Example",
+                "<PROJECT_PURPOSE>": "Example purpose",
+                "<VERSION>": "1.0.0",
+                "<OWNER>": "Example owner",
+                "<DATE>": "2026-08-03",
+                "<AUDIENCE>": "Example users",
+            }
+            for relative in ("SOURCE-OF-TRUTH.md", "docs/TECHNICAL-DOCUMENTATION.md", "docs/USER-MANUAL.md"):
+                path = target / relative
+                text = path.read_text(encoding="utf-8")
+                for old, new in replacements.items():
+                    text = text.replace(old, new)
+                path.write_text(text, encoding="utf-8")
+            passed = self.run_script(DOCUMENTATION_CHECK, "--root", str(target), "--profile", "release")
+            self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
+
+
 class PackageTests(unittest.TestCase):
     @unittest.skipUnless((ROOT / "scaffold").is_dir(), "maintainer-source package test")
     def test_package_is_deterministic_and_clean(self) -> None:
@@ -648,6 +760,20 @@ class PackageTests(unittest.TestCase):
         bad_manifest["released"] = "not-a-date"
         with self.assertRaises(jsonschema.ValidationError):
             jsonschema.Draft202012Validator(schemas["harness.schema.json"], format_checker=checker).validate(bad_manifest)
+
+        architecture = json.loads((ROOT / "scaffold" / "docs" / "ai" / "architecture-policy.json").read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator(schemas["architecture-policy.schema.json"], format_checker=checker).validate(architecture)
+        bad_architecture = copy.deepcopy(architecture)
+        bad_architecture["extensions"]["allow_additional_directories"] = False
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["architecture-policy.schema.json"], format_checker=checker).validate(bad_architecture)
+
+        template = json.loads((ROOT / "project-templates" / "python-react-hybrid" / "template-manifest.json").read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator(schemas["project-template.schema.json"], format_checker=checker).validate(template)
+        bad_template = copy.deepcopy(template)
+        bad_template["minimum_directories"].append("../escape")
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["project-template.schema.json"], format_checker=checker).validate(bad_template)
 
     def test_static_runtime_check(self) -> None:
         result = subprocess.run(

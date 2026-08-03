@@ -344,9 +344,45 @@ def check_ui(*, release: bool) -> tuple[int, int]:
     return 1, -1
 
 
+def check_architecture(*, release: bool) -> tuple[int, int]:
+    command = [
+        sys.executable,
+        "-B",
+        str(ROOT / "scripts" / "architecture_check.py"),
+        "--root",
+        str(ROOT),
+        "--profile",
+        "release" if release else "ci",
+    ]
+    code = run("architecture assurance", command, limits()["default_command_timeout_seconds"])
+    if code == 0:
+        return 1, 0
+    if code == 3:
+        return 1, 1
+    return 1, -1
+
+
+def check_documentation(*, release: bool) -> tuple[int, int]:
+    command = [
+        sys.executable,
+        "-B",
+        str(ROOT / "scripts" / "documentation_check.py"),
+        "--root",
+        str(ROOT),
+        "--profile",
+        "release" if release else "ci",
+    ]
+    code = run("documentation assurance", command, limits()["default_command_timeout_seconds"])
+    if code == 0:
+        return 1, 0
+    if code == 3:
+        return 1, 1
+    return 1, -1
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
-    result.add_argument("mode", choices=("test", "lint", "build", "security", "ui"))
+    result.add_argument("mode", choices=("test", "lint", "build", "security", "ui", "architecture", "documentation"))
     result.add_argument("--trust-project-code", action="store_true")
     result.add_argument(
         "--allow-secret-env",
@@ -372,6 +408,8 @@ def main(argv: list[str] | None = None) -> int:
             "build": lambda: check_build(trusted=trusted, allow_secret_env=arguments.allow_secret_env),
             "security": lambda: check_security(external=arguments.external_security),
             "ui": lambda: check_ui(release=arguments.release),
+            "architecture": lambda: check_architecture(release=arguments.release),
+            "documentation": lambda: check_documentation(release=arguments.release),
         }[arguments.mode]()
     except (GuardrailError, OSError, ValueError, KeyError, TypeError) as exc:
         print(f"FAIL project {arguments.mode}: invalid Harness configuration: {exc}", file=sys.stderr)

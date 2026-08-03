@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-03-harness-v6-hybrid-engineering",
+  "gate": "architecture_uml",
+  "phase": "pre_release",
+  "revision": 2,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "The release defines runtime, module, bootstrap, truth, documentation, and migration boundaries."},
+  "summary": "The approved design uses isolated Python API and React boundaries, minimum extensible topology, thin composition roots, non-overwriting bootstrap, and indexed truth ownership.",
+  "checks": [
+    {"id": "boundaries", "status": "passed", "evidence_refs": ["qualification"], "notes": "Policy, validators, package, bootstrap, compatibility, rollback, and clean extraction agree on the approved boundaries."}
+  ],
+  "findings": [
+    {"id": "ARCH-01", "title": "Implementation consistency proven locally", "severity": "high", "state": "mitigated", "blocking": false, "evidence_refs": ["qualification"], "required_action": "Maintain policy, schema, prompt, validator, fixture, migration, and package consistency in future releases.", "owner": "primary agent", "due_before": "not_applicable", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "qualification", "kind": "test", "pointer": "docs/harness/QUALIFICATION-6.0.md", "summary": "Local architecture, bootstrap, negative-test, package, and clean-extraction evidence.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-03T18:00:00-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering-architecture.md", "docs/harness/QUALIFICATION-6.0.md"],
+  "sources": [],
+  "approval": {"required": true, "reason": "The design changes the mandatory development profile.", "status": "approved", "evidence_ref": "workspace owner approval in current task"},
+  "handoff": ["Preserve the hybrid boundary and rerun clean-extraction qualification for future releases."],
+  "generated_at": "2026-08-03T18:00:00-03:00",
+  "expires_at": null
+}

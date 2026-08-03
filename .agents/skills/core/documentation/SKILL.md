@@ -17,6 +17,10 @@ Document a fact when its absence could cause misuse, unsafe changes, repeated in
 - build, release, rollback, recovery, or support behavior changed;
 - users or maintainers need migration or usage instructions.
 
+Every task declares documentation impact: `none`, `technical`, `user_manual`, or `both`. `none` needs a concrete no-impact reason. Update `docs/TECHNICAL-DOCUMENTATION.md` for material architecture, API, data, configuration, security, deployment, operations, recovery, migration, or support changes. Update `docs/USER-MANUAL.md` for user-visible features, flows, navigation, permissions, feedback, accessibility, errors, recovery, or support changes.
+
+These two files are canonical entrypoints and may link to focused subdocuments. Before an official release, verify their product version, review date, ownership, coverage, link integrity, absence of placeholders, and consistency with the truth index and released behavior. Micro changes may batch documentation until the next material milestone; do not let a release batch cross the release gate.
+
 Prefer the existing authoritative document. Create the smallest new file only when no current home fits. Link to code and task evidence; do not paste discoverable file trees, generated output, or temporary debugging notes.
 
 ## Quality rules

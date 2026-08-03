@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/architecture-policy-v1.json",
+  "title": "Python React hybrid architecture policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "profile",
+    "backend",
+    "frontend",
+    "extensions",
+    "contracts",
+    "entrypoint_limits"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": "1.0"},
+    "status": {"enum": ["initialized", "migration_required"]},
+    "profile": {"const": "python-react-hybrid"},
+    "backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root", "app_root", "default_framework", "compatible_frameworks", "entrypoints", "required_directories", "dependency_direction"],
+      "properties": {
+        "root": {"const": "backend"},
+        "app_root": {"const": "backend/app"},
+        "default_framework": {"const": "fastapi"},
+        "compatible_frameworks": {
+          "type": "array",
+          "const": ["fastapi", "flask"]
+        },
+        "entrypoints": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^backend/app/(main|server)\\.py$"}
+        },
+        "required_directories": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^backend/app/[a-z][a-z0-9_-]*$"}
+        },
+        "dependency_direction": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "frontend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root", "source_root", "framework", "language", "build_tool", "entrypoints", "required_directories"],
+      "properties": {
+        "root": {"const": "frontend"},
+        "source_root": {"const": "frontend/src"},
+        "framework": {"const": "react"},
+        "language": {"const": "typescript"},
+        "build_tool": {"const": "vite"},
+        "entrypoints": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^frontend/src/(App|main)\\.(tsx|jsx)$"}
+        },
+        "required_directories": {
+          "type": "array",
+          "minItems": 10,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^frontend/src/[A-Za-z0-9_/-]+$"}
+        }
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allow_additional_directories", "require_responsibility", "require_dependency_direction", "authority"],
+      "properties": {
+        "allow_additional_directories": {"const": true},
+        "require_responsibility": {"const": true},
+        "require_dependency_direction": {"const": true},
+        "authority": {"const": "docs/ai/conventions.md"}
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["api", "source_of_truth", "technical_documentation", "user_manual", "directory_map"],
+      "properties": {
+        "api": {"type": "string", "minLength": 1},
+        "source_of_truth": {"const": "SOURCE-OF-TRUTH.md"},
+        "technical_documentation": {"const": "docs/TECHNICAL-DOCUMENTATION.md"},
+        "user_manual": {"const": "docs/USER-MANUAL.md"},
+        "directory_map": {"const": "docs/architecture/DIRECTORY-MAP.md"}
+      }
+    },
+    "entrypoint_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_non_comment_lines", "allow_composition_only"],
+      "properties": {
+        "max_non_comment_lines": {"type": "integer", "minimum": 20, "maximum": 200},
+        "allow_composition_only": {"const": true}
+      }
+    }
+  }
+}

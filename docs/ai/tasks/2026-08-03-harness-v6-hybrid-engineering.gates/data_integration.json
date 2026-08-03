@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-03-harness-v6-hybrid-engineering",
+  "gate": "data_integration",
+  "phase": "pre_release",
+  "revision": 2,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "Python and React communicate through a versioned HTTP contract and new JSON policy contracts cross tools."},
+  "summary": "Backend owns authoritative rules and data; frontend owns presentation and transport clients; integration is through validated, versioned API contracts with typed failure behavior.",
+  "checks": [
+    {"id": "contract_ownership", "status": "passed", "evidence_refs": ["qualification"], "notes": "Architecture and template schemas, valid/invalid fixtures, API ownership, and v5 migration guidance agree."}
+  ],
+  "findings": [
+    {"id": "DATA-01", "title": "Policy and template contracts qualified", "severity": "high", "state": "mitigated", "blocking": false, "evidence_refs": ["qualification"], "required_action": "Version future contract changes and retain migration and negative-test evidence.", "owner": "primary agent", "due_before": "not_applicable", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "qualification", "kind": "test", "pointer": "docs/harness/QUALIFICATION-6.0.md", "summary": "Bundled contract, template, fixture, and migration validation evidence.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-03T18:00:00-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["schemas/architecture-policy.schema.json", "schemas/project-template.schema.json", "docs/harness/MIGRATION-5.0-6.0.md", "docs/harness/QUALIFICATION-6.0.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "No external data system is contacted.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Downstream APIs still require project-specific compatibility and migration evidence."],
+  "generated_at": "2026-08-03T18:00:00-03:00",
+  "expires_at": null
+}

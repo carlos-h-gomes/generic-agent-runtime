@@ -181,6 +181,16 @@
         "not_validated": { "type": "array", "items": { "$ref": "#/$defs/validation_gap" } }
       }
     },
+    "documentation_impact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "reason", "required_artifacts"],
+      "properties": {
+        "level": {"enum": ["none", "technical", "user_manual", "both"]},
+        "reason": {"$ref": "#/$defs/non_placeholder"},
+        "required_artifacts": {"$ref": "#/$defs/string_list"}
+      }
+    },
     "next_action": { "$ref": "#/$defs/non_placeholder" }
   },
   "allOf": [

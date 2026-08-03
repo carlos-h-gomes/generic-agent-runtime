@@ -24,6 +24,7 @@ Answer, inspect, diagnose, and review are read-only unless the user separately a
 Use `schemas/task-contract.schema.json`. The minimum useful contract states:
 
 - observable outcome and acceptance criteria;
+- documentation impact as `none`, `technical`, `user_manual`, or `both`, with a concrete reason and required artifact pointers;
 - affected files or a bounded discovery plan;
 - owned, shared, and do-not-touch paths;
 - scope, risk, assumptions, and explicit exclusions;
@@ -48,6 +49,8 @@ Creating project memory is itself a write. In read-only modes, return the contra
 Trigger gates from actual scope and risk, using the canonical IDs in the schema. Design-phase UX, architecture, data, security, and AI artifacts must exist before implementation when applicable. Record `not_applicable` only with a specific reason; do not use it to bypass a control.
 
 Use `docs/ai/quality-gates.md` for result semantics. A specialist is a procedure, not automatically a separate agent.
+
+For application generation or material application changes, require the `python-react-hybrid` architecture profile, trigger `architecture_uml`, and add observable criteria for the Python API/React boundary, minimum extensible directories, thin entrypoints, API contract, and architecture validation. A request for a single-file monolith is not an approvable task constraint; record the compliant decomposition instead.
 
 ## 5. Set a typed state
 

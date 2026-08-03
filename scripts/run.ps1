@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('validate', 'lint', 'test', 'security', 'ui', 'assurance', 'adversarial', 'cost', 'runtime', 'bridge', 'package')]
+    [ValidateSet('validate', 'lint', 'test', 'security', 'ui', 'architecture', 'documentation', 'bootstrap', 'assurance', 'adversarial', 'cost', 'runtime', 'bridge', 'package')]
     [string] $Command = 'validate',
 
     [Parameter(ValueFromRemainingArguments = $true)]
@@ -108,6 +108,12 @@ function Invoke-NativeValidate {
     if ($script:HarnessExitCode -eq 3) { $incomplete = $true }
     elseif ($script:HarnessExitCode -ne 0) { return }
 
+    foreach ($mode in @('architecture', 'documentation')) {
+        Invoke-HarnessPython 'scripts/project_checks.py' (@($mode) + $ProjectArgs)
+        if ($script:HarnessExitCode -eq 3) { $incomplete = $true }
+        elseif ($script:HarnessExitCode -ne 0) { return }
+    }
+
     if ((Test-Path (Join-Path $Root '.harness-source')) -and (Test-Path (Join-Path $Root 'scripts/package_runtime.py'))) {
         Invoke-HarnessPython 'scripts/runtime_check.py' @('--strict')
         if ($script:HarnessExitCode -ne 0) { return }
@@ -116,9 +122,9 @@ function Invoke-NativeValidate {
     }
 
     if ($RemainingArgs -contains '--full') {
-        foreach ($mode in @('build', 'security', 'ui')) {
+        foreach ($mode in @('build', 'security', 'ui', 'architecture', 'documentation')) {
             $modeArgs = @($mode) + $ProjectArgs
-            if ($mode -eq 'ui') { $modeArgs += '--release' }
+            if ($mode -in @('ui', 'architecture', 'documentation')) { $modeArgs += '--release' }
             Invoke-HarnessPython 'scripts/project_checks.py' $modeArgs
             if ($script:HarnessExitCode -eq 3) { $incomplete = $true }
             elseif ($script:HarnessExitCode -ne 0) { return }
@@ -143,6 +149,9 @@ switch ($Command) {
     'cost'     { Invoke-HarnessPython 'scripts/cost_check.py' $RemainingArgs }
     'security' { Invoke-HarnessPython 'scripts/project_checks.py' (@('security') + $ProjectArgs) }
     'ui'       { Invoke-HarnessPython 'scripts/project_checks.py' (@('ui') + $ProjectArgs) }
+    'architecture' { Invoke-HarnessPython 'scripts/project_checks.py' (@('architecture') + $ProjectArgs) }
+    'documentation' { Invoke-HarnessPython 'scripts/project_checks.py' (@('documentation') + $ProjectArgs) }
+    'bootstrap' { Invoke-HarnessPython 'scripts/bootstrap_project.py' $RemainingArgs }
     'assurance' { Invoke-HarnessPython 'scripts/security_assurance.py' $RemainingArgs }
     'adversarial' { Invoke-HarnessPython 'scripts/adversarial_lab.py' $RemainingArgs }
     'lint'     { Invoke-NativeLint }

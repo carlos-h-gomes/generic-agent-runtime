@@ -20,6 +20,21 @@
       "as_of": "2026-07-30"
     },
     {
+      "title": "CPython Supported Versions",
+      "url": "https://devguide.python.org/versions/",
+      "as_of": "2026-08-03"
+    },
+    {
+      "title": "React Versions",
+      "url": "https://react.dev/versions",
+      "as_of": "2026-08-03"
+    },
+    {
+      "title": "Vite Releases",
+      "url": "https://vite.dev/releases",
+      "as_of": "2026-08-03"
+    },
+    {
       "title": "OWASP ASVS",
       "url": "https://owasp.org/www-project-application-security-verification-standard/",
       "as_of": "2026-07-30"
@@ -56,6 +71,12 @@
       "allowed_lts_majors": [22, 24],
       "require_deployment_pin": true,
       "source": "https://nodejs.org/en/about/previous-releases"
+    },
+    "python": {
+      "default_bugfix_minors": ["3.14", "3.13"],
+      "supported_security_minors": ["3.12", "3.11", "3.10"],
+      "require_deployment_pin": true,
+      "source": "https://devguide.python.org/versions/"
     }
   },
   "frameworks": {
@@ -74,6 +95,18 @@
         }
       ],
       "source": "https://nextjs.org/blog/july-2026-security-release"
+    },
+    "react": {
+      "stable_major": 19,
+      "stable_minor": "19.2",
+      "block_prerelease": true,
+      "source": "https://react.dev/versions"
+    },
+    "vite": {
+      "default_line": "8.1",
+      "supported_lines": ["8.1", "8.0", "7.3", "6.4"],
+      "block_prerelease": true,
+      "source": "https://vite.dev/releases"
     }
   },
   "release": {
@@ -82,7 +115,11 @@
     "required_web_artifacts": [
       "docs/ai/threat-model.md",
       "docs/ai/incident-response.md",
-      "docs/ai/ui-review.json"
+      "docs/ai/ui-review.json",
+      "docs/ai/architecture-policy.json",
+      "SOURCE-OF-TRUTH.md",
+      "docs/TECHNICAL-DOCUMENTATION.md",
+      "docs/USER-MANUAL.md"
     ],
     "required_scanner_classes": [
       "dependency",

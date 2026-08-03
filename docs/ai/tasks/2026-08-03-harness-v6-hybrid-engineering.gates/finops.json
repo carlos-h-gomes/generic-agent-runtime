@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-03-harness-v6-hybrid-engineering",
+  "gate": "finops",
+  "phase": "pre_release",
+  "revision": 2,
+  "status": "passed_with_conditions",
+  "applicability": {"applicable": true, "reason": "The generated profile uses separate frontend and backend runtimes and can multiply build, hosting, API, and observability costs."},
+  "summary": "Generated projects must identify independent runtime budgets, request and build limits, quotas, monitoring, degradation, ownership, and kill switches without claiming a universal cost model.",
+  "checks": [
+    {"id": "bounded_profile", "status": "passed", "evidence_refs": ["qualification"], "notes": "Harness execution and archive budgets are bounded; downstream runtime costs remain project-specific."}
+  ],
+  "findings": [
+    {"id": "FIN-01", "title": "Downstream cost evidence is project-specific", "severity": "medium", "state": "deferred", "blocking": false, "evidence_refs": ["qualification"], "required_action": "Document quotas, worst-case exposure, alerts, degradation, and a kill switch before releasing a generated project with variable-cost services.", "owner": "downstream project owner", "due_before": "post_release", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "qualification", "kind": "test", "pointer": "docs/harness/QUALIFICATION-6.0.md", "summary": "Bounded local execution and explicit downstream cost-condition evidence.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-03T18:00:00-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["docs/harness/QUALIFICATION-6.0.md", "docs/ai/risks.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "No paid or production service is used by the local candidate build.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Quantify and approve cost exposure separately for each generated deployment."],
+  "generated_at": "2026-08-03T18:00:00-03:00",
+  "expires_at": null
+}

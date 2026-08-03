@@ -1,0 +1,59 @@
+{
+  "$schema": "../../schemas/architecture-policy.schema.json",
+  "schema_version": "1.0",
+  "status": "initialized",
+  "profile": "python-react-hybrid",
+  "backend": {
+    "root": "backend",
+    "app_root": "backend/app",
+    "default_framework": "fastapi",
+    "compatible_frameworks": ["fastapi", "flask"],
+    "entrypoints": ["backend/app/main.py", "backend/app/server.py"],
+    "required_directories": [
+      "backend/app/controllers",
+      "backend/app/services",
+      "backend/app/models",
+      "backend/app/schemas",
+      "backend/app/repositories"
+    ],
+    "dependency_direction": ["controllers -> services", "services -> models", "services -> repositories"]
+  },
+  "frontend": {
+    "root": "frontend",
+    "source_root": "frontend/src",
+    "framework": "react",
+    "language": "typescript",
+    "build_tool": "vite",
+    "entrypoints": ["frontend/src/App.tsx", "frontend/src/main.tsx"],
+    "required_directories": [
+      "frontend/src/api",
+      "frontend/src/assets",
+      "frontend/src/components",
+      "frontend/src/components/layout",
+      "frontend/src/components/ui",
+      "frontend/src/context",
+      "frontend/src/data",
+      "frontend/src/hooks",
+      "frontend/src/pages",
+      "frontend/src/services",
+      "frontend/src/utils"
+    ]
+  },
+  "extensions": {
+    "allow_additional_directories": true,
+    "require_responsibility": true,
+    "require_dependency_direction": true,
+    "authority": "docs/ai/conventions.md"
+  },
+  "contracts": {
+    "api": "backend/openapi.json",
+    "source_of_truth": "SOURCE-OF-TRUTH.md",
+    "technical_documentation": "docs/TECHNICAL-DOCUMENTATION.md",
+    "user_manual": "docs/USER-MANUAL.md",
+    "directory_map": "docs/architecture/DIRECTORY-MAP.md"
+  },
+  "entrypoint_limits": {
+    "max_non_comment_lines": 120,
+    "allow_composition_only": true
+  }
+}

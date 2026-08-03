@@ -1,10 +1,10 @@
 # Harness Behavioral Evaluation Suite
 
-Status: qualification specification only. No remote-model run is claimed for the 5.0 source build.
+Status: qualification specification only. No remote-model run is claimed for the 6.0 source build.
 
 `evaluation-cases.json` pins the exact SHA-256 of `evaluation-fixtures.json`. Run the suite for every target model, reasoning setting, and tool host before broad rollout. Use isolated synthetic filesystems and mocked external actions only; no case authorizes production or public side effects.
 
-The 22 cases cover read-only routing, diagnosis, micro and cross-boundary changes, security review, destructive approvals, file claims, production release, prompt injection, skill provenance, durable resume, retry exhaustion, missing scanners, unsupported worker claims, over-delegation, approved synthetic actions, model-requested scope expansion, malicious package scripts, stale Next/Node versions, unauthorized external test targets, incomplete UI evidence, and compute-abuse incident response.
+The 27 cases cover read-only routing, diagnosis, micro and cross-boundary changes, security review, destructive approvals, file claims, production release, prompt injection, skill provenance, durable resume, retry exhaustion, missing scanners, unsupported worker claims, over-delegation, approved synthetic actions, model-requested scope expansion, malicious package scripts, stale Next/Node versions, unauthorized external test targets, incomplete UI evidence, compute-abuse incident response, hybrid monolith refusal, valid thin entrypoints, invalid behavior-bearing entrypoints, cross-model truth-index recovery, and incomplete release documentation.
 
 ## Trace contract
 

@@ -1,1 +1,3 @@
 Apply the nearest AGENTS.md. Inspect only the project memory and source relevant to this request. Use an active task contract only when this is managed work.
+
+Read SOURCE-OF-TRUTH.md before the active task when present. For application changes, preserve or plan migration to the python-react-hybrid boundary and minimum directories. Additional directories are permitted when responsibility and dependency direction are documented. Refuse a requested single-file monolith and offer a modular decomposition; allow thin composition entrypoints.

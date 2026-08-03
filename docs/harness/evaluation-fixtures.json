@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "fixture_revision": "harness-v5-synthetic-1",
+  "fixture_revision": "harness-v6-synthetic-1",
   "synthetic_only": true,
   "repositories": {
     "auth-small": {
@@ -106,6 +106,42 @@
         "deploy/compose.yml": "services:\n  web:\n    image: synthetic\n"
       },
       "observations": {"sustained_cpu_percent": 100, "unexpected_child_process": true}
+    },
+    "hybrid-single-file-request": {
+      "files": {
+        "SOURCE-OF-TRUTH.md": "Profile: python-react-hybrid",
+        "docs/ai/architecture-policy.json": "{\"profile\":\"python-react-hybrid\"}"
+      }
+    },
+    "thin-hybrid": {
+      "files": {
+        "backend/app/main.py": "from fastapi import FastAPI\nfrom app.controllers.health import router\napp = FastAPI()\napp.include_router(router)",
+        "backend/app/controllers/health.py": "from fastapi import APIRouter\nrouter = APIRouter()",
+        "backend/app/services/__init__.py": "",
+        "backend/app/models/__init__.py": "",
+        "frontend/src/App.tsx": "import { AppRoutes } from './pages/AppRoutes'\nexport function App(){ return <AppRoutes /> }",
+        "frontend/src/pages/AppRoutes.tsx": "export function AppRoutes(){ return null }"
+      }
+    },
+    "hybrid-monolith": {
+      "files": {
+        "backend/app/main.py": "from fastapi import FastAPI\napp=FastAPI()\n@app.get('/orders')\ndef orders(): return db.query('orders')",
+        "frontend/src/App.tsx": "import { useEffect, useState } from 'react'; export function App(){const [x,setX]=useState([]);useEffect(()=>{fetch('/api').then(r=>r.json()).then(setX)},[]);return <main>{x.length}</main>}"
+      }
+    },
+    "truth-index-resume": {
+      "files": {
+        "SOURCE-OF-TRUTH.md": "Current official version: 2.0.0\nActive task: docs/ai/tasks/feature.task.json\nAPI: backend/openapi.json",
+        "docs/ai/tasks/feature.task.json": "{\"status\":\"in_progress\",\"next_action\":\"run architecture validation\"}",
+        "backend/openapi.json": "{\"openapi\":\"3.1.0\"}"
+      }
+    },
+    "release-docs-incomplete": {
+      "files": {
+        "SOURCE-OF-TRUTH.md": "Status: UNINITIALIZED",
+        "docs/TECHNICAL-DOCUMENTATION.md": "# Technical Documentation\nStatus: DRAFT\nVersion: <VERSION>",
+        "docs/USER-MANUAL.md": "# User Manual\nStatus: DRAFT\nVersion: <VERSION>"
+      }
     }
   }
 }

@@ -138,7 +138,7 @@ def build_payload(root: Path) -> tuple[dict[str, bytes], dict]:
 
     for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md", "harness.json", "security-policy.json"):
         add_file(payload, root, name, root / name)
-    for directory in (".agents", "schemas", "prompt-templates", "scripts", "security", "docs/harness"):
+    for directory in (".agents", "schemas", "prompt-templates", "project-templates", "scripts", "security", "docs/harness"):
         add_tree(payload, root, root / directory, directory)
 
     scaffold = root / manifest["distribution"]["scaffold_root"]
@@ -224,7 +224,7 @@ def build_payload(root: Path) -> tuple[dict[str, bytes], dict]:
             },
             "runDetails": {
                 "builder": {
-                    "id": "https://generic-agent-runtime.local/harness/package-runtime/v5"
+                    "id": "https://generic-agent-runtime.local/harness/package-runtime/v6"
                 },
                 "metadata": {"invocationId": "deterministic-local-build"},
             },
@@ -251,6 +251,7 @@ def validate_payload(payload: dict[str, bytes], manifest: dict) -> None:
         "SBOM.cdx.json",
         "PROVENANCE.intoto.json",
         "security-policy.json",
+        "SOURCE-OF-TRUTH.md",
         "schemas/task-contract.schema.json",
         "schemas/gate-result.schema.json",
         "schemas/bridge-event.schema.json",
@@ -258,11 +259,14 @@ def validate_payload(payload: dict[str, bytes], manifest: dict) -> None:
         "schemas/authorized-target.schema.json",
         "schemas/security-test-plan.schema.json",
         "schemas/ui-review.schema.json",
+        "schemas/architecture-policy.schema.json",
+        "schemas/project-template.schema.json",
         ".agents/skills/core/agent-orchestration/SKILL.md",
         "docs/ai/constitution.md",
         "docs/ai/quality-gates.md",
         "docs/ai/ui-review.json",
         "docs/ai/threat-model.md",
+        "docs/ai/architecture-policy.json",
         "docs/ai/incident-response.md",
         "docs/ai/tasks/_TASK_TEMPLATE.md",
         "docs/ai/bridge/board.md",
@@ -275,8 +279,21 @@ def validate_payload(payload: dict[str, bytes], manifest: dict) -> None:
         "docs/harness/ADVERSARIAL-TESTING.md",
         "docs/harness/UI-QUALITY.md",
         "docs/harness/QUALIFICATION-5.0.md",
+        "docs/harness/MIGRATION-5.0-6.0.md",
+        "docs/harness/QUALIFICATION-6.0.md",
+        "docs/harness/HYBRID-ARCHITECTURE.md",
+        "docs/harness/PROJECT-TRUTH.md",
+        "docs/harness/DOCUMENTATION-LIFECYCLE.md",
+        "docs/TECHNICAL-DOCUMENTATION.md",
+        "docs/USER-MANUAL.md",
+        "docs/architecture/DIRECTORY-MAP.md",
+        "project-templates/python-react-hybrid/template-manifest.json",
+        "prompt-templates/09-generate-python-react-application.txt",
         "scripts/bridge.py",
         "scripts/run.ps1",
+        "scripts/architecture_check.py",
+        "scripts/bootstrap_project.py",
+        "scripts/documentation_check.py",
         "scripts/security_assurance.py",
         "scripts/adversarial_lab.py",
         "scripts/ui_quality.py",
@@ -385,7 +402,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
     result.add_argument("--out", type=Path, help="output path within the repository root")
     result.add_argument("--check", action="store_true", help="validate and hash the proposed package without writing it")
-    result.add_argument("--replace", action="store_true", help="replace the canonical v5 archive if it already exists")
+    result.add_argument("--replace", action="store_true", help="replace the canonical v6 archive if it already exists")
     return result
 
 

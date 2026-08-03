@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-03-harness-v6-hybrid-engineering",
+  "gate": "code_quality_testing",
+  "phase": "pre_release",
+  "revision": 2,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "New bootstrap, policy parsing, static analysis, package selection, and release checks are regression-sensitive."},
+  "summary": "Implementation will use standard-library tooling, pure validation seams, bounded output, deterministic fixtures, and positive and negative tests before packaging.",
+  "checks": [
+    {"id": "test_strategy", "status": "passed", "evidence_refs": ["qualification"], "notes": "All 34 bundled tests passed; the optional third-party jsonschema case was skipped after the bundled validator passed."}
+  ],
+  "findings": [
+    {"id": "QA-01", "title": "Implementation and regression suite completed", "severity": "high", "state": "mitigated", "blocking": false, "evidence_refs": ["qualification"], "required_action": "Keep positive and negative hybrid-engineering regressions current.", "owner": "primary agent", "due_before": "not_applicable", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "qualification", "kind": "test", "pointer": "docs/harness/QUALIFICATION-6.0.md", "summary": "Structural, functional, negative, and full-run validation evidence.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-03T18:00:00-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["scripts/test_runtime.py", "docs/harness/QUALIFICATION-6.0.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "Bounded local synthetic tests are an authorized implementation step.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Retain the bounded regression suite and explicit optional-dependency skips."],
+  "generated_at": "2026-08-03T18:00:00-03:00",
+  "expires_at": null
+}

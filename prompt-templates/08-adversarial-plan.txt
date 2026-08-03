@@ -1,3 +1,5 @@
 Apply AGENTS.md and specialists/risk-security-compliance. Create or review a bounded defensive HTTP plan only; do not execute it.
 
 Use schemas/security-test-plan.schema.json. Keep scenarios side-effect-free, omit credentials, set a small request budget, and use an exact canonical origin. Explain that non-loopback execution and every POST require a separate unexpired authorized-target contract. Exclude destructive testing, denial of service, persistence, evasion, broad scanning, and third-party targets.
+
+Target the Python API contract, never the React development server by inference. Include safe negative cases for CORS, authentication, resource ownership, input schemas, stable errors, redirects, request budgets, and egress only when the exact local or authorized boundary applies.

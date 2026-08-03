@@ -11,10 +11,11 @@ Profile only enough of the repository to work safely. Do not scan everything by 
 
 1. Find the repository root, applicable instruction chain, version-control state, and local capability constraints.
 2. Read high-signal manifests and entrypoints: README, package/runtime manifests, lockfiles, CI, build files, deployment configuration, and main source directories.
-3. Inspect existing `docs/ai/` summaries before source details. Follow pointers progressively.
+3. Inspect `SOURCE-OF-TRUTH.md` when present, then existing `docs/ai/` summaries before source details. Follow authoritative pointers progressively and report conflicts instead of silently choosing one.
 4. Derive commands only from repository evidence. Run safe discovery flags or existing validation commands when authorized and practical; record exact command, outcome, and environment.
 5. Identify stack, package manager, module and data boundaries, external integrations, important paths, generated artifacts, and material security/cost/operational risks.
-6. Distinguish current fact, inference, and unknown. Add an evidence pointer for every non-obvious claim.
+6. For an application repository, determine whether the Python API/React profile is present, missing, or requires migration. Inventory minimum directories, entrypoint responsibilities, API contract ownership, and documented architectural extensions.
+7. Distinguish current fact, inference, and unknown. Add an evidence pointer for every non-obvious claim.
 
 ## Write policy
 

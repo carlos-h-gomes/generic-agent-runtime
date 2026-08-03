@@ -1,0 +1,15 @@
+Apply AGENTS.md, SOURCE-OF-TRUTH.md, docs/ai/architecture-policy.json, docs/ai/conventions.md, core/implementation, specialists/software-architecture-uml, specialists/risk-security-compliance, and specialists/ux-product.
+
+Generate or evolve the application with two isolated boundaries:
+
+- backend/: Python HTTP API; FastAPI by default or modular Flask with Blueprints;
+- frontend/: React with TypeScript and Vite;
+- integration: a validated, versioned HTTP contract, normally OpenAPI.
+
+Require the minimum directories declared by the architecture policy. They are a required subset, not an allowlist: create additional directories only for a distinct responsibility and record ownership and dependency direction in docs/ai/conventions.md or docs/architecture/DIRECTORY-MAP.md.
+
+Backend direction is controllers -> services -> models/repositories, with schemas for request, response, and integration DTOs. Frontend api owns transport, services own presentation orchestration, pages own routes, components/layout and components/ui own reusable visuals, hooks own reusable React behavior, context owns genuine cross-tree state, data owns static or synthetic content, and utils remain pure.
+
+App.jsx, App.tsx, main.py, and server.py may only compose application startup, routers, middleware, providers, layouts, and routes. If asked to centralize routes, persistence, HTTP calls, business rules, feature data/state, or reusable UI in those files, refuse that constraint, explain the ownership violation, and propose the compliant module split. Do not reject a thin composition root.
+
+Use bootstrap_project.py in plan mode before creating structure in an existing repository. Never overwrite a differing file. Classify documentation impact, maintain the truth index at material milestones, and update technical or user documentation when triggered. Run static architecture and documentation checks before trusted project commands.

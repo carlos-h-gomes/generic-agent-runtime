@@ -1,0 +1,259 @@
+{
+  "$schema": "../../../schemas/task-contract.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-03-harness-v6-hybrid-engineering",
+  "status": "done",
+  "mode": "change",
+  "work_level": 3,
+  "outcome": "Deliver a deterministic Harness v6.0 release candidate that generates and enforces an extensible Python API plus React frontend architecture, an authoritative project truth index, safe project bootstrapping, and release-grade technical and user documentation.",
+  "acceptance_criteria": [
+    "The immutable v5.0 archive and directory remain unchanged and the source archive SHA-256 is recorded.",
+    "A new agent-runtime-v6.0 candidate defines Python API and React frontend boundaries, minimum required directories, allowed architectural extension rules, and thin composition entrypoints.",
+    "Requests to centralize application behavior in App.jsx, App.tsx, main.py, or server.py are rejected constructively and valid thin entrypoints remain allowed.",
+    "A packaged python-react-hybrid project template and bounded plan/apply bootstrap create missing structure without silently overwriting existing project files.",
+    "SOURCE-OF-TRUTH.md acts as the authoritative index of project facts and detailed sources without replacing tasks, decisions, tests, schemas, or specialist documentation.",
+    "Technical documentation and a user manual are maintained by documented impact triggers and become blocking, complete release artifacts for official project versions.",
+    "Architecture, documentation, task, prompt, script, schema, fixture, manifest, SBOM, provenance, migration, and package metadata are internally consistent.",
+    "Positive and negative tests cover minimum topology, permitted extensions, import direction, anti-monolith behavior, bootstrap collisions, truth-index integrity, and release-documentation completeness.",
+    "All applicable gates close without unresolved blocker and a fresh extracted archive passes strict validation with a recorded SHA-256."
+  ],
+  "scope": {
+    "size": "system",
+    "in": [
+      "Create root managed-task evidence for the v6 evolution.",
+      "Derive a new agent-runtime-v6.0 candidate from the immutable v5.0 baseline.",
+      "Add normative architecture, memory, documentation, prompts, project template, bootstrap, schemas, validation, tests, migration, and release evidence.",
+      "Run bounded local validation and deterministic packaging against synthetic fixtures."
+    ],
+    "out": [
+      "Modify agent-runtime-v5.0 or its ZIP.",
+      "Create or change a real downstream product application.",
+      "Install dependencies from the network, deploy, commit, push, message, or mutate production.",
+      "Execute adversarial traffic or project-owned downstream commands."
+    ]
+  },
+  "risk": {
+    "level": "high",
+    "reversibility": "easy",
+    "external_effect": "local",
+    "triggers": [
+      "The release changes defaults and refusal behavior for future code generation.",
+      "The release introduces filesystem bootstrap behavior and machine release blockers.",
+      "Architecture and documentation drift could create false assurance across models and tool hosts."
+    ]
+  },
+  "authorization": {
+    "writes": {
+      "allowed": true,
+      "scope": [
+        "Root docs/ai/tasks evidence for this v6 task.",
+        "A new agent-runtime-v6.0 candidate directory and its deterministic local ZIP.",
+        "Bounded temporary validation artifacts without sensitive data."
+      ]
+    },
+    "external_actions": {
+      "allowed": false,
+      "scope": []
+    }
+  },
+  "files": {
+    "owned": [
+      "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering*",
+      "agent-runtime-v6.0/**",
+      "agent-runtime-v6.0.zip"
+    ],
+    "shared": [
+      "AGENTS.md",
+      "docs/ai/",
+      "agent-runtime-v5.0/"
+    ],
+    "do_not_touch": [
+      "agent-runtime-v5.0/**",
+      "agent-runtime-v5.0.zip",
+      "agent-runtime-v4.2/**",
+      "agent-runtime-v4.2.zip",
+      "all earlier released versions and archives"
+    ],
+    "discover": [
+      "Inspect only v5 packaging, validation, memory, skills, prompts, schemas, fixtures, and release documentation needed for the successor.",
+      "Use current official references only if a changing runtime or framework claim is added."
+    ]
+  },
+  "gates": [
+    {
+      "id": "architecture_uml",
+      "status": "passed",
+      "reason": "The release changes project topology, dependency direction, bootstrap and documentation ownership.",
+      "artifact": "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering.gates/architecture_uml.json",
+      "owner": "primary agent",
+      "approval_ref": "workspace owner approval in current task"
+    },
+    {
+      "id": "security_compliance",
+      "status": "passed",
+      "reason": "The architecture introduces an HTTP trust boundary and a filesystem bootstrap tool.",
+      "artifact": "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering.gates/security_compliance.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "ux_product",
+      "status": "passed",
+      "reason": "The mandatory React layer and release user manual directly govern user-facing delivery.",
+      "artifact": "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering.gates/ux_product.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "data_integration",
+      "status": "passed",
+      "reason": "Frontend/backend integration and new JSON contracts cross runtime boundaries.",
+      "artifact": "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering.gates/data_integration.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "ai_llm",
+      "status": "passed_with_conditions",
+      "reason": "The Harness changes model generation and refusal behavior across hosts.",
+      "artifact": "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering.gates/ai_llm.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "finops",
+      "status": "passed_with_conditions",
+      "reason": "Generated projects use two runtimes and need bounded build, deployment, and operational guidance.",
+      "artifact": "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering.gates/finops.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "code_quality_testing",
+      "status": "passed",
+      "reason": "New bootstrap and static validators require regression and negative-fixture coverage.",
+      "artifact": "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering.gates/code_quality_testing.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "observability_release",
+      "status": "passed",
+      "reason": "A new major archive needs migration, deterministic packaging, rollback and clean-extraction evidence.",
+      "artifact": "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering.gates/observability_release.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    }
+  ],
+  "skills": [
+    "core/task-triage",
+    "core/project-profiling",
+    "core/implementation",
+    "core/validation",
+    "core/context-memory",
+    "core/documentation",
+    "specialists/software-architecture-uml",
+    "specialists/risk-security-compliance",
+    "specialists/ux-product",
+    "specialists/data-integration",
+    "specialists/ai-llm",
+    "specialists/finops-cost",
+    "specialists/code-quality-testing",
+    "specialists/observability-release"
+  ],
+  "approvals": [
+    {
+      "action": "Create a new local v6.0 candidate implementing the approved hybrid architecture, truth index, bootstrap, and documentation lifecycle.",
+      "required": true,
+      "status": "approved",
+      "reason": "The workspace owner approved the revised plan and authorized creation.",
+      "granted_by": "workspace owner in current task",
+      "scope": [
+        "Local reversible candidate and evidence only.",
+        "No production, deployment, messaging, commit, push, credential, or external target action."
+      ]
+    }
+  ],
+  "context": {
+    "task_file": "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering.task.json",
+    "references": [
+      "AGENTS.md",
+      "docs/ai/constitution.md",
+      "docs/ai/risks.md",
+      "agent-runtime-v5.0/AGENTS.md",
+      "agent-runtime-v5.0/docs/ai/standards.md",
+      "agent-runtime-v5.0/docs/ai/conventions.md",
+      "agent-runtime-v5.0/scripts/package_runtime.py"
+    ],
+    "assumptions": [
+      "FastAPI plus React with TypeScript and Vite is the default generated profile; Flask remains compatible when it preserves the same boundaries.",
+      "Minimum directories are required, additional directories are allowed when their responsibility and dependency direction are documented.",
+      "SOURCE-OF-TRUTH.md is the root index of authoritative project facts and pointers, not a replacement for detailed evidence.",
+      "Official release documentation is blocking while micro changes may declare no documentation impact with a reason."
+    ],
+    "missing_information": []
+  },
+  "coordination": {
+    "strategy": "single_agent",
+    "run_id": null,
+    "claims": [
+      "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering*",
+      "agent-runtime-v6.0",
+      "agent-runtime-v6.0.zip"
+    ],
+    "max_depth": 0,
+    "max_concurrency": 1
+  },
+  "documentation_impact": {
+    "level": "both",
+    "reason": "The release changes architecture, generation, installation, operations, and downstream user-facing documentation requirements.",
+    "required_artifacts": [
+      "docs/harness/HYBRID-ARCHITECTURE.md",
+      "docs/harness/PROJECT-TRUTH.md",
+      "docs/harness/DOCUMENTATION-LIFECYCLE.md",
+      "docs/harness/MIGRATION-5.0-6.0.md",
+      "scaffold/docs/TECHNICAL-DOCUMENTATION.md",
+      "scaffold/docs/USER-MANUAL.md"
+    ]
+  },
+  "validation": {
+    "commands": [
+      "python -B scripts/test_runtime.py",
+      "python -B scripts/runtime_check.py --strict",
+      "python -B scripts/package_runtime.py --check",
+      "python -B scripts/security_assurance.py --profile release",
+      "python -B scripts/ui_quality.py --profile release",
+      "python -B scripts/adversarial_lab.py plan --plan security/examples/loopback-plan.json",
+      "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\run.ps1 validate --full"
+    ],
+    "manual_checks": [
+      "Confirm v5.0 immutability and source hash.",
+      "Review refusal language, entrypoint exceptions, extension rules, truth precedence, documentation coverage, and packaged file inventory.",
+      "Verify archive paths, resource bounds, manifest, SBOM, provenance, deterministic rebuild, and fresh extraction."
+    ],
+    "max_attempts": 3,
+    "evidence": [
+      "Baseline v5.0 archive SHA-256 A2DF0C4DC057DD166E5F530BA76280796F03D3AF63F4FC8F340281BE5C5406FF.",
+      "Workspace owner explicitly authorized a third correction and validation round after the default two-round limit.",
+      "Bundled strict validation passed 127 checks; the full runner passed with exit code 0; all 34 runtime tests passed with one optional jsonschema-dependent case skipped.",
+      "Release security, UI-policy, architecture, documentation, and passive loopback adversarial-plan checks returned exit code 0.",
+      "Two deterministic package plans matched; the final 168-file archive passed path, resource, manifest, SBOM, provenance, timestamp, and fresh-extraction validation.",
+      "Final agent-runtime-v6.0.zip SHA-256 3857C989F99AA7FBDEFA70627706F445FF05B4EC86D206FB6E85B04C70F04122."
+    ],
+    "not_validated": [
+      {
+        "area": "Target model and host behavior execution",
+        "reason": "The 27-case behavioral suite is pinned and structurally validated but was not executed on every intended model and host.",
+        "disposition": "accepted_residual",
+        "acceptance_ref": "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering.gates/ai_llm.json"
+      },
+      {
+        "area": "Downstream deployment cost evidence",
+        "reason": "No downstream application or paid deployment is in scope, so quotas and worst-case exposure remain project-specific.",
+        "disposition": "accepted_residual",
+        "acceptance_ref": "docs/ai/tasks/2026-08-03-harness-v6-hybrid-engineering.gates/finops.json"
+      }
+    ]
+  },
+  "next_action": "Publish the archive digest through a trusted channel and execute the pinned behavior suite on each intended model and host before broad rollout."
+}

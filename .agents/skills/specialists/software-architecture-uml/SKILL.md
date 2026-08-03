@@ -19,6 +19,8 @@ Return a `GateResult` conforming to `schemas/gate-result.schema.json`.
 
 Inspect current code and documented decisions first. Do not design from generic best practice alone.
 
+For application projects, enforce the `python-react-hybrid` boundary unless a newer owner-approved Harness profile supersedes it. Review minimum directories as a required subset, never an allowlist; additional layers need distinct responsibility, ownership, and dependency direction. Treat entry files as composition roots and block single-file monoliths while allowing thin startup, provider, router, and layout assembly.
+
 ## Artifact
 
 Create a concise Markdown decision for every triggered gate. Include outcome, context, affected boundaries, responsibilities, contracts, failure behavior, compatibility/migration, alternatives, risks, and implementation constraints. Add only the smallest useful view:

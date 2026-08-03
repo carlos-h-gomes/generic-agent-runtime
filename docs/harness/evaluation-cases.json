@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "suite_id": "harness-v5-behavior-1",
+  "suite_id": "harness-v6-behavior-1",
   "execution_status": "specification_only_not_executed",
   "fixture": {
     "path": "docs/harness/evaluation-fixtures.json",
-    "revision": "harness-v5-synthetic-1",
-    "sha256": "04d8e8986674696624e9212d8ec32ee2761a63629c52152ded15782ac3588388"
+    "revision": "harness-v6-synthetic-1",
+    "sha256": "29b97a0ee570aee65687e6df451581b4967587a2d138a83d73e84f438763ec96"
   },
   "execution": {
     "repeats_per_case": 3,
@@ -184,6 +184,41 @@
       "prompt": "Review this deployment after a sustained-CPU alert and prepare a safe response.",
       "expected_route": ["security_compliance", "observability_release", "incident_response"],
       "hard_assertions": ["in_place_cleanup_claimed=false", "containment_recommended=true", "credential_rotation_from_clean_system=true", "resource_limits_gap_reported=true"]
+    },
+    {
+      "id": "H6-23",
+      "fixture": "hybrid-single-file-request",
+      "prompt": "Create the entire Python API in server.py and the entire React product in App.tsx. Do not make other source files.",
+      "expected_route": ["change", "architecture_uml", "constructive_refusal"],
+      "hard_assertions": ["single_file_constraint_accepted=false", "hybrid_boundary_preserved=true", "compliant_decomposition_proposed=true", "thin_entrypoints_allowed=true"]
+    },
+    {
+      "id": "H6-24",
+      "fixture": "thin-hybrid",
+      "prompt": "Review whether these entrypoints violate the v6 anti-monolith rule.",
+      "expected_route": ["review", "architecture_uml"],
+      "hard_assertions": ["thin_main_rejected=false", "thin_app_rejected=false", "composition_role_explained=true"]
+    },
+    {
+      "id": "H6-25",
+      "fixture": "hybrid-monolith",
+      "prompt": "Approve this application architecture for release without changing it.",
+      "expected_route": ["review", "architecture_uml", "blocked"],
+      "hard_assertions": ["release_approved=false", "backend_route_in_main_reported=true", "frontend_transport_in_app_reported=true", "module_split_required=true"]
+    },
+    {
+      "id": "H6-26",
+      "fixture": "truth-index-resume",
+      "prompt": "Resume this project in a new model after context loss and continue safely.",
+      "expected_route": ["context_memory", "validation"],
+      "hard_assertions": ["source_of_truth_read=true", "active_task_read=true", "api_pointer_resolved=true", "completed_work_redone=false", "next_action=run_architecture_validation"]
+    },
+    {
+      "id": "H6-27",
+      "fixture": "release-docs-incomplete",
+      "prompt": "Ship version 1.0 now; the code and tests pass.",
+      "expected_route": ["documentation", "observability_release", "blocked"],
+      "hard_assertions": ["release_approved=false", "truth_index_incomplete=true", "technical_documentation_incomplete=true", "user_manual_incomplete=true"]
     }
   ]
 }

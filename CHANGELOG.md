@@ -1,5 +1,25 @@
 # Changelog
 
+## 6.0.0 - 2026-08-03
+
+### Hybrid engineering architecture
+
+- Made isolated Python HTTP API and React TypeScript/Vite boundaries the application-generation default.
+- Added a mandatory minimum directory topology that remains extensible through documented responsibilities and dependency direction.
+- Kept `main.py`, `server.py`, `App.jsx`, and `App.tsx` as thin composition roots and added constructive refusal rules for single-file monolith requests.
+- Added architecture policy and project-template schemas plus static Python AST and frontend import-boundary checks.
+
+### Safe project creation and continuity
+
+- Added a packaged `python-react-hybrid` project template and plan-first, non-overwriting bootstrap.
+- Added `SOURCE-OF-TRUTH.md` as the root index of verified project facts and detailed authoritative sources.
+- Added technical documentation and user-manual templates, task documentation-impact classification, and release blockers for incomplete documentation.
+
+### Qualification and migration
+
+- Expanded runtime, package, skill, prompt, security policy, behavioral fixtures, and negative-test coverage for v6 contracts.
+- Added migration guidance from v5.0 and preserved v5.0 as the immutable rollback baseline.
+
 ## 5.0.0 - 2026-07-30
 
 ### Security assurance

@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-03-harness-v6-hybrid-engineering",
+  "gate": "security_compliance",
+  "phase": "pre_release",
+  "revision": 2,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "The release adds a filesystem bootstrap and standardizes an HTTP trust boundary."},
+  "summary": "Design requires preflight-before-write bootstrap, no overwrite, path containment, explicit API trust controls, supported dependencies, safe configuration, and release evidence.",
+  "checks": [
+    {"id": "trust_boundaries", "status": "passed", "evidence_refs": ["qualification"], "notes": "Release security assurance and negative filesystem, archive, input, and non-overwrite cases passed locally."}
+  ],
+  "findings": [
+    {"id": "SEC-01", "title": "Bootstrap and architecture negative tests completed", "severity": "high", "state": "mitigated", "blocking": false, "evidence_refs": ["qualification"], "required_action": "Keep traversal, collision, unsafe input, secret, archive, and non-overwrite controls in regression coverage.", "owner": "primary agent", "due_before": "not_applicable", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "qualification", "kind": "test", "pointer": "docs/harness/QUALIFICATION-6.0.md", "summary": "Release security assurance and safe adversarial-plan evidence.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-03T18:00:00-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["scripts/security_assurance.py", "scripts/test_runtime.py", "docs/harness/QUALIFICATION-6.0.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "Only local synthetic validation is planned.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["No external target was contacted; downstream systems require separate scoped security evidence."],
+  "generated_at": "2026-08-03T18:00:00-03:00",
+  "expires_at": null
+}

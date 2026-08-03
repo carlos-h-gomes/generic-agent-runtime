@@ -259,6 +259,16 @@ def validate_json_schemas(
         plan_example = json.loads(
             (root / "security" / "examples" / "loopback-plan.json").read_text(encoding="utf-8")
         )
+        maintainer_marker = manifest.get("distribution", {}).get("maintainer_marker", ".harness-source")
+        architecture_path = (
+            root / "scaffold" / "docs" / "ai" / "architecture-policy.json"
+            if (root / maintainer_marker).is_file()
+            else root / "docs" / "ai" / "architecture-policy.json"
+        )
+        architecture_policy = json.loads(architecture_path.read_text(encoding="utf-8"))
+        project_template = json.loads(
+            (root / "project-templates" / "python-react-hybrid" / "template-manifest.json").read_text(encoding="utf-8")
+        )
         for _path, task in tasks:
             schema_lite.validate(task, schemas["task-contract.schema.json"])
         for _path, gate in gates:
@@ -268,6 +278,8 @@ def validate_json_schemas(
         schema_lite.validate(ui_review, schemas["ui-review.schema.json"])
         schema_lite.validate(target_example, schemas["authorized-target.schema.json"])
         schema_lite.validate(plan_example, schemas["security-test-plan.schema.json"])
+        schema_lite.validate(architecture_policy, schemas["architecture-policy.schema.json"])
+        schema_lite.validate(project_template, schemas["project-template.schema.json"])
         template = json.loads((root / "docs" / "ai" / "tasks" / "_GATE_RESULT_TEMPLATE.json").read_text(encoding="utf-8"))
         schema_lite.validate(template, schemas["gate-result.schema.json"])
     except Exception as exc:
@@ -296,6 +308,8 @@ def validate_json_schemas(
         jsonschema.Draft202012Validator(schemas["ui-review.schema.json"], format_checker=format_checker).validate(ui_review)
         jsonschema.Draft202012Validator(schemas["authorized-target.schema.json"], format_checker=format_checker).validate(target_example)
         jsonschema.Draft202012Validator(schemas["security-test-plan.schema.json"], format_checker=format_checker).validate(plan_example)
+        jsonschema.Draft202012Validator(schemas["architecture-policy.schema.json"], format_checker=format_checker).validate(architecture_policy)
+        jsonschema.Draft202012Validator(schemas["project-template.schema.json"], format_checker=format_checker).validate(project_template)
         jsonschema.Draft202012Validator(schemas["gate-result.schema.json"], format_checker=format_checker).validate(template)
     except Exception as exc:  # jsonschema exposes several validation exception types
         report.failures.append(f"JSON Schema validation: {exc}")
@@ -329,12 +343,17 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "scripts/security_assurance.py",
         "scripts/adversarial_lab.py",
         "scripts/ui_quality.py",
+        "scripts/architecture_check.py",
+        "scripts/bootstrap_project.py",
+        "scripts/documentation_check.py",
         "scripts/schema_lite.py",
         "security-policy.json",
         "schemas/security-policy.schema.json",
         "schemas/authorized-target.schema.json",
         "schemas/security-test-plan.schema.json",
         "schemas/ui-review.schema.json",
+        "schemas/architecture-policy.schema.json",
+        "schemas/project-template.schema.json",
         "docs/ai/ui-review.json",
         "docs/ai/threat-model.md",
         "docs/ai/incident-response.md",
@@ -344,6 +363,12 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "docs/harness/ADVERSARIAL-TESTING.md",
         "docs/harness/UI-QUALITY.md",
         "docs/harness/QUALIFICATION-5.0.md",
+        "docs/harness/MIGRATION-5.0-6.0.md",
+        "docs/harness/QUALIFICATION-6.0.md",
+        "docs/harness/HYBRID-ARCHITECTURE.md",
+        "docs/harness/PROJECT-TRUTH.md",
+        "docs/harness/DOCUMENTATION-LIFECYCLE.md",
+        "project-templates/python-react-hybrid/template-manifest.json",
         "docs/harness/evaluation-suite.md",
         "docs/harness/evaluation-cases.json",
         "docs/harness/evaluation-fixtures.json",
@@ -361,7 +386,16 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
     report.check(manifest.get("contract_versions") == {"task": "1.0", "gate_result": "1.0", "bridge_event": "2.0"}, "manifest contract versions preserve v4.2 compatibility")
     report.check(
         manifest.get("policy_versions")
-        == {"security": "1.0", "authorized_target": "1.0", "security_test_plan": "1.0", "ui_review": "1.0"},
+        == {
+            "security": "1.0",
+            "authorized_target": "1.0",
+            "security_test_plan": "1.0",
+            "ui_review": "1.0",
+            "architecture_policy": "1.0",
+            "project_template": "1.0",
+            "source_of_truth": "1.0",
+            "release_documentation": "1.0",
+        },
         "manifest policy versions are canonical",
     )
 
@@ -372,8 +406,8 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         evaluation
         and fixtures
         and evaluation.get("execution_status") == "specification_only_not_executed"
-        and evaluation.get("suite_id") == "harness-v5-behavior-1"
-        and len(evaluation.get("cases") or []) >= 22
+        and evaluation.get("suite_id") == "harness-v6-behavior-1"
+        and len(evaluation.get("cases") or []) >= 27
         and evaluation.get("fixture", {}).get("revision") == fixtures.get("fixture_revision")
         and evaluation.get("fixture", {}).get("sha256") == hashlib.sha256(fixtures_path.read_bytes()).hexdigest()
     )
@@ -384,7 +418,7 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
     budget = manifest.get("instruction_budget") or {}
     report.check(len(agents) <= budget.get("agents_md_max_bytes", 0), f"AGENTS.md byte budget ({len(agents)}/{budget.get('agents_md_max_bytes')})")
     report.check(line_count <= budget.get("agents_md_max_lines", 0), f"AGENTS.md line budget ({line_count}/{budget.get('agents_md_max_lines')})")
-    report.check(b"Version: 5.0" in agents, "AGENTS.md version matches release family")
+    report.check(b"Version: 6.0" in agents, "AGENTS.md version matches release family")
     claude = (root / "CLAUDE.md").read_text(encoding="utf-8")
     report.check("@AGENTS.md" in claude and len(claude.encode("utf-8")) <= 4096, "CLAUDE.md is a thin AGENTS adapter")
     gemini = (root / "GEMINI.md").read_text(encoding="utf-8")
@@ -401,6 +435,8 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
             "authorized-target.schema.json",
             "security-test-plan.schema.json",
             "ui-review.schema.json",
+            "architecture-policy.schema.json",
+            "project-template.schema.json",
         )
     ]
     schemas_ok = True
@@ -450,7 +486,12 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
     canonical_files = [root / "AGENTS.md", root / "CLAUDE.md"]
     canonical_files += list((root / ".agents" / "skills").glob("*/*/SKILL.md"))
     canonical_files += list((root / "prompt-templates").glob("*.txt"))
-    canonical_files += [root / "docs" / "ai" / "quality-gates.md", root / "docs" / "ai" / "release-checklist.md"]
+    canonical_files += [
+        root / "docs" / "ai" / "quality-gates.md",
+        root / "docs" / "ai" / "release-checklist.md",
+        root / "docs" / "ai" / "standards.md",
+        root / "docs" / "ai" / "conventions.md",
+    ]
     forbidden = {"prompt injection is prevented", "prompt injection prevented", "checkout tested end-to-end in production with a real card"}
     unsafe: list[str] = []
     for path in canonical_files:
@@ -586,23 +627,40 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
                 "docs/harness/ADVERSARIAL-TESTING.md",
                 "docs/harness/UI-QUALITY.md",
                 "docs/harness/QUALIFICATION-5.0.md",
+                "docs/harness/MIGRATION-5.0-6.0.md",
+                "docs/harness/QUALIFICATION-6.0.md",
+                "docs/harness/HYBRID-ARCHITECTURE.md",
+                "docs/harness/PROJECT-TRUTH.md",
+                "docs/harness/DOCUMENTATION-LIFECYCLE.md",
+                "SOURCE-OF-TRUTH.md",
+                "docs/TECHNICAL-DOCUMENTATION.md",
+                "docs/USER-MANUAL.md",
+                "docs/architecture/DIRECTORY-MAP.md",
                 "schemas/task-contract.schema.json",
                 "schemas/security-policy.schema.json",
                 "schemas/authorized-target.schema.json",
                 "schemas/security-test-plan.schema.json",
                 "schemas/ui-review.schema.json",
+                "schemas/architecture-policy.schema.json",
+                "schemas/project-template.schema.json",
                 ".agents/skills/core/task-triage/SKILL.md",
                 "docs/ai/constitution.md",
                 "docs/ai/quality-gates.md",
                 "docs/ai/ui-review.json",
                 "docs/ai/threat-model.md",
                 "docs/ai/incident-response.md",
+                "docs/ai/architecture-policy.json",
                 "docs/ai/tasks/_TASK_TEMPLATE.md",
                 "docs/ai/bridge/ledger.jsonl",
                 "scripts/bridge.py",
                 "scripts/security_assurance.py",
                 "scripts/adversarial_lab.py",
                 "scripts/ui_quality.py",
+                "scripts/architecture_check.py",
+                "scripts/bootstrap_project.py",
+                "scripts/documentation_check.py",
+                "project-templates/python-react-hybrid/template-manifest.json",
+                "prompt-templates/09-generate-python-react-application.txt",
             }
             report.check(required.issubset(names), "archive contains the portable runtime and clean memory templates")
             report.check("README.md" not in names and "CHANGELOG.md" not in names, "archive does not overwrite a consumer project's root README or changelog")

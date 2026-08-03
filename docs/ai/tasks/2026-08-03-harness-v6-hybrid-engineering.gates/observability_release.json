@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-03-harness-v6-hybrid-engineering",
+  "gate": "observability_release",
+  "phase": "pre_release",
+  "revision": 2,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "The deliverable is a major portable release archive with migration and downstream release-documentation rules."},
+  "summary": "v5.0 remains the rollback baseline; v6 requires deterministic packaging, external digest publication guidance, manifest, SBOM, provenance, migration, documentation gates, and clean-extraction proof.",
+  "checks": [
+    {"id": "release_plan", "status": "passed", "evidence_refs": ["qualification"], "notes": "Determinism, archive bounds, manifest, SBOM, provenance, external digest, migration, rollback, and clean extraction passed."}
+  ],
+  "findings": [
+    {"id": "REL-01", "title": "Qualified v6 artifact created", "severity": "high", "state": "mitigated", "blocking": false, "evidence_refs": ["qualification"], "required_action": "Publish the final digest through a separate trusted channel and retain the v5 rollback artifact.", "owner": "primary agent", "due_before": "not_applicable", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "qualification", "kind": "test", "pointer": "docs/harness/QUALIFICATION-6.0.md", "summary": "Deterministic archive and clean-extraction qualification; final SHA-256 is recorded in the task evidence.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": "3857c989f99aa7fbdefa70627706f445ff05b4ec86d206fb6e85b04c70f04122", "captured_at": "2026-08-03T18:00:00-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["agent-runtime-v6.0.zip", "docs/harness/QUALIFICATION-6.0.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "Local candidate packaging is approved; publishing or deployment is not.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Publish the digest separately; unsigned provenance and downstream rollout remain explicit boundaries."],
+  "generated_at": "2026-08-03T18:00:00-03:00",
+  "expires_at": null
+}

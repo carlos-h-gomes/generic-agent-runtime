@@ -182,7 +182,7 @@ def execute(root: Path, plan: dict, scope_path: Path | None, report: CheckReport
             report.failed(f"{scenario['id']}: constructed URL escaped the authorized origin")
             return
         headers = {
-            "User-Agent": "GenericAgentRuntime-Safe-Assurance/5.0",
+            "User-Agent": "GenericAgentRuntime-Safe-Assurance/6.0",
             "Accept": "text/html,application/json;q=0.9,*/*;q=0.1",
             **scenario.get("headers", {}),
         }

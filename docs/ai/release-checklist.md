@@ -4,6 +4,7 @@
 
 ## Identity and recovery
 
+- [ ] [B] `SOURCE-OF-TRUTH.md` identifies the current product version, architecture profile, authoritative sources, active work, material risks, and last qualified evidence.
 - [ ] [B] Revision, artifact digest, SBOM, provenance, environment, and owner are identified.
 - [ ] [B] Reproducible build/install mode and lockfile are evidenced.
 - [ ] [B] Rollback or restore was exercised against declared objectives.
@@ -21,6 +22,7 @@
 
 ## Product and UI
 
+- [ ] [B] `docs/USER-MANUAL.md` matches the released version, features, navigation, workflows, permissions, feedback, recovery, accessibility, troubleshooting, and support behavior.
 - [ ] [B] Critical journeys and the full interaction-state matrix are evidenced.
 - [ ] [B] Narrow and wide responsive evidence and content stress were reviewed.
 - [ ] [B] Automated accessibility plus keyboard, focus, semantics, reflow/zoom, error, and motion checks are recorded.
@@ -28,6 +30,8 @@
 
 ## Data, AI, operations, and cost
 
+- [ ] [B] The Python API/React boundary, minimum extensible directories, import direction, thin entrypoints, and versioned API contract passed architecture validation.
+- [ ] [B] `docs/TECHNICAL-DOCUMENTATION.md` covers current architecture, modules, API, data, auth, configuration, build/test, deployment/rollback, observability, recovery, operations, support, and residual risks.
 - [ ] [B] Data contracts, validation, migration, replay/idempotency, retention, and recovery are covered where applicable.
 - [ ] [B] AI output/tool policies, injection resistance, eval thresholds, memory, and fallback are covered where applicable.
 - [ ] [B] Logs are redacted; SLIs/SLOs, alerts, escalation, runbook, and monitoring window are defined.
@@ -38,6 +42,10 @@
 
 ```text
 Release/artifact/digest:
+SOURCE-OF-TRUTH version/reconciliation:
+Architecture policy/check evidence:
+Technical documentation review:
+User manual review:
 Target environment:
 Approver and scope:
 GateResult paths:

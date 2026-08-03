@@ -1,3 +1,5 @@
 Create a compact context packet for the active task from authoritative repository sources. Label each non-obvious item verified, inferred, historical, or unknown and include pointers.
 
 Keep only facts needed for safe execution or resume: criteria, boundaries, contracts, conventions, approvals, ownership, risks, validation state, and next action. Never include secrets, customer data, full logs, private prompts, or hidden reasoning.
+
+Start from SOURCE-OF-TRUTH.md and preserve its authoritative pointers rather than copying their full content. Include the Python API/React boundary, directory extensions, API contract, documentation impact, and current technical/manual status when applicable. Missing material truth is an explicit unknown requiring reconciliation, not an instruction to discard verified work.

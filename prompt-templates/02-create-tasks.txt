@@ -1,3 +1,5 @@
 Apply AGENTS.md and core/task-triage. Convert my request into a contract conforming to schemas/task-contract.schema.json.
 
 Separate mode/authorization, work level/scope, and risk. Define observable acceptance criteria, affected-file discovery, gates, approvals, coordination, and validation. Do not implement. For Level 2/3, cross-boundary/system, or multi-session work, persist the .task.json plus concise Markdown notes only if writes are authorized.
+
+Classify documentation impact as none, technical, user_manual, or both with a reason and artifact pointers. Application work must include the python-react-hybrid boundary, minimum extensible directories, thin entrypoints, API contract, SOURCE-OF-TRUTH reconciliation, architecture validation, and applicable release documentation. Do not encode a single-file monolith as an acceptance criterion.

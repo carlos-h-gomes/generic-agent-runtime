@@ -1,1 +1,3 @@
 Apply AGENTS.md. For fast-path work, execute the authorized request directly with targeted validation. For managed work, execute only the active task contract whose authorization, status, gates, and claims permit the next change.
+
+Read SOURCE-OF-TRUTH.md and the architecture policy before application edits. Maintain the isolated Python API and React frontend, required minimum directories, permitted documented extensions, thin composition entrypoints, and versioned HTTP contract. If the request asks for a single-file monolith, refuse that constraint, explain the boundary violation, and continue only with the compliant modular decomposition. Apply the task's documentation-impact decision before completion.

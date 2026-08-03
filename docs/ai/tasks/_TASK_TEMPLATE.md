@@ -27,6 +27,13 @@ Add only the smallest diagram or decision needed to remove ambiguity.
 
 ## Implementation notes
 
+## Documentation impact
+
+- Classification: `none` / `technical` / `user_manual` / `both`
+- Reason:
+- Required artifacts:
+- Milestone or release deadline:
+
 ## Validation attempts
 
 Three total attempts include the initial run.

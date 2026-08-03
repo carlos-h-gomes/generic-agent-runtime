@@ -7,6 +7,10 @@ description: "Implement an authorized repository change with the smallest cohere
 
 Implementation follows the user request and established repository evidence. Fast-path work may use an inline plan; managed work follows its task contract.
 
+For application work, preserve the Python API/React boundary and the minimum extensible topology in `docs/ai/architecture-policy.json`. Keep `main.py`, `server.py`, `App.jsx`, and `App.tsx` as thin composition roots. If a request would centralize routes, persistence, HTTP clients, business rules, feature state/data, or reusable UI in one of them, reject that constraint and implement or propose the compliant modular decomposition.
+
+Additional directories are allowed when a distinct responsibility needs them; document the new layer and permitted dependencies rather than forcing unrelated behavior into an existing folder.
+
 ## Preconditions
 
 Confirm:
