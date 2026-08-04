@@ -9,9 +9,13 @@ Last reviewed: `<DATE>`
 
 ## Architecture and runtime boundaries
 
+Record whether Harness adoption was greenfield, brownfield, or upgrade. Adoption does not establish application conformance. Link every approved code/n8n/hybrid automation decision and identify its system of record.
+
 ## Module and directory responsibilities
 
 ## API contracts and integrations
+
+For n8n include sanitized workflow exports, environment promotion, risky-node review, idempotency/replay, error workflow, correlation, retention, rollback, and kill switch.
 
 ## Data ownership, schemas, and migrations
 

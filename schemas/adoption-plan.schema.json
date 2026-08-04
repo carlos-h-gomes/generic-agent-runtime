@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/adoption-plan-v1.json",
+  "title": "Harness adoption plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "plan_id", "status", "source", "target", "adoption_mode", "harness_posture",
+    "application_posture", "architecture_disposition", "operations", "conflicts", "reconciled_shared", "approvals",
+    "source_fingerprint", "target_fingerprint", "plan_digest", "generated_at"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": "1.0"},
+    "plan_id": {"type": "string", "pattern": "^adopt-[0-9a-f]{16}$"},
+    "status": {"enum": ["ready", "awaiting_approval", "blocked", "applied", "verified"]},
+    "source": {
+      "type": "object", "additionalProperties": false, "required": ["version", "archive", "manifest"],
+      "properties": {
+        "version": {"type": "string", "pattern": "^[0-9]+[.][0-9]+[.][0-9]+$"},
+        "archive": {"type": "string", "minLength": 1}, "manifest": {"type": "string", "minLength": 1}
+      }
+    },
+    "target": {
+      "type": "object", "additionalProperties": false, "required": ["identifier", "existing_harness_version"],
+      "properties": {"identifier": {"type": "string", "minLength": 1}, "existing_harness_version": {"type": ["string", "null"]}}
+    },
+    "adoption_mode": {"enum": ["greenfield", "brownfield", "upgrade"]},
+    "harness_posture": {"enum": ["absent", "current", "prior_supported", "modified_or_unknown"]},
+    "application_posture": {"enum": ["empty", "python_react_hybrid", "observed", "unknown"]},
+    "architecture_disposition": {"enum": ["initialize_target", "preserve", "profile_required", "migration_required"]},
+    "operations": {
+      "type": "array", "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["path", "ownership", "action", "content_source", "source_sha256", "target_sha256", "reason"],
+        "properties": {
+          "path": {"type": "string", "pattern": "^[A-Za-z0-9._/-]+$"},
+          "ownership": {"enum": ["harness", "project", "shared", "generated"]},
+          "action": {"enum": ["create", "preserve", "replace", "conflict", "skip"]},
+          "content_source": {"enum": ["distribution", "generated", "none"]},
+          "source_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+          "target_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+          "reason": {"type": "string", "minLength": 1, "maxLength": 500}
+        }
+      }
+    },
+    "conflicts": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "reconciled_shared": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[A-Za-z0-9._/-]+$"}},
+    "approvals": {"type": "array", "uniqueItems": true, "items": {"enum": ["replace_harness_owned"]}},
+    "source_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "target_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "plan_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "generated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {"if": {"properties": {"status": {"const": "ready"}}, "required": ["status"]}, "then": {"properties": {"conflicts": {"maxItems": 0}, "approvals": {"maxItems": 0}}}},
+    {"if": {"properties": {"status": {"const": "awaiting_approval"}}, "required": ["status"]}, "then": {"properties": {"conflicts": {"maxItems": 0}, "approvals": {"minItems": 1}}}},
+    {"if": {"properties": {"status": {"const": "blocked"}}, "required": ["status"]}, "then": {"properties": {"conflicts": {"minItems": 1}}}}
+  ]
+}

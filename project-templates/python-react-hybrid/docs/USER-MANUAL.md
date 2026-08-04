@@ -16,6 +16,8 @@ Last reviewed: `<DATE>`
 
 ## Primary workflows
 
+Document any operator-visible n8n workflow activation, pause, retry, degraded mode, and recovery behavior without exposing credentials or internal implementation details.
+
 ## Forms, validation, and feedback
 
 ## Roles, permissions, and restrictions

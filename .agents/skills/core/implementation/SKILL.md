@@ -7,7 +7,9 @@ description: "Implement an authorized repository change with the smallest cohere
 
 Implementation follows the user request and established repository evidence. Fast-path work may use an inline plan; managed work follows its task contract.
 
-For application work, preserve the Python API/React boundary and the minimum extensible topology in `docs/ai/architecture-policy.json`. Keep `main.py`, `server.py`, `App.jsx`, and `App.tsx` as thin composition roots. If a request would centralize routes, persistence, HTTP clients, business rules, feature state/data, or reusable UI in one of them, reject that constraint and implement or propose the compliant modular decomposition.
+For greenfield or already conformant application work, preserve the Python API/React boundary and minimum extensible topology in `docs/ai/architecture-policy.json`. Brownfield adoption preserves the observed stack until a separate migration is authorized. Keep `main.py`, `server.py`, `App.jsx`, and `App.tsx` as thin composition roots when that profile applies. If a request would centralize routes, persistence, HTTP clients, business rules, feature state/data, or reusable UI in one of them, reject that constraint and implement or propose the compliant modular decomposition.
+
+Do not implement a material automation until its execution-plane decision is schema-valid. Keep authoritative behavior in code, and implement n8n only as bounded orchestration under the recorded reliability, security, operations, cost, rollback, and kill-switch controls.
 
 Additional directories are allowed when a distinct responsibility needs them; document the new layer and permitted dependencies rather than forcing unrelated behavior into an existing folder.
 

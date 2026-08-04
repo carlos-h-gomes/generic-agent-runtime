@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "harness_version": "7.0.0",
+  "excluded_files": ["MANIFEST.sha256", "SBOM.cdx.json", "PROVENANCE.intoto.json"],
+  "shared_files": ["AGENTS.md", "CLAUDE.md", "GEMINI.md", "security-policy.json"],
+  "project_owned_files": [
+    "SOURCE-OF-TRUTH.md",
+    "docs/TECHNICAL-DOCUMENTATION.md",
+    "docs/USER-MANUAL.md",
+    "docs/ai/architecture-policy.json",
+    "docs/ai/commands.md",
+    "docs/ai/constitution.md",
+    "docs/ai/conventions.md",
+    "docs/ai/decision-log.md",
+    "docs/ai/incident-response.md",
+    "docs/ai/project-profile.md",
+    "docs/ai/risks.md",
+    "docs/ai/shared-context.md",
+    "docs/ai/threat-model.md",
+    "docs/ai/ui-review.json"
+  ],
+  "project_owned_prefixes": ["docs/ai/bridge/", "docs/architecture/"],
+  "harness_owned_files": [
+    "adoption-policy.json", "harness.json",
+    "docs/ai/quality-gates.md", "docs/ai/release-checklist.md", "docs/ai/standards.md",
+    "docs/ai/tasks/_GATE_RESULT_TEMPLATE.json", "docs/ai/tasks/_TASK_CONTRACT_TEMPLATE.task.json", "docs/ai/tasks/_TASK_TEMPLATE.md"
+  ],
+  "harness_owned_prefixes": [".agents/", "docs/harness/", "project-templates/", "prompt-templates/", "schemas/", "scripts/", "security/"]
+}

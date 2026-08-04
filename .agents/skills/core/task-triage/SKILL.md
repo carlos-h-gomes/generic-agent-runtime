@@ -50,7 +50,9 @@ Trigger gates from actual scope and risk, using the canonical IDs in the schema.
 
 Use `docs/ai/quality-gates.md` for result semantics. A specialist is a procedure, not automatically a separate agent.
 
-For application generation or material application changes, require the `python-react-hybrid` architecture profile, trigger `architecture_uml`, and add observable criteria for the Python API/React boundary, minimum extensible directories, thin entrypoints, API contract, and architecture validation. A request for a single-file monolith is not an approvable task constraint; record the compliant decomposition instead.
+For greenfield application generation, require the `python-react-hybrid` target profile. For brownfield work, preserve the observed stack and require an evidence-backed project architecture policy; migration to Python/React is a separate managed outcome. Trigger `architecture_uml` and add observable criteria for the applicable boundaries, entrypoints, contracts, compatibility, and validation. A request for a single-file monolith is not an approvable task constraint; record the compliant decomposition instead.
+
+Material automation triggers architecture, data, security, FinOps, code-quality, and release review. Require a `code`, `n8n`, or `hybrid` decision conforming to `schemas/automation-decision.schema.json`; unknown facts keep the decision draft.
 
 ## 5. Set a typed state
 

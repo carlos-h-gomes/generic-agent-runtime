@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('validate', 'lint', 'test', 'security', 'ui', 'architecture', 'documentation', 'bootstrap', 'assurance', 'adversarial', 'cost', 'runtime', 'bridge', 'package')]
+    [ValidateSet('validate', 'lint', 'test', 'security', 'ui', 'architecture', 'documentation', 'bootstrap', 'adopt', 'automation', 'assurance', 'adversarial', 'cost', 'runtime', 'bridge', 'package')]
     [string] $Command = 'validate',
 
     [Parameter(ValueFromRemainingArguments = $true)]
@@ -152,6 +152,8 @@ switch ($Command) {
     'architecture' { Invoke-HarnessPython 'scripts/project_checks.py' (@('architecture') + $ProjectArgs) }
     'documentation' { Invoke-HarnessPython 'scripts/project_checks.py' (@('documentation') + $ProjectArgs) }
     'bootstrap' { Invoke-HarnessPython 'scripts/bootstrap_project.py' $RemainingArgs }
+    'adopt' { Invoke-HarnessPython 'scripts/adopt_harness.py' $RemainingArgs }
+    'automation' { Invoke-HarnessPython 'scripts/automation_decision.py' $RemainingArgs }
     'assurance' { Invoke-HarnessPython 'scripts/security_assurance.py' $RemainingArgs }
     'adversarial' { Invoke-HarnessPython 'scripts/adversarial_lab.py' $RemainingArgs }
     'lint'     { Invoke-NativeLint }

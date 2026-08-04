@@ -19,7 +19,9 @@ Return a `GateResult` conforming to `schemas/gate-result.schema.json`.
 
 Inspect current code and documented decisions first. Do not design from generic best practice alone.
 
-For application projects, enforce the `python-react-hybrid` boundary unless a newer owner-approved Harness profile supersedes it. Review minimum directories as a required subset, never an allowlist; additional layers need distinct responsibility, ownership, and dependency direction. Treat entry files as composition roots and block single-file monoliths while allowing thin startup, provider, router, and layout assembly.
+For greenfield generation and projects already targeting it, enforce the `python-react-hybrid` boundary unless a newer owner-approved profile supersedes it. Brownfield admission preserves the verified existing architecture; migration to Python/React requires a separate approved decision. Review minimum directories as a required subset when the profile applies, never an allowlist. Treat entry files as composition roots and block single-file monoliths while allowing thin startup, provider, router, and layout assembly.
+
+For automation, identify the system of record and authority before choosing code, n8n, or hybrid. Authorization, transactional invariants, complex state/concurrency, intensive computation, and strict performance stay in code. n8n may coordinate versioned APIs at the edge only.
 
 ## Artifact
 

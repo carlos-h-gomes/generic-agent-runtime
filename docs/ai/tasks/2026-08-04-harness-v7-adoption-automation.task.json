@@ -1,0 +1,166 @@
+{
+  "$schema": "../../../schemas/task-contract.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-04-harness-v7-adoption-automation",
+  "status": "done",
+  "mode": "change",
+  "work_level": 3,
+  "outcome": "Deliver a deterministic Harness v7.0 successor that governs n8n/code/hybrid execution-plane decisions and safely adopts greenfield, brownfield, and prior-Harness projects without conflating governance installation with application migration.",
+  "acceptance_criteria": [
+    "The immutable v6.0 directory and archive remain unchanged and the source archive SHA-256 is recorded.",
+    "A normative policy and machine contract classify automations as code, n8n, or hybrid using explicit eligibility criteria, hard blockers, ownership, reliability, security, cost, and evidence requirements.",
+    "Production n8n decisions require versioned sanitized workflows, environment separation, least-privilege credentials, bounded retries, idempotency, failure handling, observability, retention, rollback, and a kill switch.",
+    "A normative adoption policy and machine contract independently classify adoption mode, existing Harness posture, application posture, file ownership, conflicts, approvals, and migration requirements.",
+    "A bounded adopt_harness.py plan/apply/verify workflow is read-only by default, performs full preflight, never overwrites project-owned or conflicting content, and emits a machine-readable plan.",
+    "Greenfield adoption can initialize the default Python/React profile; brownfield adoption preserves the detected stack and never creates application-template directories implicitly; upgrades preserve project memory and use explicit migration steps.",
+    "Architecture validation distinguishes absent applications, observed brownfield profiles, target profiles, and migration-required states without treating an unknown topology as not applicable.",
+    "Prompts, skills, schemas, scripts, fixtures, documentation, migration guidance, manifests, SBOM, provenance, version metadata, and package inventory agree on v7 behavior.",
+    "Positive and negative tests cover adoption modes, ownership conflicts, zero-write failures, unsafe paths, untrusted plans, automation hard blockers, invalid n8n evidence, and v6-to-v7 compatibility.",
+    "All applicable gates close without unresolved blockers and a deterministic v7 archive passes manifest, path, resource, and fresh-extraction verification with a recorded SHA-256."
+  ],
+  "scope": {
+    "size": "system",
+    "in": [
+      "Create managed task, architecture, gate, migration, and qualification evidence for v7.",
+      "Derive agent-runtime-v7.0 from the verified immutable v6.0 baseline.",
+      "Implement automation execution-plane and Harness adoption policies, schemas, scripts, validation, tests, prompts, and documentation.",
+      "Run bounded local validation and deterministic packaging with synthetic fixtures."
+    ],
+    "out": [
+      "Modify any released v6.0 or earlier directory or archive.",
+      "Mutate a real downstream project, n8n instance, database, external service, or production environment.",
+      "Install network dependencies, deploy, commit, push, publish, message, rotate credentials, or run external security tests."
+    ]
+  },
+  "risk": {
+    "level": "high",
+    "reversibility": "easy",
+    "external_effect": "local",
+    "triggers": [
+      "The release changes default Harness behavior when entering existing projects.",
+      "The release introduces a filesystem adoption tool and versioned migration contracts.",
+      "Incorrect automation routing could place business authority or sensitive operations in an unsuitable execution plane.",
+      "Packaging and migration errors could overwrite project-owned governance or memory."
+    ]
+  },
+  "authorization": {
+    "writes": {
+      "allowed": true,
+      "scope": [
+        "Root docs/ai/tasks evidence for the v7 task.",
+        "A new agent-runtime-v7.0 candidate directory and deterministic local ZIP.",
+        "Bounded temporary validation artifacts containing synthetic data only."
+      ]
+    },
+    "external_actions": {"allowed": false, "scope": []}
+  },
+  "files": {
+    "owned": [
+      "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation*",
+      "agent-runtime-v7.0/**",
+      "agent-runtime-v7.0.zip"
+    ],
+    "shared": ["AGENTS.md", "docs/ai/", "agent-runtime-v6.0/"],
+    "do_not_touch": [
+      "agent-runtime-v6.0/**",
+      "agent-runtime-v6.0.zip",
+      "all earlier released versions and archives"
+    ],
+    "discover": [
+      "Inspect only v6 packaging, validation, schemas, skills, prompts, migration, and documentation required for the successor.",
+      "Use official n8n documentation for changing product capability and security claims."
+    ]
+  },
+  "gates": [
+    {"id": "architecture_uml", "status": "passed", "reason": "Adoption modes, ownership, migration, execution planes, contracts, and failure behavior change system boundaries.", "artifact": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation.gates/architecture_uml.json", "owner": "primary agent", "approval_ref": "workspace owner approval in current task"},
+    {"id": "security_compliance", "status": "passed_with_conditions", "reason": "n8n, credentials, webhooks, workflow code, filesystem adoption, and project-memory merges cross trust boundaries.", "artifact": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation.gates/security_compliance.json", "owner": "primary agent", "approval_ref": null},
+    {"id": "data_integration", "status": "passed", "reason": "Automation workflows require explicit ownership, schemas, idempotency, replay, and migration semantics.", "artifact": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation.gates/data_integration.json", "owner": "primary agent", "approval_ref": null},
+    {"id": "ai_llm", "status": "passed_with_conditions", "reason": "The Harness changes model routing, refusal, profiling, and structured decision behavior.", "artifact": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation.gates/ai_llm.json", "owner": "primary agent", "approval_ref": null},
+    {"id": "finops", "status": "passed_with_conditions", "reason": "n8n licensing, compute, retries, retention, fan-out, and external APIs can create variable cost.", "artifact": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation.gates/finops.json", "owner": "primary agent", "approval_ref": null},
+    {"id": "code_quality_testing", "status": "passed", "reason": "New classifiers, schemas, adoption writes, compatibility paths, and packaging are regression-sensitive.", "artifact": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation.gates/code_quality_testing.json", "owner": "primary agent", "approval_ref": null},
+    {"id": "observability_release", "status": "passed", "reason": "A new major archive requires deterministic packaging, rollback, migration, provenance, and clean-extraction evidence.", "artifact": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation.gates/observability_release.json", "owner": "primary agent", "approval_ref": null},
+    {"id": "ux_product", "status": "not_applicable", "reason": "The v7 deliverable adds no executable user interface; CLI messages and documentation remain covered by code quality and documentation checks.", "artifact": null, "owner": "primary agent", "approval_ref": null}
+  ],
+  "skills": [
+    "core/task-triage", "core/project-profiling", "core/implementation", "core/minimalism", "core/documentation", "core/validation",
+    "specialists/software-architecture-uml", "specialists/risk-security-compliance", "specialists/data-integration", "specialists/ai-llm", "specialists/finops-cost", "specialists/code-quality-testing", "specialists/observability-release"
+  ],
+  "approvals": [
+    {
+      "action": "Create and qualify a local v7.0 successor implementing the approved automation and adoption policies.",
+      "required": true,
+      "status": "approved",
+      "reason": "The workspace owner explicitly approved the proposed plan.",
+      "granted_by": "workspace owner in current task on 2026-08-04",
+      "scope": ["Local reversible candidate and release artifact only.", "No downstream mutation or external action."]
+    }
+  ],
+  "context": {
+    "task_file": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation.task.json",
+    "references": [
+      "AGENTS.md", "docs/ai/constitution.md", "docs/ai/risks.md", "agent-runtime-v6.0/AGENTS.md",
+      "agent-runtime-v6.0/docs/harness/INSTALL.md", "agent-runtime-v6.0/docs/harness/MIGRATION-5.0-6.0.md",
+      "agent-runtime-v6.0/scripts/bootstrap_project.py", "agent-runtime-v6.0/scripts/architecture_check.py"
+    ],
+    "assumptions": [
+      "python-react-hybrid remains the default target for greenfield application generation but is not an admission condition for brownfield governance adoption.",
+      "Governance installation, application bootstrap, architecture migration, and Harness upgrade are separate authorized operations.",
+      "Code owns authoritative business behavior; n8n may orchestrate bounded edge workflows; hybrid is preferred when both responsibilities exist.",
+      "No external n8n instance or downstream repository is needed to qualify the portable policy and local tooling."
+    ],
+    "missing_information": []
+  },
+  "coordination": {"strategy": "single_agent", "run_id": null, "claims": ["docs/ai/tasks/2026-08-04-harness-v7-adoption-automation*", "agent-runtime-v7.0", "agent-runtime-v7.0.zip"], "max_depth": 0, "max_concurrency": 1},
+  "documentation_impact": {
+    "level": "both",
+    "reason": "The release changes maintainer architecture, schemas, migration, installation, CLI workflows, and user-facing adoption and automation decisions.",
+    "required_artifacts": ["docs/harness/AUTOMATION-EXECUTION-POLICY.md", "docs/harness/HARNESS-ADOPTION-POLICY.md", "docs/harness/MIGRATION-6.0-7.0.md", "docs/TECHNICAL-DOCUMENTATION.md", "docs/USER-MANUAL.md"]
+  },
+  "validation": {
+    "commands": [
+      "python -B scripts/test_runtime.py",
+      "python -B scripts/runtime_check.py --strict",
+      "python -B scripts/package_runtime.py --check",
+      "python -B scripts/security_assurance.py --profile release",
+      "python -B scripts/ui_quality.py --profile release",
+      "python -B scripts/adversarial_lab.py plan --plan security/examples/loopback-plan.json",
+      "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\run.ps1 validate --full"
+    ],
+    "manual_checks": [
+      "Confirm v6.0 immutability and baseline archive digest.",
+      "Review automation hard blockers, brownfield no-mutation behavior, file ownership, approvals, migration compatibility, and safe failure.",
+      "Verify archive paths, resource bounds, manifest, SBOM, provenance, deterministic rebuild, and fresh extraction."
+    ],
+    "max_attempts": 2,
+    "evidence": [
+      "Baseline v6.0 archive SHA-256 3857C989F99AA7FBDEFA70627706F445FF05B4EC86D206FB6E85B04C70F04122 and 167 manifest entries verified on 2026-08-04.",
+      "All 41 runtime tests passed; one optional third-party jsonschema-dependent case was skipped after the bundled validator passed.",
+      "Strict validation passed 187 mandatory checks with zero failures; the full PowerShell release runner completed with exit code 0.",
+      "Release security assurance passed four applicable checks; UI quality correctly returned not applicable; the passive adversarial plan validated without network activity.",
+      "The deterministic package plan contained 181 files and 230955 bytes with SHA-256 986C061F6EDD6D022030FC62866C6068F0C1977A1D5D35FF4206D455CA2E7B2E.",
+      "The final agent-runtime-v7.0.zip passed 201 mandatory archive/source checks with one optional jsonschema skip and zero failures, then passed strict validation from a fresh temporary extraction.",
+      "Final agent-runtime-v7.0.zip SHA-256 986C061F6EDD6D022030FC62866C6068F0C1977A1D5D35FF4206D455CA2E7B2E; v6.0 rollback archive SHA-256 remained 3857C989F99AA7FBDEFA70627706F445FF05B4EC86D206FB6E85B04C70F04122."
+    ],
+    "not_validated": [
+      {
+        "area": "Target model and host behavior execution",
+        "reason": "The 32-case behavioral suite is pinned and structurally validated but was not executed on every intended model, reasoning setting, and tool host.",
+        "disposition": "accepted_residual",
+        "acceptance_ref": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation.gates/ai_llm.json"
+      },
+      {
+        "area": "Downstream n8n and production controls",
+        "reason": "No real n8n instance, downstream repository, credential store, or deployment was in scope; environment separation, security, cost, backup, observability, and rollback evidence remain project-specific.",
+        "disposition": "accepted_residual",
+        "acceptance_ref": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation.gates/security_compliance.json"
+      },
+      {
+        "area": "External artifact authentication",
+        "reason": "The bundled provenance is deterministic but unsigned.",
+        "disposition": "accepted_residual",
+        "acceptance_ref": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation.gates/observability_release.json"
+      }
+    ]
+  },
+  "next_action": "Publish the final archive digest through a trusted channel, then run the pinned behavioral suite and project-specific adoption/n8n gates before broad rollout."
+}

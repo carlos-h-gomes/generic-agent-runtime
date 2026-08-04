@@ -1,0 +1,7 @@
+Apply the nearest AGENTS.md and `docs/harness/AUTOMATION-EXECUTION-POLICY.md`. Inspect the proposed automation and authoritative project sources read-only before recommending `code`, `n8n`, or `hybrid`.
+
+Identify the system of record, business authority, triggers, schemas, trust boundaries, latency/throughput, state/concurrency, idempotency/replay, failure behavior, sensitive data, node capabilities, environment/version control, observability, retention, rollback, kill switch, and expected/burst/worst-case billing units. Label unknown facts and abstain rather than defaulting to n8n.
+
+Any authorization, tenant, financial/transactional, strict performance, complex state/concurrency, intensive compute/data, missing production control, or unbounded-cost requirement blocks pure n8n. Use hybrid only when every blocked responsibility remains behind a versioned code API.
+
+Return or update a decision conforming to `schemas/automation-decision.schema.json`. Do not activate a workflow, create credentials, call external services, edit production, or claim security/reliability from the schema alone.

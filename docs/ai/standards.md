@@ -10,6 +10,8 @@ The API boundary must define ownership, versioning, authentication, authorizatio
 
 `SOURCE-OF-TRUTH.md` is the root index of verified project facts and authoritative pointers. Tasks, decisions, schemas, code, tests, technical documentation, and the user manual retain their specialized authority. Official releases require current technical and user documentation.
 
+Harness adoption follows `docs/harness/HARNESS-ADOPTION-POLICY.md`; installing governance never implies application bootstrap or migration. Automation placement follows `docs/harness/AUTOMATION-EXECUTION-POLICY.md` and a versioned decision contract. Recheck n8n editions, supported versions, environment/source-control capabilities, security guidance, execution retention, and pricing before relying on them downstream.
+
 | Domain | Reference | Version/date | Checked | Harness use |
 |---|---|---:|---:|---|
 | Application security | [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/) | 5.0.0 | 2026-07-30 | Verification-control vocabulary and security test planning. |
@@ -25,5 +27,6 @@ The API boundary must define ownership, versioning, authentication, authorizatio
 | Supply chain | [SLSA specification](https://slsa.dev/spec/v1.2/) | 1.2 | 2026-07-30 | Provenance shape and explicit authenticity boundary. |
 | SBOM | [CycloneDX](https://cyclonedx.org/specification/overview/) | 1.7 | 2026-07-30 | Release component inventory. |
 | Contracts | [JSON Schema 2020-12](https://json-schema.org/draft/2020-12/json-schema-core) | 2020-12 | 2026-07-30 | Machine-readable contracts. |
+| Workflow automation | [n8n source control and environments](https://docs.n8n.io/source-control-environments/create-environments/) and [security audit](https://docs.n8n.io/hosting/securing/security-audit/) | Living guidance | 2026-08-04 | Environment promotion, protected production, risky-node, webhook, credential, and instance controls. |
 
 References scope review; they do not prove compliance. Recheck before relying on these versions after the policy expiry date.

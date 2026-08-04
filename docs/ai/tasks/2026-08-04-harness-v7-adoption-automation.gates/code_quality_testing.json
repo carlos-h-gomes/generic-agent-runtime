@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-04-harness-v7-adoption-automation",
+  "gate": "code_quality_testing",
+  "phase": "pre_release",
+  "revision": 2,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "Adoption writes, shared-file reconciliation, automation classification, schema validation, and compatibility behavior are regression-sensitive."},
+  "summary": "The v7 standard-library implementation passed positive and negative coverage for all adoption modes, zero-write failures, ownership conflicts, unsafe inputs, automation blockers, and package determinism.",
+  "checks": [
+    {"id": "regression_suite", "status": "passed", "evidence_refs": ["qualification"], "notes": "All 41 tests passed; one optional third-party jsonschema case was skipped after the bundled validator passed."},
+    {"id": "strict_contracts", "status": "passed", "evidence_refs": ["qualification"], "notes": "Strict bundled validation passed all mandatory schema, task, gate, policy, fixture, documentation, and runtime checks."},
+    {"id": "negative_paths", "status": "passed", "evidence_refs": ["qualification"], "notes": "Unsafe manifest paths, maintainer sources, missing approvals, target drift, conflicts, n8n authority blockers, and missing controls fail safely."}
+  ],
+  "findings": [
+    {"id": "QA-01", "title": "Adoption and automation regression suite completed", "severity": "high", "state": "mitigated", "blocking": false, "evidence_refs": ["qualification"], "required_action": "Keep ownership, no-partial-write, upgrade, and automation hard-blocker regressions current.", "owner": "Harness maintainer", "due_before": "not_applicable", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "qualification", "kind": "test", "pointer": "docs/harness/QUALIFICATION-7.0.md", "summary": "Local structural, functional, negative, security, and package-plan evidence for v7.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-04T14:35:59-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["scripts/test_runtime.py", "docs/harness/QUALIFICATION-7.0.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "Bounded local synthetic tests are within the approved implementation scope.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Retain explicit optional-dependency skips and rerun the full suite after contract changes."],
+  "generated_at": "2026-08-04T14:35:59-03:00",
+  "expires_at": null
+}

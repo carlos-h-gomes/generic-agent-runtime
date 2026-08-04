@@ -9,9 +9,13 @@ Last reviewed: `<DATE>`
 
 ## Architecture and runtime boundaries
 
+Record Harness adoption mode and link every approved code/n8n/hybrid automation decision. n8n may orchestrate versioned APIs but cannot own authoritative business behavior.
+
 ## Module and directory responsibilities
 
 ## API contracts and integrations
+
+For n8n include workflow export, environment promotion, risky-node review, idempotency/replay, error workflow, correlation, retention, rollback, and kill switch.
 
 ## Data ownership, schemas, and migrations
 

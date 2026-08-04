@@ -1,0 +1,34 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-04-harness-v7-adoption-automation",
+  "gate": "security_compliance",
+  "phase": "design",
+  "revision": 1,
+  "status": "passed_with_conditions",
+  "applicability": {"applicable": true, "reason": "The release governs untrusted repositories, filesystem writes, credentials, webhooks, workflow code, external integrations, and production automation."},
+  "summary": "Adoption is deny-by-default, plan-digest bound, path-contained, non-overwriting, and project-memory preserving; n8n production eligibility requires least privilege, protected ingress, constrained nodes, retention, containment, and recovery.",
+  "checks": [
+    {"id": "filesystem", "status": "passed", "evidence_refs": ["design"], "notes": "Full preflight, target fingerprint, path containment, linked-path rejection, and exclusive creation are design requirements."},
+    {"id": "n8n_controls", "status": "passed", "evidence_refs": ["design", "n8n_audit", "n8n_env"], "notes": "Risky nodes, unprotected webhooks, stale instances, environment separation, credentials, and production protection are governed."},
+    {"id": "production_evidence", "status": "not_applicable", "evidence_refs": [], "notes": "No real n8n deployment or downstream production target is authorized."}
+  ],
+  "findings": [
+    {"id": "SEC-01", "title": "Downstream n8n security remains environment-specific", "severity": "medium", "state": "deferred", "blocking": false, "evidence_refs": ["n8n_audit", "n8n_env"], "required_action": "Require fresh instance audit, node inventory, credential scope, webhook protection, egress, backup, restore, and incident evidence before downstream production activation.", "owner": "downstream security owner", "due_before": "post_release", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "design", "kind": "file", "pointer": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation-architecture.md", "summary": "Approved trust boundaries and safe adoption failure behavior.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-04T14:09:28-03:00"},
+    {"id": "n8n_audit", "kind": "source", "pointer": "https://docs.n8n.io/hosting/securing/security-audit/", "summary": "Official audit covers credentials, database expressions, filesystem access, risky/community/custom nodes, unprotected webhooks, settings, and version posture.", "redacted_excerpt": null, "sensitivity": "public", "redacted": false, "sha256": null, "captured_at": "2026-08-04T14:09:28-03:00"},
+    {"id": "n8n_env", "kind": "source", "pointer": "https://docs.n8n.io/source-control-environments/create-environments/", "summary": "Official guidance describes Git-backed environments, protected production instances, and one-direction promotion patterns.", "redacted_excerpt": null, "sensitivity": "public", "redacted": false, "sha256": null, "captured_at": "2026-08-04T14:09:28-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["docs/ai/tasks/2026-08-04-harness-v7-adoption-automation-architecture.md"],
+  "sources": [
+    {"title": "n8n Security audit", "url": "https://docs.n8n.io/hosting/securing/security-audit/", "version": null, "as_of": "2026-08-04"},
+    {"title": "n8n source control environments", "url": "https://docs.n8n.io/source-control-environments/create-environments/", "version": null, "as_of": "2026-08-04"}
+  ],
+  "approval": {"required": false, "reason": "No external target, credential, deployment, or production action is in scope.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Close local negative tests before release; retain downstream production security as an explicit condition."],
+  "generated_at": "2026-08-04T14:09:28-03:00",
+  "expires_at": null
+}

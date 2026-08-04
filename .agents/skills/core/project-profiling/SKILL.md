@@ -14,8 +14,9 @@ Profile only enough of the repository to work safely. Do not scan everything by 
 3. Inspect `SOURCE-OF-TRUTH.md` when present, then existing `docs/ai/` summaries before source details. Follow authoritative pointers progressively and report conflicts instead of silently choosing one.
 4. Derive commands only from repository evidence. Run safe discovery flags or existing validation commands when authorized and practical; record exact command, outcome, and environment.
 5. Identify stack, package manager, module and data boundaries, external integrations, important paths, generated artifacts, and material security/cost/operational risks.
-6. For an application repository, determine whether the Python API/React profile is present, missing, or requires migration. Inventory minimum directories, entrypoint responsibilities, API contract ownership, and documented architectural extensions.
-7. Distinguish current fact, inference, and unknown. Add an evidence pointer for every non-obvious claim.
+6. Independently classify Harness adoption (`greenfield`, `brownfield`, `upgrade`), existing Harness posture, application posture, and architecture disposition. Missing Python/React directories never proves an application is absent; inspect manifests and source/deployment roots. Preserve a brownfield stack and identify profiling or migration work without creating target directories.
+7. For a project already targeting Python API/React, inventory minimum directories, entrypoint responsibilities, API contract ownership, and documented architectural extensions.
+8. Distinguish current fact, inference, and unknown. Add an evidence pointer for every non-obvious claim.
 
 ## Write policy
 
@@ -33,7 +34,7 @@ Do not copy README prose or file trees. Do not overwrite unresolved user or agen
 
 ## Bootstrap boundary
 
-If the repository lacks a usable memory layer, propose the smallest bootstrap. Do not create governance, validation scripts, or product changes automatically unless authorized. Profiling can precede a separately requested implementation, but it does not silently broaden the task.
+If the repository lacks a usable memory layer, propose the smallest bootstrap. Use `docs/harness/HARNESS-ADOPTION-POLICY.md`; governance adoption, application bootstrap, architecture migration, and deployment are separate authorizations. Do not create governance, validation scripts, or product changes automatically unless authorized.
 
 ## Output
 

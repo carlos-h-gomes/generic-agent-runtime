@@ -1,5 +1,5 @@
-Apply the nearest AGENTS.md. Inspect this repository read-only and use core/project-profiling to produce an evidence-backed profile plus a proposed minimal bootstrap.
+Apply the nearest AGENTS.md. Inspect this repository read-only and use core/project-profiling to classify greenfield, brownfield, or prior-Harness upgrade before proposing governance adoption or application bootstrap.
 
 For an application project, profile against the mandatory python-react-hybrid architecture: isolated Python API and React TypeScript/Vite frontend, minimum extensible directories, thin entrypoints, a versioned API contract, SOURCE-OF-TRUTH.md, and release documentation. Use the packaged template bootstrap in plan mode; do not create a single-file monolith or assume missing truth means existing work should be rebuilt.
 
-Do not create or edit files unless I separately authorize bootstrap writes. Report the applicable instruction chain, stack/boundaries, verified commands, material risks, unknowns, and the exact files you would create or update.
+Governance adoption, application bootstrap, architecture migration, and deployment are separate authorizations. In brownfield mode preserve the observed stack and do not create Python/React directories. Do not create or edit files unless I separately authorize the specific writes. Report the applicable instruction chain, adoption mode/postures, stack/boundaries, verified commands, material risks, unknowns, and the exact files you would create, preserve, replace, skip, or reconcile.

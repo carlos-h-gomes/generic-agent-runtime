@@ -27,3 +27,5 @@ For multi-agent work, estimate total root plus worker tokens and tool calls; par
 Evidence may include dated pricing links, formulas, aggregate usage, and cost regression results. Never record account IDs, invoices, billing credentials, or customer-level usage.
 
 Block cost-increasing execution when worst-case exposure is unbounded, a material increase lacks approval, or no owner/kill switch exists. Security and product constraints take precedence over savings.
+
+For n8n or hybrid workflows include edition/license capabilities, executions, workers, concurrency, retries, replay, retention, binary storage, egress, and every external API billing unit. A workflow cannot be approved while pricing or volume remains unknown unless the cost is demonstrably not applicable.

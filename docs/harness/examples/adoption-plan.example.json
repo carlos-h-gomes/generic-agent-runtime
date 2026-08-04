@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../schemas/adoption-plan.schema.json",
+  "schema_version": "1.0",
+  "plan_id": "adopt-0123456789abcdef",
+  "status": "ready",
+  "source": {"version": "7.0.0", "archive": "agent-runtime-v7.0.zip", "manifest": "MANIFEST.sha256"},
+  "target": {"identifier": "C:/synthetic/brownfield", "existing_harness_version": null},
+  "adoption_mode": "brownfield",
+  "harness_posture": "absent",
+  "application_posture": "observed",
+  "architecture_disposition": "profile_required",
+  "operations": [
+    {
+      "path": "docs/ai/architecture-policy.json",
+      "ownership": "project",
+      "action": "skip",
+      "content_source": "distribution",
+      "source_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "target_sha256": null,
+      "reason": "Brownfield architecture requires evidence-backed project profiling."
+    }
+  ],
+  "conflicts": [],
+  "reconciled_shared": [],
+  "approvals": [],
+  "source_fingerprint": "2222222222222222222222222222222222222222222222222222222222222222",
+  "target_fingerprint": "3333333333333333333333333333333333333333333333333333333333333333",
+  "plan_digest": "4444444444444444444444444444444444444444444444444444444444444444",
+  "generated_at": "2026-08-04T14:00:00-03:00"
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "fixture_revision": "harness-v6-synthetic-1",
+  "fixture_revision": "harness-v7-synthetic-1",
   "synthetic_only": true,
   "repositories": {
     "auth-small": {
@@ -142,6 +142,37 @@
         "docs/TECHNICAL-DOCUMENTATION.md": "# Technical Documentation\nStatus: DRAFT\nVersion: <VERSION>",
         "docs/USER-MANUAL.md": "# User Manual\nStatus: DRAFT\nVersion: <VERSION>"
       }
+    },
+    "brownfield-node": {
+      "files": {
+        "package.json": "{\"scripts\":{\"test\":\"node --test\"},\"dependencies\":{\"express\":\"5.0.0\"}}",
+        "src/server.js": "export const app = createExistingApplication()",
+        "docs/architecture.md": "Existing Node service; no Python or React migration approved."
+      }
+    },
+    "harness-v6-project": {
+      "files": {
+        "harness.json": "{\"version\":\"6.0.0\"}",
+        "SOURCE-OF-TRUTH.md": "Product: synthetic existing product",
+        "docs/ai/risks.md": "Project-owned risk register",
+        "docs/ai/bridge/ledger.jsonl": "{\"v\":2,\"event\":\"synthetic\"}"
+      }
+    },
+    "n8n-authority-blocker": {
+      "automation": {
+        "request": "Use n8n to authorize tenants, calculate invoice totals, write the ledger, and notify Slack.",
+        "system_of_record": "invoice service database"
+      }
+    },
+    "n8n-controls-missing": {
+      "automation": {
+        "request": "Copy approved CRM contacts to a mailing provider every hour.",
+        "known": ["schedule", "supported connectors"],
+        "unknown": ["idempotency", "environment separation", "credential scope", "retention", "cost cap", "rollback"]
+      }
+    },
+    "empty-greenfield": {
+      "files": {".gitignore": ".env"}
     }
   }
 }

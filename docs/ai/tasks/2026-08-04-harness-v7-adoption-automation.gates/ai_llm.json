@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-04-harness-v7-adoption-automation",
+  "gate": "ai_llm",
+  "phase": "design",
+  "revision": 1,
+  "status": "passed_with_conditions",
+  "applicability": {"applicable": true, "reason": "Harness prompts and skills direct models to classify projects, select execution planes, refuse unsafe placement, and request approvals."},
+  "summary": "Model output is advisory and schema-validated; filesystem apply never consumes untrusted prose, hard blockers override preferences, unknown facts cause abstention, and protected actions remain approval-bound.",
+  "checks": [
+    {"id": "structured_output", "status": "passed", "evidence_refs": ["design"], "notes": "Automation and adoption decisions use versioned schemas and fail closed on invalid or unknown required facts."},
+    {"id": "tool_boundary", "status": "passed", "evidence_refs": ["design"], "notes": "Apply accepts a local reviewed plan with fingerprint checks rather than model-generated commands."},
+    {"id": "behavioral_hosts", "status": "not_applicable", "evidence_refs": [], "notes": "Cross-model runtime qualification is outside the local static release build and remains a rollout condition."}
+  ],
+  "findings": [
+    {"id": "AI-01", "title": "Cross-host behavior requires rollout qualification", "severity": "medium", "state": "deferred", "blocking": false, "evidence_refs": ["design"], "required_action": "Execute pinned normal, malformed, adversarial, multilingual, abstention, and protected-action cases on each supported model and tool host before broad rollout.", "owner": "Harness rollout owner", "due_before": "post_release", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "design", "kind": "file", "pointer": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation-architecture.md", "summary": "Approved structured decision, safe failure, approval, and tool boundary design.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-04T14:09:28-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["docs/ai/tasks/2026-08-04-harness-v7-adoption-automation-architecture.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "Local prompt and schema implementation does not authorize downstream tool actions.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Add synthetic behavioral cases and preserve cross-host execution as an explicit rollout condition."],
+  "generated_at": "2026-08-04T14:09:28-03:00",
+  "expires_at": null
+}

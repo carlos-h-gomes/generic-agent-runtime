@@ -26,6 +26,8 @@ Project-owned scripts and configuration are untrusted code. Inspect first; execu
 
 Use `security-policy.json` only while it is current. For controlled HTTP assurance, validate the plan first. Non-loopback traffic and every `POST` require an exact, bounded, unexpired `authorized-target` contract. Do not run destructive payloads, denial-of-service tests, credential attacks, persistence, evasion, scanning, or tests against a system without recorded authorization.
 
+For n8n, review protected environment promotion, webhook authentication, credential scope, execution-data minimization, SSRF/egress, risky/community/custom/Code/command/file nodes, task-runner isolation, version posture, backup of database and encryption material, restore, containment, and kill switch. Connector availability is never security approval.
+
 ## Findings
 
 Assign impact-based severity and a blocking disposition. Critical/high findings block by default and require an authorized human reference for risk acceptance; project rules cannot override constitutional or platform prohibitions. Specify required action, owner, due point, and residual risk.

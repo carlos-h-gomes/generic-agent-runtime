@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-04-harness-v7-adoption-automation",
+  "gate": "architecture_uml",
+  "phase": "design",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "The release changes governance installation, application admission, migration, file ownership, and automation execution-plane boundaries."},
+  "summary": "The approved design separates governance adoption, application bootstrap, architecture migration, and Harness upgrade; code remains authoritative while n8n is bounded edge orchestration.",
+  "checks": [
+    {"id": "boundaries", "status": "passed", "evidence_refs": ["design"], "notes": "Actors, responsibilities, ownership, contracts, approval boundaries, failure states, compatibility, rollback, and rejected alternatives are explicit."},
+    {"id": "brownfield", "status": "passed", "evidence_refs": ["design"], "notes": "Brownfield admission preserves the observed stack and cannot silently generate application structure."},
+    {"id": "automation_planes", "status": "passed", "evidence_refs": ["design"], "notes": "Code, n8n, and hybrid responsibilities are separated by domain authority and versioned APIs."}
+  ],
+  "findings": [
+    {"id": "ARCH-01", "title": "Implementation must preserve plan/apply separation", "severity": "high", "state": "mitigated", "blocking": false, "evidence_refs": ["design", "approval"], "required_action": "Keep adoption writes plan-digest bound, non-overwriting, and independent from application migration.", "owner": "primary agent", "due_before": "not_applicable", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "design", "kind": "diagram", "pointer": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation-architecture.md", "summary": "Approved adoption state flow and automation boundary design.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-04T14:09:28-03:00"},
+    {"id": "approval", "kind": "other", "pointer": "current task user message on 2026-08-04", "summary": "Workspace owner approved the proposed implementation plan.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-04T14:09:28-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["docs/ai/tasks/2026-08-04-harness-v7-adoption-automation-architecture.md"],
+  "sources": [],
+  "approval": {"required": true, "reason": "The design changes mandatory Harness admission and automation-routing behavior.", "status": "approved", "evidence_ref": "approval"},
+  "handoff": ["Implement only in the v7 successor and close consistency checks before release."],
+  "generated_at": "2026-08-04T14:09:28-03:00",
+  "expires_at": null
+}

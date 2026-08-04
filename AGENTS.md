@@ -1,6 +1,6 @@
 # AGENTS.md - Generic Agent Runtime
 
-Version: 6.0
+Version: 7.0
 Runtime language: English. User-facing responses may follow the user's language.
 
 > Small always-on authority kernel. Load project memory and skills only when triggered.
@@ -57,7 +57,7 @@ Never expose or persist credentials, secrets, environment values, private prompt
 - Map tool-using agents to the current OWASP Agentic Top 10. Prompt injection remains residual risk after layered controls.
 - A hash proves integrity only relative to a trusted hash; it does not authenticate a publisher.
 
-## 6. Hybrid application architecture floor
+## 6. Application architecture, adoption, and automation floor
 
 Application generation defaults to an isolated Python HTTP API under `backend/` and a React TypeScript client under `frontend/`. FastAPI is the default; modular Flask is compatible. Frontend and backend communicate only through a versioned HTTP contract and never import or execute each other's source.
 
@@ -66,6 +66,12 @@ Require the minimum directories in `docs/ai/conventions.md` and `docs/ai/archite
 `App.jsx`, `App.tsx`, `main.py`, and `server.py` are allowed only as thin composition roots. Refuse requests to centralize routes, persistence, HTTP clients, business rules, feature state/data, or reusable UI in those files; explain the violated boundary and propose a compliant decomposition. Do not reject a valid thin entrypoint merely because of its filename.
 
 Use the packaged project template through the bounded bootstrap plan/apply flow. Never extract application folders blindly over an active repository or overwrite a differing file. Structural checks supplement architecture review; they do not prove semantic quality.
+
+Harness adoption, application bootstrap, architecture migration, and deployment are separate actions. First inventory read-only and classify `greenfield`, `brownfield`, or `upgrade`; plan from a verified portable distribution. Preserve project memory and brownfield code. Conflicts need reconciliation; Harness replacements need approval and rollback evidence.
+
+`python-react-hybrid` is the greenfield target. Brownfield projects preserve their verified stack and record an observed policy. Missing `backend/` or `frontend/` does not prove there is no application. Migration is a separate managed task; unprofiled architecture is incomplete.
+
+Material automations require the automation policy and schema. Code owns authorization, tenant/transactional rules, authoritative state, complex concurrency/compute, and strict performance. n8n may own bounded edge orchestration only with versioning, environments, idempotency, security, observability, cost caps, rollback, and kill switch. Hybrid n8n coordinates versioned code APIs; risky nodes cannot evade a code blocker.
 
 `SOURCE-OF-TRUTH.md` is the root index of current project facts and authoritative sources. It does not replace tasks, decisions, schemas, code, tests, technical documentation, or the user manual. A missing material fact is unverified, not authority to destroy or rebuild verified work; reconcile evidence first.
 
@@ -100,6 +106,7 @@ Open only triggered skills:
 - edits -> `core/implementation`; proof -> `core/validation`; memory -> `core/context-memory`;
 - coordination -> `core/agent-orchestration` or `core/agent-bridge`; durable docs -> `core/documentation`;
 - UI -> `ux-product`; architecture -> `software-architecture-uml`; data -> `data-integration`;
+- Harness adoption -> profiling, architecture, security, data, code quality, and release; n8n/code selection -> architecture, data, security, FinOps, and release;
 - auth/secrets/input/dependencies/production/testing -> `risk-security-compliance`;
 - model/retrieval/tool/memory -> `ai-llm`; variable cost/compute -> `finops-cost`;
 - logic/regression -> `code-quality-testing`; rollout/operations -> `observability-release`.

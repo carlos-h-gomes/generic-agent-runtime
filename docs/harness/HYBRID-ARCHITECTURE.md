@@ -1,6 +1,6 @@
 # Hybrid application architecture
 
-Harness v6 application projects have two isolated deployable boundaries: a Python HTTP API and a React TypeScript/Vite client. The frontend never imports Python source; the backend never owns React presentation. Integration is through a versioned, validated API contract.
+Harness v7 greenfield application projects have two isolated deployable boundaries: a Python HTTP API and a React TypeScript/Vite client. The frontend never imports Python source; the backend never owns React presentation. Integration is through a versioned, validated API contract. Brownfield governance adoption preserves the observed stack; this profile is applied only when already present or through a separately authorized application bootstrap or migration.
 
 The minimum topology is defined in `docs/ai/conventions.md` and `docs/ai/architecture-policy.json`. It is not a closed list. Add a directory when it has a distinct responsibility that does not fit an existing layer, then record its owner and permitted dependencies.
 

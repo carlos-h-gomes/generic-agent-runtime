@@ -1,10 +1,10 @@
-# Generic Agent Runtime v6
+# Generic Agent Runtime v7
 
 Maintainer source for the Generic Agent Runtime hybrid engineering harness.
 
-Version 6 generates and validates application projects with an isolated Python HTTP API and React TypeScript/Vite frontend. It adds a minimum but extensible directory contract, constructive refusal of single-file monoliths, collision-safe project bootstrap, an authoritative `SOURCE-OF-TRUTH.md` index, and release-grade technical and user documentation.
+Version 7 adds plan-first Harness adoption for greenfield, brownfield, and prior-Harness projects, plus machine-governed `code`, `n8n`, and `hybrid` automation decisions. Governance installation no longer implies application bootstrap or architecture migration. The Python HTTP API plus React TypeScript/Vite profile remains the greenfield generation target.
 
-The portable consumer artifact is `agent-runtime-v6.0.zip`. It keeps application structure under `project-templates/python-react-hybrid/`; installing the Harness does not blindly create or overwrite product code.
+The portable consumer artifact is `agent-runtime-v7.0.zip`. It keeps application structure under `project-templates/python-react-hybrid/`; installing the Harness does not blindly create or overwrite product code.
 
 ## Maintainer commands
 
@@ -25,6 +25,22 @@ bash scripts/package.sh --check
 ```
 
 ## Downstream bootstrap
+
+Adopt Harness governance from a clean portable extraction:
+
+```text
+python scripts/adopt_harness.py plan --target <project-root> --out <plan.json>
+python scripts/adopt_harness.py apply --target <project-root> --plan <plan.json>
+python scripts/adopt_harness.py verify --target <project-root>
+```
+
+Validate an automation decision:
+
+```text
+python scripts/automation_decision.py <decision.json>
+```
+
+Bootstrap a greenfield application only as a separate action:
 
 Inspect first:
 

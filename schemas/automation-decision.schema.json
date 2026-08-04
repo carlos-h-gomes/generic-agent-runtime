@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/automation-decision-v1.json",
+  "title": "Harness automation execution-plane decision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "decision_id", "status", "execution_plane", "workload", "owner",
+    "system_of_record", "authority_location", "triggers", "hard_blockers", "blocker_handling",
+    "eligibility", "contracts", "reliability", "security", "operations", "cost", "evidence",
+    "approval", "decided_at"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": "1.0"},
+    "decision_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"},
+    "status": {"enum": ["draft", "approved", "rejected", "superseded"]},
+    "execution_plane": {"enum": ["undecided", "code", "n8n", "hybrid"]},
+    "workload": {"type": "string", "minLength": 1, "maxLength": 500},
+    "owner": {"type": "string", "minLength": 1, "maxLength": 200},
+    "system_of_record": {"type": "string", "minLength": 1, "maxLength": 300},
+    "authority_location": {"enum": ["code_service", "external_system", "unresolved"]},
+    "triggers": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["webhook", "schedule", "event", "manual", "api", "queue", "file"]}},
+    "hard_blockers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": [
+        "authorization_or_tenant_rule", "financial_or_transactional_invariant", "strict_latency_or_throughput",
+        "complex_concurrency_or_state", "intensive_compute_or_large_data", "unsupported_security_or_compliance",
+        "unbounded_execution_or_cost", "production_controls_unavailable"
+      ]}
+    },
+    "blocker_handling": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 500}},
+    "eligibility": {
+      "type": "object", "additionalProperties": false,
+      "required": ["edge_orchestration", "bounded_flow", "visual_operations_value", "supported_integrations", "authoritative_logic_in_code", "version_controlled", "environment_separation", "idempotent_side_effects"],
+      "properties": {
+        "edge_orchestration": {"type": "boolean"}, "bounded_flow": {"type": "boolean"},
+        "visual_operations_value": {"type": "boolean"}, "supported_integrations": {"type": "boolean"},
+        "authoritative_logic_in_code": {"type": "boolean"}, "version_controlled": {"type": "boolean"},
+        "environment_separation": {"type": "boolean"}, "idempotent_side_effects": {"type": "boolean"}
+      }
+    },
+    "contracts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["input_schema", "output_schema", "api_version", "validation_failure"],
+      "properties": {
+        "input_schema": {"type": "string", "minLength": 1}, "output_schema": {"type": "string", "minLength": 1},
+        "api_version": {"type": "string", "minLength": 1}, "validation_failure": {"type": "string", "minLength": 1}
+      }
+    },
+    "reliability": {
+      "type": "object", "additionalProperties": false,
+      "required": ["timeout_seconds", "max_attempts", "idempotency_key", "replay_safe", "partial_failure", "reconciliation_owner"],
+      "properties": {
+        "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 86400},
+        "max_attempts": {"type": "integer", "minimum": 1, "maximum": 20},
+        "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 300},
+        "replay_safe": {"type": "boolean"}, "partial_failure": {"type": "string", "minLength": 1},
+        "reconciliation_owner": {"type": "string", "minLength": 1}
+      }
+    },
+    "security": {
+      "type": "object", "additionalProperties": false,
+      "required": ["credentials_external", "least_privilege", "webhook_protected", "risky_nodes_reviewed", "egress_scoped", "sensitive_data_minimized"],
+      "properties": {
+        "credentials_external": {"type": "boolean"}, "least_privilege": {"type": "boolean"},
+        "webhook_protected": {"type": "boolean"}, "risky_nodes_reviewed": {"type": "boolean"},
+        "egress_scoped": {"type": "boolean"}, "sensitive_data_minimized": {"type": "boolean"}
+      }
+    },
+    "operations": {
+      "type": "object", "additionalProperties": false,
+      "required": ["workflow_export", "protected_production", "correlation_id", "error_workflow", "retention_days", "rollback", "kill_switch"],
+      "properties": {
+        "workflow_export": {"type": "string", "minLength": 1}, "protected_production": {"type": "boolean"},
+        "correlation_id": {"type": "string", "minLength": 1}, "error_workflow": {"type": "string", "minLength": 1},
+        "retention_days": {"type": "integer", "minimum": 0, "maximum": 3650},
+        "rollback": {"type": "string", "minLength": 1}, "kill_switch": {"type": "string", "minLength": 1}
+      }
+    },
+    "cost": {
+      "type": "object", "additionalProperties": false,
+      "required": ["pricing_status", "billing_units", "expected_volume", "burst_volume", "hard_cap", "alert_owner", "unbounded_exposure"],
+      "properties": {
+        "pricing_status": {"enum": ["verified", "unknown", "not_applicable"]},
+        "billing_units": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "expected_volume": {"type": "string", "minLength": 1}, "burst_volume": {"type": "string", "minLength": 1},
+        "hard_cap": {"type": "string", "minLength": 1}, "alert_owner": {"type": "string", "minLength": 1},
+        "unbounded_exposure": {"type": "boolean"}
+      }
+    },
+    "evidence": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "approval": {
+      "type": "object", "additionalProperties": false, "required": ["required", "status", "reference"],
+      "properties": {
+        "required": {"type": "boolean"}, "status": {"enum": ["not_required", "pending", "approved", "rejected"]},
+        "reference": {"type": ["string", "null"]}
+      }
+    },
+    "decided_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"execution_plane": {"const": "n8n"}}, "required": ["execution_plane"]},
+      "then": {
+        "properties": {
+          "hard_blockers": {"maxItems": 0},
+          "authority_location": {"enum": ["code_service", "external_system"]},
+          "eligibility": {"properties": {
+            "edge_orchestration": {"const": true}, "bounded_flow": {"const": true}, "visual_operations_value": {"const": true},
+            "supported_integrations": {"const": true}, "authoritative_logic_in_code": {"const": true},
+            "version_controlled": {"const": true}, "environment_separation": {"const": true}, "idempotent_side_effects": {"const": true}
+          }},
+          "security": {"properties": {
+            "credentials_external": {"const": true}, "least_privilege": {"const": true}, "webhook_protected": {"const": true},
+            "risky_nodes_reviewed": {"const": true}, "egress_scoped": {"const": true}, "sensitive_data_minimized": {"const": true}
+          }},
+          "operations": {"properties": {"protected_production": {"const": true}}},
+          "cost": {"properties": {"unbounded_exposure": {"const": false}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"execution_plane": {"const": "hybrid"}}, "required": ["execution_plane"]},
+      "then": {
+        "properties": {
+          "authority_location": {"const": "code_service"},
+          "eligibility": {"properties": {
+            "edge_orchestration": {"const": true}, "bounded_flow": {"const": true}, "authoritative_logic_in_code": {"const": true},
+            "version_controlled": {"const": true}, "environment_separation": {"const": true}, "idempotent_side_effects": {"const": true}
+          }},
+          "security": {"properties": {"credentials_external": {"const": true}, "least_privilege": {"const": true}, "risky_nodes_reviewed": {"const": true}}},
+          "operations": {"properties": {"protected_production": {"const": true}}},
+          "cost": {"properties": {"unbounded_exposure": {"const": false}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "approved"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "execution_plane": {"enum": ["code", "n8n", "hybrid"]},
+          "authority_location": {"enum": ["code_service", "external_system"]},
+          "approval": {"properties": {"status": {"enum": ["not_required", "approved"]}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"approval": {"properties": {"required": {"const": true}}}}, "required": ["approval"]},
+      "then": {"properties": {"approval": {"properties": {"status": {"enum": ["pending", "approved", "rejected"]}}}}}
+    }
+  ]
+}

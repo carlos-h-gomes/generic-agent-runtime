@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-04-harness-v7-adoption-automation",
+  "gate": "data_integration",
+  "phase": "design",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "n8n workflows, APIs, webhooks, retries, replays, and adoption plans are versioned integration contracts."},
+  "summary": "Automation decisions must identify source, destination, system of record, schemas, validation, delivery, idempotency, replay, retention, and recovery; adoption plans are immutable reviewed inputs to apply.",
+  "checks": [
+    {"id": "ownership", "status": "passed", "evidence_refs": ["design"], "notes": "Code remains authoritative and n8n cannot silently become the system of record."},
+    {"id": "delivery", "status": "passed", "evidence_refs": ["design"], "notes": "Idempotency, bounded retry, timeout, poison-event handling, and replay are required when applicable."},
+    {"id": "migration", "status": "passed", "evidence_refs": ["design"], "notes": "Harness upgrade and application migration use separate contracts and rollback paths."}
+  ],
+  "findings": [],
+  "evidence": [
+    {"id": "design", "kind": "file", "pointer": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation-architecture.md", "summary": "Approved contract ownership, failure, compatibility, and migration design.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-04T14:09:28-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["docs/ai/tasks/2026-08-04-harness-v7-adoption-automation-architecture.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "Only synthetic local contract fixtures are in scope.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Add positive and negative schema fixtures for authority, idempotency, replay, and adoption-plan drift."],
+  "generated_at": "2026-08-04T14:09:28-03:00",
+  "expires_at": null
+}

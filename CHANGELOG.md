@@ -1,5 +1,13 @@
 # Changelog
 
+## 7.0.0 - 2026-08-04
+
+- Added a normative and machine-readable `code`, `n8n`, and `hybrid` automation execution-plane policy.
+- Added manifest-verified Harness adoption planning, explicit ownership, target drift detection, non-overwriting apply, rollback copies, and read-only verification.
+- Separated governance adoption, application bootstrap, architecture migration, and deployment authorization.
+- Added brownfield admission that preserves existing stacks and reports unprofiled architecture as incomplete instead of silently forcing Python/React or declaring no application.
+- Added v6-to-v7 migration, new schemas, synthetic fixtures, prompts, tests, and release evidence.
+
 ## 6.0.0 - 2026-08-03
 
 ### Hybrid engineering architecture

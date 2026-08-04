@@ -31,6 +31,8 @@ UI_QUALITY = ROOT / "scripts" / "ui_quality.py"
 ADVERSARIAL_LAB = ROOT / "scripts" / "adversarial_lab.py"
 ARCHITECTURE_CHECK = ROOT / "scripts" / "architecture_check.py"
 BOOTSTRAP_PROJECT = ROOT / "scripts" / "bootstrap_project.py"
+ADOPT_HARNESS = ROOT / "scripts" / "adopt_harness.py"
+AUTOMATION_DECISION = ROOT / "scripts" / "automation_decision.py"
 DOCUMENTATION_CHECK = ROOT / "scripts" / "documentation_check.py"
 GUARDRAILS = ROOT / "scripts" / "harnesslib" / "guardrails.py"
 BRIDGE_MODULE = None
@@ -608,6 +610,158 @@ class HybridEngineeringTests(unittest.TestCase):
                 path.write_text(text, encoding="utf-8")
             passed = self.run_script(DOCUMENTATION_CHECK, "--root", str(target), "--profile", "release")
             self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
+
+
+class AdoptionAndAutomationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        package = load_module("package_for_adoption_tests", ROOT / "scripts" / "package_runtime.py")
+        cls.payload, cls.manifest = package.build_payload(ROOT)
+        package.validate_payload(cls.payload, cls.manifest)
+        cls.adopt = load_module("adopt_harness_tests", ADOPT_HARNESS)
+
+    def write_distribution(self, root: Path) -> None:
+        for name, content in self.payload.items():
+            path = root / Path(*name.split("/"))
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+
+    def source_data(self, root: Path) -> dict:
+        self.write_distribution(root)
+        return self.adopt.verify_source(root)
+
+    def test_automation_contract_accepts_draft_hybrid_and_rejects_pure_n8n_blocker(self) -> None:
+        example = ROOT / "docs" / "harness" / "examples" / "automation-decision.example.json"
+        valid = subprocess.run(
+            [sys.executable, "-B", str(AUTOMATION_DECISION), str(example)],
+            text=True, capture_output=True, check=False, timeout=30,
+        )
+        self.assertEqual(valid.returncode, 0, valid.stdout + valid.stderr)
+        decision = json.loads(example.read_text(encoding="utf-8"))
+        decision["execution_plane"] = "n8n"
+        decision["blocker_handling"] = []
+        with tempfile.TemporaryDirectory() as temp_name:
+            invalid_path = Path(temp_name) / "invalid.json"
+            invalid_path.write_text(json.dumps(decision), encoding="utf-8")
+            invalid = subprocess.run(
+                [sys.executable, "-B", str(AUTOMATION_DECISION), str(invalid_path)],
+                text=True, capture_output=True, check=False, timeout=30,
+            )
+        self.assertEqual(invalid.returncode, 1, invalid.stdout + invalid.stderr)
+        self.assertIn("FAIL automation decision", invalid.stderr)
+
+    def test_brownfield_plan_is_read_only_preserves_stack_and_skips_target_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as source_name, tempfile.TemporaryDirectory() as target_name:
+            source = Path(source_name)
+            target = Path(target_name)
+            source_data = self.source_data(source)
+            (target / "src").mkdir()
+            (target / "src" / "server.js").write_text("existing\n", encoding="utf-8")
+            (target / "package.json").write_text('{"name":"existing"}\n', encoding="utf-8")
+            before = sorted(path.relative_to(target).as_posix() for path in target.rglob("*"))
+            plan = self.adopt.build_plan(source_data, target, "auto")
+            after = sorted(path.relative_to(target).as_posix() for path in target.rglob("*"))
+            self.assertEqual(before, after)
+            self.assertEqual(plan["adoption_mode"], "brownfield")
+            self.assertEqual(plan["application_posture"], "observed")
+            self.assertEqual(plan["architecture_disposition"], "profile_required")
+            architecture = next(item for item in plan["operations"] if item["path"] == "docs/ai/architecture-policy.json")
+            self.assertEqual(architecture["action"], "skip")
+            self.assertFalse(any(item["path"].startswith(("backend/", "frontend/")) for item in plan["operations"]))
+            self.assertFalse((target / ".harness").exists())
+
+    def test_greenfield_apply_and_verify_do_not_bootstrap_application(self) -> None:
+        with tempfile.TemporaryDirectory() as source_name, tempfile.TemporaryDirectory() as target_name:
+            source, target = Path(source_name), Path(target_name)
+            source_data = self.source_data(source)
+            plan = self.adopt.build_plan(source_data, target, "greenfield")
+            self.adopt.validate_plan(plan, source / "schemas" / "adoption-plan.schema.json")
+            self.assertEqual(plan["status"], "ready")
+            self.adopt.apply_plan(source_data, target, plan, approve_replace=False)
+            self.assertEqual(self.adopt.verify_installation(source_data, target), [])
+            self.assertTrue((target / ".harness" / "adoption-state.json").is_file())
+            self.assertFalse((target / "backend").exists())
+            self.assertFalse((target / "frontend").exists())
+
+    def test_upgrade_requires_approval_backs_up_harness_and_preserves_project_memory(self) -> None:
+        with tempfile.TemporaryDirectory() as source_name, tempfile.TemporaryDirectory() as target_name:
+            source, target = Path(source_name), Path(target_name)
+            source_data = self.source_data(source)
+            prior = copy.deepcopy(source_data["harness"])
+            prior["version"] = "6.0.0"
+            for marker in (
+                "scripts/runtime_check.py",
+                ".agents/skills/core/task-triage/SKILL.md",
+                "docs/harness/INSTALL.md",
+            ):
+                path = target / Path(*marker.split("/"))
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("prior\n", encoding="utf-8")
+            (target / "harness.json").write_text(json.dumps(prior), encoding="utf-8")
+            truth = target / "SOURCE-OF-TRUTH.md"
+            truth.write_text("project-owned truth\n", encoding="utf-8")
+            plan = self.adopt.build_plan(source_data, target, "upgrade")
+            self.assertEqual(plan["status"], "awaiting_approval")
+            self.assertIn("replace_harness_owned", plan["approvals"])
+            with self.assertRaises(self.adopt.AdoptionBlocked):
+                self.adopt.apply_plan(source_data, target, plan, approve_replace=False)
+            self.adopt.apply_plan(source_data, target, plan, approve_replace=True)
+            self.assertEqual(truth.read_text(encoding="utf-8"), "project-owned truth\n")
+            backup = target / ".harness" / "rollback" / plan["plan_digest"] / "harness.json"
+            self.assertTrue(backup.is_file())
+            self.assertEqual(self.adopt.verify_installation(source_data, target), [])
+
+    def test_shared_conflict_and_target_drift_block_without_partial_writes(self) -> None:
+        with tempfile.TemporaryDirectory() as source_name, tempfile.TemporaryDirectory() as target_name:
+            source, target = Path(source_name), Path(target_name)
+            source_data = self.source_data(source)
+            (target / "AGENTS.md").write_text("project instructions\n", encoding="utf-8")
+            conflict = self.adopt.build_plan(source_data, target, "brownfield")
+            self.assertEqual(conflict["status"], "blocked")
+            with self.assertRaises(self.adopt.AdoptionBlocked):
+                self.adopt.apply_plan(source_data, target, conflict, approve_replace=False)
+            self.assertFalse((target / "harness.json").exists())
+            reconciled = self.adopt.build_plan(source_data, target, "brownfield", {"AGENTS.md"})
+            self.assertEqual(reconciled["status"], "ready")
+            self.assertEqual(reconciled["reconciled_shared"], ["AGENTS.md"])
+            self.adopt.apply_plan(source_data, target, reconciled, approve_replace=False)
+            self.assertEqual((target / "AGENTS.md").read_text(encoding="utf-8"), "project instructions\n")
+            self.assertEqual(self.adopt.verify_installation(source_data, target), [])
+
+        with tempfile.TemporaryDirectory() as source_name, tempfile.TemporaryDirectory() as target_name:
+            source, target = Path(source_name), Path(target_name)
+            source_data = self.source_data(source)
+            plan = self.adopt.build_plan(source_data, target, "greenfield")
+            (target / "AGENTS.md").write_text("appeared after plan\n", encoding="utf-8")
+            with self.assertRaises(self.adopt.AdoptionBlocked):
+                self.adopt.apply_plan(source_data, target, plan, approve_replace=False)
+            self.assertFalse((target / "harness.json").exists())
+
+    def test_brownfield_architecture_is_incomplete_not_not_applicable(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            (target / "src").mkdir()
+            (target / "package.json").write_text('{"name":"existing"}', encoding="utf-8")
+            state = target / ".harness" / "adoption-state.json"
+            state.parent.mkdir()
+            state.write_text(json.dumps({"architecture_disposition": "profile_required", "application_posture": "observed"}), encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, "-B", str(ARCHITECTURE_CHECK), "--root", str(target)],
+                text=True, capture_output=True, check=False, timeout=30,
+            )
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertIn("observed brownfield", result.stdout)
+
+    def test_adoption_rejects_maintainer_source_and_unsafe_manifest_path(self) -> None:
+        with self.assertRaises(self.adopt.AdoptionError):
+            self.adopt.verify_source(ROOT)
+        with tempfile.TemporaryDirectory() as source_name:
+            source = Path(source_name)
+            self.write_distribution(source)
+            manifest = source / "MANIFEST.sha256"
+            manifest.write_text(manifest.read_text(encoding="utf-8") + "0" * 64 + "  ../escape\n", encoding="utf-8")
+            with self.assertRaises(self.adopt.AdoptionError):
+                self.adopt.verify_source(source)
 
 
 class PackageTests(unittest.TestCase):

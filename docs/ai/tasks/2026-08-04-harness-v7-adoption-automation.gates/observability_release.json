@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-04-harness-v7-adoption-automation",
+  "gate": "observability_release",
+  "phase": "pre_release",
+  "revision": 2,
+  "status": "passed",
+  "applicability": {"applicable": true, "reason": "The deliverable is a major portable release with a filesystem adoption path, migration contract, rollback behavior, and deterministic archive."},
+  "summary": "v6 remains the immutable rollback baseline; v7 has plan-bound adoption evidence, backups for approved replacements, migration guidance, deterministic package construction, manifest/SBOM/provenance checks, and clean-extraction verification requirements.",
+  "checks": [
+    {"id": "migration_rollback", "status": "passed", "evidence_refs": ["qualification"], "notes": "Greenfield, brownfield, and v6 upgrade paths have explicit plan/apply/verify, approval, backup, and rollback behavior."},
+    {"id": "release_integrity", "status": "passed", "evidence_refs": ["qualification"], "notes": "Package inventory, ownership, path/resource bounds, manifest, SBOM, provenance, deterministic timestamps, and extraction are release gates."},
+    {"id": "operational_boundary", "status": "passed", "evidence_refs": ["qualification"], "notes": "Downstream n8n and deployment evidence remains an explicit rollout condition rather than a local pass claim."}
+  ],
+  "findings": [
+    {"id": "REL-01", "title": "v7 release candidate locally qualified", "severity": "high", "state": "mitigated", "blocking": false, "evidence_refs": ["qualification"], "required_action": "Publish the final digest through a separate trusted channel and retain the v6 rollback artifact.", "owner": "Release owner", "due_before": "not_applicable", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "qualification", "kind": "test", "pointer": "docs/harness/QUALIFICATION-7.0.md", "summary": "Deterministic release, migration, rollback, package, and clean-extraction qualification; the final archive digest is recorded in the task evidence.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-04T14:35:59-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["agent-runtime-v7.0.zip", "docs/harness/QUALIFICATION-7.0.md", "docs/harness/MIGRATION-6.0-7.0.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "Local candidate packaging is approved; publishing and deployment remain unauthorized.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Publish the digest separately and perform downstream rollout evidence collection before production use."],
+  "generated_at": "2026-08-04T14:35:59-03:00",
+  "expires_at": null
+}

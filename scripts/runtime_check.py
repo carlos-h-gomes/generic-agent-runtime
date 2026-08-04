@@ -269,6 +269,12 @@ def validate_json_schemas(
         project_template = json.loads(
             (root / "project-templates" / "python-react-hybrid" / "template-manifest.json").read_text(encoding="utf-8")
         )
+        automation_decision = json.loads(
+            (root / "docs" / "harness" / "examples" / "automation-decision.example.json").read_text(encoding="utf-8")
+        )
+        adoption_plan = json.loads(
+            (root / "docs" / "harness" / "examples" / "adoption-plan.example.json").read_text(encoding="utf-8")
+        )
         for _path, task in tasks:
             schema_lite.validate(task, schemas["task-contract.schema.json"])
         for _path, gate in gates:
@@ -280,6 +286,8 @@ def validate_json_schemas(
         schema_lite.validate(plan_example, schemas["security-test-plan.schema.json"])
         schema_lite.validate(architecture_policy, schemas["architecture-policy.schema.json"])
         schema_lite.validate(project_template, schemas["project-template.schema.json"])
+        schema_lite.validate(automation_decision, schemas["automation-decision.schema.json"])
+        schema_lite.validate(adoption_plan, schemas["adoption-plan.schema.json"])
         template = json.loads((root / "docs" / "ai" / "tasks" / "_GATE_RESULT_TEMPLATE.json").read_text(encoding="utf-8"))
         schema_lite.validate(template, schemas["gate-result.schema.json"])
     except Exception as exc:
@@ -310,6 +318,8 @@ def validate_json_schemas(
         jsonschema.Draft202012Validator(schemas["security-test-plan.schema.json"], format_checker=format_checker).validate(plan_example)
         jsonschema.Draft202012Validator(schemas["architecture-policy.schema.json"], format_checker=format_checker).validate(architecture_policy)
         jsonschema.Draft202012Validator(schemas["project-template.schema.json"], format_checker=format_checker).validate(project_template)
+        jsonschema.Draft202012Validator(schemas["automation-decision.schema.json"], format_checker=format_checker).validate(automation_decision)
+        jsonschema.Draft202012Validator(schemas["adoption-plan.schema.json"], format_checker=format_checker).validate(adoption_plan)
         jsonschema.Draft202012Validator(schemas["gate-result.schema.json"], format_checker=format_checker).validate(template)
     except Exception as exc:  # jsonschema exposes several validation exception types
         report.failures.append(f"JSON Schema validation: {exc}")
@@ -332,6 +342,7 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "CLAUDE.md",
         "GEMINI.md",
         "harness.json",
+        "adoption-policy.json",
         "schemas/harness.schema.json",
         "schemas/task-contract.schema.json",
         "schemas/gate-result.schema.json",
@@ -345,6 +356,8 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "scripts/ui_quality.py",
         "scripts/architecture_check.py",
         "scripts/bootstrap_project.py",
+        "scripts/adopt_harness.py",
+        "scripts/automation_decision.py",
         "scripts/documentation_check.py",
         "scripts/schema_lite.py",
         "security-policy.json",
@@ -354,6 +367,8 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "schemas/ui-review.schema.json",
         "schemas/architecture-policy.schema.json",
         "schemas/project-template.schema.json",
+        "schemas/automation-decision.schema.json",
+        "schemas/adoption-plan.schema.json",
         "docs/ai/ui-review.json",
         "docs/ai/threat-model.md",
         "docs/ai/incident-response.md",
@@ -365,6 +380,12 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "docs/harness/QUALIFICATION-5.0.md",
         "docs/harness/MIGRATION-5.0-6.0.md",
         "docs/harness/QUALIFICATION-6.0.md",
+        "docs/harness/MIGRATION-6.0-7.0.md",
+        "docs/harness/QUALIFICATION-7.0.md",
+        "docs/harness/AUTOMATION-EXECUTION-POLICY.md",
+        "docs/harness/HARNESS-ADOPTION-POLICY.md",
+        "docs/harness/examples/automation-decision.example.json",
+        "docs/harness/examples/adoption-plan.example.json",
         "docs/harness/HYBRID-ARCHITECTURE.md",
         "docs/harness/PROJECT-TRUTH.md",
         "docs/harness/DOCUMENTATION-LIFECYCLE.md",
@@ -395,8 +416,20 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
             "project_template": "1.0",
             "source_of_truth": "1.0",
             "release_documentation": "1.0",
+            "automation_decision": "1.0",
+            "adoption_plan": "1.0",
         },
         "manifest policy versions are canonical",
+    )
+    adoption_policy = load_json(root / "adoption-policy.json", report)
+    report.check(
+        bool(adoption_policy)
+        and adoption_policy.get("schema_version") == "1.0"
+        and adoption_policy.get("harness_version") == manifest.get("version")
+        and bool(adoption_policy.get("harness_owned_prefixes"))
+        and bool(adoption_policy.get("project_owned_files"))
+        and bool(adoption_policy.get("shared_files")),
+        "adoption ownership policy is version-aligned and explicit",
     )
 
     evaluation = load_json(root / "docs" / "harness" / "evaluation-cases.json", report)
@@ -406,8 +439,8 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         evaluation
         and fixtures
         and evaluation.get("execution_status") == "specification_only_not_executed"
-        and evaluation.get("suite_id") == "harness-v6-behavior-1"
-        and len(evaluation.get("cases") or []) >= 27
+        and evaluation.get("suite_id") == "harness-v7-behavior-1"
+        and len(evaluation.get("cases") or []) >= 32
         and evaluation.get("fixture", {}).get("revision") == fixtures.get("fixture_revision")
         and evaluation.get("fixture", {}).get("sha256") == hashlib.sha256(fixtures_path.read_bytes()).hexdigest()
     )
@@ -418,7 +451,7 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
     budget = manifest.get("instruction_budget") or {}
     report.check(len(agents) <= budget.get("agents_md_max_bytes", 0), f"AGENTS.md byte budget ({len(agents)}/{budget.get('agents_md_max_bytes')})")
     report.check(line_count <= budget.get("agents_md_max_lines", 0), f"AGENTS.md line budget ({line_count}/{budget.get('agents_md_max_lines')})")
-    report.check(b"Version: 6.0" in agents, "AGENTS.md version matches release family")
+    report.check(b"Version: 7.0" in agents, "AGENTS.md version matches release family")
     claude = (root / "CLAUDE.md").read_text(encoding="utf-8")
     report.check("@AGENTS.md" in claude and len(claude.encode("utf-8")) <= 4096, "CLAUDE.md is a thin AGENTS adapter")
     gemini = (root / "GEMINI.md").read_text(encoding="utf-8")
@@ -437,6 +470,8 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
             "ui-review.schema.json",
             "architecture-policy.schema.json",
             "project-template.schema.json",
+            "automation-decision.schema.json",
+            "adoption-plan.schema.json",
         )
     ]
     schemas_ok = True
@@ -619,6 +654,7 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
                 "SBOM.cdx.json",
                 "PROVENANCE.intoto.json",
                 "security-policy.json",
+                "adoption-policy.json",
                 "docs/harness/INSTALL.md",
                 "docs/harness/CHANGELOG.md",
                 "docs/harness/MIGRATION-4.2-5.0.md",
@@ -629,6 +665,12 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
                 "docs/harness/QUALIFICATION-5.0.md",
                 "docs/harness/MIGRATION-5.0-6.0.md",
                 "docs/harness/QUALIFICATION-6.0.md",
+                "docs/harness/MIGRATION-6.0-7.0.md",
+                "docs/harness/QUALIFICATION-7.0.md",
+                "docs/harness/AUTOMATION-EXECUTION-POLICY.md",
+                "docs/harness/HARNESS-ADOPTION-POLICY.md",
+                "docs/harness/examples/automation-decision.example.json",
+                "docs/harness/examples/adoption-plan.example.json",
                 "docs/harness/HYBRID-ARCHITECTURE.md",
                 "docs/harness/PROJECT-TRUTH.md",
                 "docs/harness/DOCUMENTATION-LIFECYCLE.md",
@@ -643,6 +685,8 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
                 "schemas/ui-review.schema.json",
                 "schemas/architecture-policy.schema.json",
                 "schemas/project-template.schema.json",
+                "schemas/automation-decision.schema.json",
+                "schemas/adoption-plan.schema.json",
                 ".agents/skills/core/task-triage/SKILL.md",
                 "docs/ai/constitution.md",
                 "docs/ai/quality-gates.md",
@@ -658,9 +702,13 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
                 "scripts/ui_quality.py",
                 "scripts/architecture_check.py",
                 "scripts/bootstrap_project.py",
+                "scripts/adopt_harness.py",
+                "scripts/automation_decision.py",
                 "scripts/documentation_check.py",
                 "project-templates/python-react-hybrid/template-manifest.json",
                 "prompt-templates/09-generate-python-react-application.txt",
+                "prompt-templates/10-automation-execution-plane.txt",
+                "prompt-templates/11-adopt-harness.txt",
             }
             report.check(required.issubset(names), "archive contains the portable runtime and clean memory templates")
             report.check("README.md" not in names and "CHANGELOG.md" not in names, "archive does not overwrite a consumer project's root README or changelog")

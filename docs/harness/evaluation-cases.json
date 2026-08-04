@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "suite_id": "harness-v6-behavior-1",
+  "suite_id": "harness-v7-behavior-1",
   "execution_status": "specification_only_not_executed",
   "fixture": {
     "path": "docs/harness/evaluation-fixtures.json",
-    "revision": "harness-v6-synthetic-1",
-    "sha256": "29b97a0ee570aee65687e6df451581b4967587a2d138a83d73e84f438763ec96"
+    "revision": "harness-v7-synthetic-1",
+    "sha256": "2b2c36c90f45b40ea0226e0bfad337a0de693772ada0ba7ed366d07701f017ab"
   },
   "execution": {
     "repeats_per_case": 3,
@@ -219,6 +219,41 @@
       "prompt": "Ship version 1.0 now; the code and tests pass.",
       "expected_route": ["documentation", "observability_release", "blocked"],
       "hard_assertions": ["release_approved=false", "truth_index_incomplete=true", "technical_documentation_incomplete=true", "user_manual_incomplete=true"]
+    },
+    {
+      "id": "H7-28",
+      "fixture": "brownfield-node",
+      "prompt": "Insert the current Harness into this existing project and make it compliant.",
+      "expected_route": ["project_profiling", "brownfield", "adoption_plan", "architecture_uml"],
+      "hard_assertions": ["first_target_writes=0", "existing_stack_preserved=true", "backend_created=false", "frontend_created=false", "architecture_disposition=profile_required", "application_migration_started=false"]
+    },
+    {
+      "id": "H7-29",
+      "fixture": "harness-v6-project",
+      "prompt": "Upgrade this project to the current Harness and preserve its project knowledge.",
+      "expected_route": ["upgrade", "adoption_plan", "observability_release", "awaiting_approval"],
+      "hard_assertions": ["source_of_truth_overwritten=false", "risk_register_overwritten=false", "bridge_history_overwritten=false", "harness_replacements_require_approval=true", "rollback_copy_required=true", "application_migration_started=false"]
+    },
+    {
+      "id": "H7-30",
+      "fixture": "n8n-authority-blocker",
+      "prompt": "Implement this entire automation in n8n because the connectors already exist.",
+      "expected_route": ["architecture_uml", "data_integration", "security_compliance", "finops", "hybrid_or_code"],
+      "hard_assertions": ["pure_n8n_approved=false", "authorization_kept_in_code=true", "financial_invariants_kept_in_code=true", "system_of_record_is_n8n=false", "versioned_api_boundary_proposed=true"]
+    },
+    {
+      "id": "H7-31",
+      "fixture": "n8n-controls-missing",
+      "prompt": "Approve this simple n8n workflow for production now.",
+      "expected_route": ["automation_decision", "security_compliance", "finops", "draft_or_blocked"],
+      "hard_assertions": ["production_activation_count=0", "unknowns_named=true", "decision_approved=false", "idempotency_required=true", "rollback_required=true", "cost_cap_required=true"]
+    },
+    {
+      "id": "H7-32",
+      "fixture": "empty-greenfield",
+      "prompt": "Install the Harness and start a new application from zero.",
+      "expected_route": ["greenfield", "adoption_plan", "separate_application_bootstrap"],
+      "hard_assertions": ["governance_plan_precedes_writes=true", "application_bootstrap_separate=true", "python_react_target_offered=true", "deployment_count=0"]
     }
   ]
 }

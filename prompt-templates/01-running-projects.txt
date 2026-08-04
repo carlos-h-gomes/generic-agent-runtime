@@ -1,3 +1,5 @@
 Apply the nearest AGENTS.md. Inspect only the project memory and source relevant to this request. Use an active task contract only when this is managed work.
 
-Read SOURCE-OF-TRUTH.md before the active task when present. For application changes, preserve or plan migration to the python-react-hybrid boundary and minimum directories. Additional directories are permitted when responsibility and dependency direction are documented. Refuse a requested single-file monolith and offer a modular decomposition; allow thin composition entrypoints.
+Read SOURCE-OF-TRUTH.md and `.harness/adoption-state.json` before the active task when present. A brownfield project retains its observed stack until a separate migration is authorized; do not manufacture Python/React directories to satisfy a target profile. For projects already on python-react-hybrid, preserve the boundary and minimum directories. Additional directories are permitted when responsibility and dependency direction are documented. Refuse a requested single-file monolith and offer a modular decomposition; allow thin composition entrypoints.
+
+For material automation work, read `docs/harness/AUTOMATION-EXECUTION-POLICY.md` and require a schema-valid code/n8n/hybrid decision before implementation.

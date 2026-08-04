@@ -2,12 +2,12 @@
   "$schema": "schemas/harness.schema.json",
   "name": "generic-agent-runtime",
   "display_name": "Generic Agent Runtime",
-  "version": "6.0.0",
-  "released": "2026-08-03",
+  "version": "7.0.0",
+  "released": "2026-08-04",
   "runtime_language": "English",
   "source_baseline": {
-    "name": "agent-runtime-v5.0.zip",
-    "sha256": "a2df0c4dc057dd166e5f530ba76280796f03d3af63f4fc8f340281be5c5406ff"
+    "name": "agent-runtime-v6.0.zip",
+    "sha256": "3857c989f99aa7fbdefa70627706f445ff05b4ec86d206fb6e85b04c70f04122"
   },
   "adapters": [
     "CLAUDE.md",
@@ -26,7 +26,9 @@
     "architecture_policy": "1.0",
     "project_template": "1.0",
     "source_of_truth": "1.0",
-    "release_documentation": "1.0"
+    "release_documentation": "1.0",
+    "automation_decision": "1.0",
+    "adoption_plan": "1.0"
   },
   "instruction_budget": {
     "agents_md_max_bytes": 12288,
@@ -62,17 +64,20 @@
     "security_test_plan": "schemas/security-test-plan.schema.json",
     "ui_review": "schemas/ui-review.schema.json",
     "architecture_policy": "schemas/architecture-policy.schema.json",
-    "project_template": "schemas/project-template.schema.json"
+    "project_template": "schemas/project-template.schema.json",
+    "automation_decision": "schemas/automation-decision.schema.json",
+    "adoption_plan": "schemas/adoption-plan.schema.json"
   },
   "security_policy": "security-policy.json",
   "distribution": {
-    "archive": "agent-runtime-v6.0.zip",
+    "archive": "agent-runtime-v7.0.zip",
     "manifest": "MANIFEST.sha256",
     "scaffold_root": "scaffold",
     "project_template_root": "project-templates/python-react-hybrid",
     "exclude_maintainer_tasks": true,
     "empty_bridge": true,
-    "maintainer_marker": ".harness-source"
+    "maintainer_marker": ".harness-source",
+    "adoption_policy": "adoption-policy.json"
   },
   "execution_limits": {
     "default_command_timeout_seconds": 300,

@@ -136,7 +136,7 @@ def build_payload(root: Path) -> tuple[dict[str, bytes], dict]:
     manifest = json.loads((root / "harness.json").read_text(encoding="utf-8"))
     payload: dict[str, bytes] = {}
 
-    for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md", "harness.json", "security-policy.json"):
+    for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md", "harness.json", "security-policy.json", "adoption-policy.json"):
         add_file(payload, root, name, root / name)
     for directory in (".agents", "schemas", "prompt-templates", "project-templates", "scripts", "security", "docs/harness"):
         add_tree(payload, root, root / directory, directory)
@@ -224,7 +224,7 @@ def build_payload(root: Path) -> tuple[dict[str, bytes], dict]:
             },
             "runDetails": {
                 "builder": {
-                    "id": "https://generic-agent-runtime.local/harness/package-runtime/v6"
+                    "id": "https://generic-agent-runtime.local/harness/package-runtime/v7"
                 },
                 "metadata": {"invocationId": "deterministic-local-build"},
             },
@@ -251,6 +251,7 @@ def validate_payload(payload: dict[str, bytes], manifest: dict) -> None:
         "SBOM.cdx.json",
         "PROVENANCE.intoto.json",
         "security-policy.json",
+        "adoption-policy.json",
         "SOURCE-OF-TRUTH.md",
         "schemas/task-contract.schema.json",
         "schemas/gate-result.schema.json",
@@ -261,6 +262,8 @@ def validate_payload(payload: dict[str, bytes], manifest: dict) -> None:
         "schemas/ui-review.schema.json",
         "schemas/architecture-policy.schema.json",
         "schemas/project-template.schema.json",
+        "schemas/automation-decision.schema.json",
+        "schemas/adoption-plan.schema.json",
         ".agents/skills/core/agent-orchestration/SKILL.md",
         "docs/ai/constitution.md",
         "docs/ai/quality-gates.md",
@@ -281,6 +284,11 @@ def validate_payload(payload: dict[str, bytes], manifest: dict) -> None:
         "docs/harness/QUALIFICATION-5.0.md",
         "docs/harness/MIGRATION-5.0-6.0.md",
         "docs/harness/QUALIFICATION-6.0.md",
+        "docs/harness/MIGRATION-6.0-7.0.md",
+        "docs/harness/QUALIFICATION-7.0.md",
+        "docs/harness/AUTOMATION-EXECUTION-POLICY.md",
+        "docs/harness/HARNESS-ADOPTION-POLICY.md",
+        "docs/harness/examples/automation-decision.example.json",
         "docs/harness/HYBRID-ARCHITECTURE.md",
         "docs/harness/PROJECT-TRUTH.md",
         "docs/harness/DOCUMENTATION-LIFECYCLE.md",
@@ -289,10 +297,14 @@ def validate_payload(payload: dict[str, bytes], manifest: dict) -> None:
         "docs/architecture/DIRECTORY-MAP.md",
         "project-templates/python-react-hybrid/template-manifest.json",
         "prompt-templates/09-generate-python-react-application.txt",
+        "prompt-templates/10-automation-execution-plane.txt",
+        "prompt-templates/11-adopt-harness.txt",
         "scripts/bridge.py",
         "scripts/run.ps1",
         "scripts/architecture_check.py",
         "scripts/bootstrap_project.py",
+        "scripts/adopt_harness.py",
+        "scripts/automation_decision.py",
         "scripts/documentation_check.py",
         "scripts/security_assurance.py",
         "scripts/adversarial_lab.py",
@@ -313,6 +325,31 @@ def validate_payload(payload: dict[str, bytes], manifest: dict) -> None:
         raise PackageError(f"maintainer/live/generated files in payload: {forbidden}")
     if payload["docs/ai/bridge/ledger.jsonl"]:
         raise PackageError("packaged bridge ledger must be empty")
+    adoption_policy = json.loads(payload["adoption-policy.json"])
+    excluded = set(adoption_policy.get("excluded_files", []))
+    exact = {
+        **{name: "shared" for name in adoption_policy.get("shared_files", [])},
+        **{name: "project" for name in adoption_policy.get("project_owned_files", [])},
+        **{name: "harness" for name in adoption_policy.get("harness_owned_files", [])},
+    }
+    unclassified: list[str] = []
+    ambiguous: list[str] = []
+    for name in payload:
+        if name in excluded:
+            continue
+        if name in exact:
+            continue
+        matches = []
+        if any(name.startswith(prefix) for prefix in adoption_policy.get("project_owned_prefixes", [])):
+            matches.append("project")
+        if any(name.startswith(prefix) for prefix in adoption_policy.get("harness_owned_prefixes", [])):
+            matches.append("harness")
+        if not matches:
+            unclassified.append(name)
+        elif len(matches) > 1:
+            ambiguous.append(name)
+    if unclassified or ambiguous:
+        raise PackageError(f"adoption ownership is incomplete: unclassified={unclassified}, ambiguous={ambiguous}")
     if len(payload) > manifest["archive_limits"]["max_entries"]:
         raise PackageError("package exceeds archive entry limit")
     if any(len(name) > manifest["archive_limits"]["max_name_length"] for name in payload):
@@ -402,7 +439,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
     result.add_argument("--out", type=Path, help="output path within the repository root")
     result.add_argument("--check", action="store_true", help="validate and hash the proposed package without writing it")
-    result.add_argument("--replace", action="store_true", help="replace the canonical v6 archive if it already exists")
+    result.add_argument("--replace", action="store_true", help="replace the canonical v7 archive if it already exists")
     return result
 
 

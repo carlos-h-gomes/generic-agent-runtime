@@ -10,6 +10,15 @@ Status: initialize project-specific extensions while preserving this mandatory m
 - Frontend and backend do not import or execute each other's source. Integration uses a versioned HTTP contract, normally OpenAPI.
 - Authoritative business rules, resource authorization, and persistence remain in the backend. The frontend owns presentation, interaction state, navigation, and browser-side orchestration.
 
+This profile is the greenfield generation target. Harness adoption into a brownfield repository preserves the evidence-backed existing stack; governance installation cannot create this topology or claim conformance. A non-target project records an observed architecture policy before application work, and any migration to this profile uses a separate managed task.
+
+## Automation execution planes
+
+- Code owns business authority, authorization, tenant isolation, transactional invariants, authoritative persistence, complex state/concurrency, intensive computation, and strict performance.
+- n8n may own bounded edge orchestration only under `docs/harness/AUTOMATION-EXECUTION-POLICY.md` and a valid `automation-decision` contract.
+- Hybrid workflows call versioned code APIs for every authoritative or blocked responsibility.
+- Workflow exports are sanitized and versioned; credentials, direct production editing, unbounded retries/fan-out, and using risky nodes to evade a code boundary are prohibited.
+
 ## Required minimum topology
 
 Backend required paths:

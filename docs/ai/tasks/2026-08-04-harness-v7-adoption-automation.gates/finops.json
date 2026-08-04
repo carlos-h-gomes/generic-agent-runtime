@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-04-harness-v7-adoption-automation",
+  "gate": "finops",
+  "phase": "design",
+  "revision": 1,
+  "status": "passed_with_conditions",
+  "applicability": {"applicable": true, "reason": "n8n editions, compute, execution retention, workers, external APIs, fan-out, retries, and replay can create recurring variable cost."},
+  "summary": "Automation decisions must identify billing units and owners, bound volume/concurrency/retry/replay/retention, define alerts and kill switches, and avoid guessing prices when edition, provider, region, or volume is unknown.",
+  "checks": [
+    {"id": "cost_dimensions", "status": "passed", "evidence_refs": ["design"], "notes": "Edition capability, execution volume, retries, concurrency, storage, egress, API calls, and failure amplification are required decision inputs."},
+    {"id": "local_build", "status": "passed", "evidence_refs": ["design"], "notes": "The v7 implementation uses standard-library tooling and no paid or network dependency."},
+    {"id": "downstream_pricing", "status": "not_applicable", "evidence_refs": [], "notes": "No provider, edition, region, or downstream volume has been selected."}
+  ],
+  "findings": [
+    {"id": "FIN-01", "title": "Downstream pricing and volume are project-specific", "severity": "medium", "state": "deferred", "blocking": false, "evidence_refs": ["design"], "required_action": "Before activating a variable-cost workflow, record dated pricing, expected/burst/worst-case formulas, hard caps, alert owner, degradation, and kill switch.", "owner": "downstream cost owner", "due_before": "post_release", "risk_acceptance_ref": null}
+  ],
+  "evidence": [
+    {"id": "design", "kind": "file", "pointer": "docs/ai/tasks/2026-08-04-harness-v7-adoption-automation-architecture.md", "summary": "Approved execution-plane and bounded-operation design.", "redacted_excerpt": null, "sensitivity": "internal", "redacted": false, "sha256": null, "captured_at": "2026-08-04T14:09:28-03:00"}
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": ["docs/ai/tasks/2026-08-04-harness-v7-adoption-automation-architecture.md"],
+  "sources": [],
+  "approval": {"required": false, "reason": "The local candidate build incurs no paid external usage.", "status": "not_required", "evidence_ref": null},
+  "handoff": ["Encode downstream cost evidence fields without inventing a universal n8n cost model."],
+  "generated_at": "2026-08-04T14:09:28-03:00",
+  "expires_at": null
+}

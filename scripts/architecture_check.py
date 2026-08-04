@@ -194,10 +194,33 @@ def main(argv: list[str] | None = None) -> int:
     arguments = parser().parse_args(argv)
     root = arguments.root.resolve()
     policy_path = arguments.policy if arguments.policy.is_absolute() else root / arguments.policy
-    application_detected = (root / "backend").exists() or (root / "frontend").exists()
+    application_markers = (
+        "backend", "frontend", "src", "app", "package.json", "pyproject.toml", "requirements.txt",
+        "Pipfile", "pom.xml", "build.gradle", "build.gradle.kts", "go.mod", "Cargo.toml",
+        "composer.json", "Gemfile", "Dockerfile", "docker-compose.yml", "compose.yml",
+    )
+    application_detected = any((root / marker).exists() for marker in application_markers)
     if not application_detected:
         print("NOT_APPLICABLE architecture: no application boundary detected")
         return 0
+    adoption_path = root / ".harness" / "adoption-state.json"
+    if adoption_path.is_file():
+        try:
+            adoption = load_object(adoption_path)
+            disposition = adoption.get("architecture_disposition")
+            posture = adoption.get("application_posture")
+            if disposition == "profile_required":
+                print(
+                    "INCOMPLETE architecture: observed brownfield application requires an "
+                    f"evidence-backed project policy (posture={posture})"
+                )
+                return 3
+            if disposition == "migration_required":
+                print("INCOMPLETE architecture: a separate approved architecture migration is required")
+                return 3
+        except (OSError, UnicodeError, json.JSONDecodeError, TypeError, ValueError) as exc:
+            print(f"FAIL architecture: invalid adoption state: {exc}", file=sys.stderr)
+            return 2
     if not policy_path.is_file():
         print("INCOMPLETE architecture: docs/ai/architecture-policy.json is missing")
         return 3
