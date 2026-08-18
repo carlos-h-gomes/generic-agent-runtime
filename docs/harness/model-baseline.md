@@ -2,6 +2,8 @@
 
 Harness 4.1 is model-neutral. This file records the frontier-runtime context used for the release and must be re-checked later.
 
+> **Revalidation pending.** This baseline was checked on 2026-07-15 for Harness 4.1 and has not been revalidated for later releases (4.2 through 7.0). The claims and sources below record what was verified on that date; they are not a current check.
+
 ## GPT-5.6 Sol Ultra interpretation
 
 OpenAI announced GPT-5.6 on 2026-07-09. `gpt-5.6-sol` is the Sol model ID; `gpt-5.6` is an alias. “Ultra” is a high-capability execution setting combining maximum reasoning and proactive multi-agent work, not another model slug. Supported product surfaces may use four agents by default, while the Responses Multi-agent beta recommends three concurrent subagents as a starting point.
