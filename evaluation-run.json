@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "suite_id": "harness-v7-behavior-1",
+  "fixture_sha256": "2b2c36c90f45b40ea0226e0bfad337a0de693772ada0ba7ed366d07701f017ab",
+  "cases_in_suite": 32,
+  "cases_attempted": 3,
+  "cases_passed": 3,
+  "execution_status": "partial_execution",
+  "coverage_note": "3 of 32 specified cases were attempted. Unattempted cases remain specification only.",
+  "cases": [
+    {
+      "case_id": "H4-01",
+      "repeats": 3,
+      "required_repeats": 3,
+      "status": "pass",
+      "reason": "all repeats passed every hard assertion",
+      "hosts": [
+        "claude-fable-5-cowork"
+      ]
+    },
+    {
+      "case_id": "H4-09",
+      "repeats": 3,
+      "required_repeats": 3,
+      "status": "pass",
+      "reason": "all repeats passed every hard assertion",
+      "hosts": [
+        "claude-fable-5-cowork"
+      ]
+    },
+    {
+      "case_id": "H5-18",
+      "repeats": 3,
+      "required_repeats": 3,
+      "status": "pass",
+      "reason": "all repeats passed every hard assertion",
+      "hosts": [
+        "claude-fable-5-cowork"
+      ]
+    }
+  ]
+}
