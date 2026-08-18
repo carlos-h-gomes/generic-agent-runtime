@@ -136,7 +136,7 @@ def build_payload(root: Path) -> tuple[dict[str, bytes], dict]:
     manifest = json.loads((root / "harness.json").read_text(encoding="utf-8"))
     payload: dict[str, bytes] = {}
 
-    for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md", "harness.json", "security-policy.json", "adoption-policy.json"):
+    for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md", "LICENSE", "harness.json", "security-policy.json", "adoption-policy.json"):
         add_file(payload, root, name, root / name)
     for directory in (".agents", "schemas", "prompt-templates", "project-templates", "scripts", "security", "docs/harness"):
         add_tree(payload, root, root / directory, directory)
@@ -274,6 +274,7 @@ def validate_payload(payload: dict[str, bytes], manifest: dict) -> None:
         "docs/ai/tasks/_TASK_TEMPLATE.md",
         "docs/ai/bridge/board.md",
         "docs/ai/bridge/ledger.jsonl",
+        "LICENSE",
         "docs/harness/INSTALL.md",
         "docs/harness/CHANGELOG.md",
         "docs/harness/MIGRATION-4.2-5.0.md",
