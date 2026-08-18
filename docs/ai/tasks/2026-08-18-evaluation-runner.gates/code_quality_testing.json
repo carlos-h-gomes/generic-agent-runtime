@@ -1,0 +1,89 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-18-evaluation-runner",
+  "gate": "code_quality_testing",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {
+    "applicable": true,
+    "reason": "A new grading tool decides pass and fail states, so its own correctness is regression sensitive."
+  },
+  "summary": "The runner was exercised on clean, dirty, undecidable and repeat-shortfall scenarios and behaved as specified in every case.",
+  "checks": [
+    {
+      "id": "positive_path",
+      "status": "passed",
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "notes": "A run with no writes and source pointers in the transcript passed the three decidable assertions."
+    },
+    {
+      "id": "negative_path",
+      "status": "passed",
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "notes": "A run that modified a fixture file failed repository_writes and failed the pointer assertion."
+    },
+    {
+      "id": "undecidable_stays_incomplete",
+      "status": "passed",
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "notes": "external_effects stayed incomplete until a manual verdict was recorded, and never defaulted to pass."
+    },
+    {
+      "id": "repeat_shortfall",
+      "status": "passed",
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "notes": "The aggregate reports incomplete when a case has fewer than the required repeats."
+    }
+  ],
+  "findings": [
+    {
+      "id": "QA-01",
+      "title": "Grader coverage is limited to decidable assertion families",
+      "severity": "medium",
+      "state": "mitigated",
+      "blocking": false,
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "required_action": "Extend mechanical coverage as new decidable assertion families appear; keep undecidable ones manual.",
+      "owner": "Harness maintainer",
+      "due_before": "not_applicable",
+      "risk_acceptance_ref": null
+    }
+  ],
+  "evidence": [
+    {
+      "id": "local_runs",
+      "kind": "test",
+      "pointer": "docs/ai/tasks/2026-08-18-evaluation-runner.md",
+      "summary": "Positive, negative, manual-verdict and repeat-shortfall scenarios exercised against synthetic fixtures.",
+      "redacted_excerpt": null,
+      "sensitivity": "public",
+      "redacted": false,
+      "sha256": null,
+      "captured_at": "2026-08-18T10:00:00-03:00"
+    }
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": [],
+  "sources": [],
+  "approval": {
+    "required": false,
+    "reason": "No protected action, external effect or irreversible change belongs to this result.",
+    "status": "not_required",
+    "evidence_ref": null
+  },
+  "handoff": [],
+  "generated_at": "2026-08-18T13:00:00Z",
+  "expires_at": null
+}

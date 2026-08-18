@@ -1,0 +1,73 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-18-evaluation-runner",
+  "gate": "observability_release",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {
+    "applicable": true,
+    "reason": "The change alters how execution status of the behavioral suite is claimed in released documentation."
+  },
+  "summary": "Execution status became per case and evidence backed. The documented case count was corrected from 27 to 32 and no behavioral claim is made for an unexecuted case.",
+  "checks": [
+    {
+      "id": "claim_matches_evidence",
+      "status": "passed",
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "notes": "The suite document states specification with an executable runner; a case is claimed only after passing every required repeat."
+    },
+    {
+      "id": "documented_count_matches_suite",
+      "status": "passed",
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "notes": "evaluation-suite.md now reports 32 cases, matching evaluation-cases.json, and describes the v7 cases."
+    }
+  ],
+  "findings": [
+    {
+      "id": "REL-01",
+      "title": "No case has been executed against a live host yet",
+      "severity": "high",
+      "state": "mitigated",
+      "blocking": false,
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "required_action": "Execute H4-01, H4-09 and H5-18 for the required repeats and commit the aggregate.",
+      "owner": "Operator",
+      "due_before": "release",
+      "risk_acceptance_ref": null
+    }
+  ],
+  "evidence": [
+    {
+      "id": "local_runs",
+      "kind": "test",
+      "pointer": "docs/ai/tasks/2026-08-18-evaluation-runner.md",
+      "summary": "Positive, negative, manual-verdict and repeat-shortfall scenarios exercised against synthetic fixtures.",
+      "redacted_excerpt": null,
+      "sensitivity": "public",
+      "redacted": false,
+      "sha256": null,
+      "captured_at": "2026-08-18T10:00:00-03:00"
+    }
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": [],
+  "sources": [],
+  "approval": {
+    "required": false,
+    "reason": "No protected action, external effect or irreversible change belongs to this result.",
+    "status": "not_required",
+    "evidence_ref": null
+  },
+  "handoff": [],
+  "generated_at": "2026-08-18T13:00:00Z",
+  "expires_at": null
+}

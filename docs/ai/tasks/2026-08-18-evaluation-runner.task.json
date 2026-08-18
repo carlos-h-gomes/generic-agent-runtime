@@ -1,0 +1,209 @@
+{
+  "$schema": "../../../schemas/task-contract.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-18-evaluation-runner",
+  "status": "done",
+  "mode": "change",
+  "work_level": 2,
+  "outcome": "Make the behavioral evaluation suite executable and gradable so that per-case execution status becomes evidence instead of a specification claim.",
+  "acceptance_criteria": [
+    "A bounded runner materializes any specified case into an isolated synthetic fixture repository and verifies the pinned fixture SHA-256 before use.",
+    "Filesystem-decidable and transcript-decidable hard assertions are graded mechanically without human judgement.",
+    "An assertion with no decidable method is reported as incomplete and never as pass.",
+    "A case passes only when every hard assertion passes on every required repeat.",
+    "The aggregate output states how many of the specified cases were attempted and marks the remainder as specification only.",
+    "Recorded results contain aggregates and sanitized pointers only, never raw transcripts or credentials.",
+    "The documented case count matches the suite contents."
+  ],
+  "scope": {
+    "size": "local",
+    "in": [
+      "Add scripts/run_evaluation.py with materialize, grade and aggregate subcommands.",
+      "Correct the documented case count in docs/harness/evaluation-suite.md from 27 to 32 and describe the v7 cases.",
+      "Document the grading methods and the incomplete-over-pass rule."
+    ],
+    "out": [
+      "Execute the suite against any live model as part of this task.",
+      "Claim a behavioral result for any case.",
+      "Touch a real repository, network target or external service."
+    ]
+  },
+  "risk": {
+    "level": "medium",
+    "reversibility": "easy",
+    "external_effect": "local",
+    "triggers": [
+      "A grader that guesses a verdict would manufacture false evidence in a project whose central claim is evidence quality.",
+      "Storing raw transcripts in results could leak prompts or sensitive content."
+    ]
+  },
+  "authorization": {
+    "writes": {
+      "allowed": true,
+      "scope": [
+        "scripts/run_evaluation.py",
+        "docs/harness/evaluation-suite.md",
+        "docs/ai/tasks/2026-08-18-evaluation-runner*"
+      ]
+    },
+    "external_actions": {
+      "allowed": false,
+      "scope": []
+    }
+  },
+  "files": {
+    "owned": [
+      "scripts/run_evaluation.py",
+      "docs/ai/tasks/2026-08-18-evaluation-runner*"
+    ],
+    "shared": [
+      "docs/harness/evaluation-suite.md"
+    ],
+    "do_not_touch": [
+      "docs/harness/evaluation-cases.json",
+      "docs/harness/evaluation-fixtures.json",
+      "harness.json"
+    ],
+    "discover": [
+      "docs/harness/evaluation-*",
+      "schemas/"
+    ]
+  },
+  "gates": [
+    {
+      "id": "code_quality_testing",
+      "status": "passed",
+      "reason": "A tool that decides pass and fail states is regression sensitive and needs positive and negative coverage.",
+      "artifact": "docs/ai/tasks/2026-08-18-evaluation-runner.gates/code_quality_testing.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "security_compliance",
+      "status": "passed",
+      "reason": "The tool materializes repositories, reads transcripts and writes results, so leakage and path handling are in scope.",
+      "artifact": "docs/ai/tasks/2026-08-18-evaluation-runner.gates/security_compliance.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "observability_release",
+      "status": "passed",
+      "reason": "The change alters how execution status of the behavioral suite is claimed in released documentation.",
+      "artifact": "docs/ai/tasks/2026-08-18-evaluation-runner.gates/observability_release.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "architecture_uml",
+      "status": "not_applicable",
+      "reason": "One leaf tool plus a documentation correction; no boundary or contract change.",
+      "artifact": null,
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "ux_product",
+      "status": "not_applicable",
+      "reason": "No user interface surface is added or modified.",
+      "artifact": null,
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "data_integration",
+      "status": "not_applicable",
+      "reason": "No external data source, schema ownership or persistence path is involved.",
+      "artifact": null,
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "finops",
+      "status": "not_applicable",
+      "reason": "No model, network or paid resource is consumed by the tool itself.",
+      "artifact": null,
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "ai_llm",
+      "status": "not_applicable",
+      "reason": "The runner is host neutral and invokes no model.",
+      "artifact": null,
+      "owner": "primary agent",
+      "approval_ref": null
+    }
+  ],
+  "skills": [
+    "core/task-triage",
+    "core/validation",
+    "specialists/code-quality-testing"
+  ],
+  "approvals": [],
+  "context": {
+    "task_file": "2026-08-18-evaluation-runner.md",
+    "references": [
+      "AGENTS.md",
+      "docs/harness/evaluation-suite.md",
+      "docs/harness/SECURITY-MODEL.md"
+    ],
+    "assumptions": [
+      "The agent host is invoked by the operator outside this runner, so the runner stays host-neutral.",
+      "Network isolation is enforced by the operator's environment and recorded as a manual verdict."
+    ],
+    "missing_information": [
+      "No accepted baseline exists yet, so cost and latency thresholds cannot be compared."
+    ]
+  },
+  "coordination": {
+    "strategy": "single_agent",
+    "run_id": null,
+    "claims": [],
+    "max_depth": 0,
+    "max_concurrency": 1
+  },
+  "documentation_impact": {
+    "level": "technical",
+    "reason": "The suite gains an execution procedure and a grading contract that operators must follow.",
+    "required_artifacts": [
+      "docs/harness/evaluation-suite.md"
+    ]
+  },
+  "validation": {
+    "commands": [
+      "bash scripts/validate.sh"
+    ],
+    "manual_checks": [
+      "Materialize H4-01, run a clean no-write scenario and confirm the three decidable assertions pass.",
+      "Repeat with a scenario that writes to the fixture and confirm the run fails.",
+      "Confirm an undecidable assertion stays incomplete until a manual verdict is recorded.",
+      "Confirm the aggregate refuses to pass a case with fewer than the required repeats."
+    ],
+    "max_attempts": 2,
+    "evidence": [
+      "Positive, negative, manual-verdict and repeat-shortfall scenarios were exercised locally against synthetic fixtures."
+    ],
+    "not_validated": [
+      {
+        "area": "live model execution",
+        "disposition": "out_of_scope",
+        "reason": "This task delivers the runner. Executing the suite against a host is the operator's next action and is tracked as REL-01.",
+        "acceptance_ref": null
+      },
+      {
+        "area": "cost and latency thresholds",
+        "disposition": "blocked",
+        "reason": "The suite compares candidates against an accepted baseline and no baseline run exists yet.",
+        "acceptance_ref": null
+      },
+      {
+        "area": "network isolation of the agent host",
+        "disposition": "accepted_residual",
+        "reason": "Isolation is enforced by the operator environment and cannot be proven by the runner.",
+        "acceptance_ref": "docs/ai/tasks/2026-08-18-evaluation-runner.gates/security_compliance.json#SEC-01"
+      }
+    ]
+  },
+  "next_action": "Operator runs H4-01, H4-09 and H5-18 against one host for three repeats each and commits the resulting evaluation-run.json."
+}

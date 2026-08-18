@@ -1,0 +1,89 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-18-evaluation-runner",
+  "gate": "security_compliance",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed",
+  "applicability": {
+    "applicable": true,
+    "reason": "The tool materializes repositories, reads agent transcripts and writes result files, so leakage and path handling are in scope."
+  },
+  "summary": "The runner uses pinned synthetic fixtures only, verifies the fixture digest before use, refuses a non-empty output directory and stores aggregates rather than raw transcripts.",
+  "checks": [
+    {
+      "id": "synthetic_only",
+      "status": "passed",
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "notes": "Fixture content comes solely from the pinned fixture file; no real repository is read or written."
+    },
+    {
+      "id": "fixture_integrity",
+      "status": "passed",
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "notes": "The runner verifies the pinned SHA-256 before materializing and voids a run if the fixture changed between materialize and grade."
+    },
+    {
+      "id": "no_transcript_persistence",
+      "status": "passed",
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "notes": "Result files hold aggregates, observed counts and sanitized pointers; the transcript stays outside the recorded result."
+    },
+    {
+      "id": "no_network",
+      "status": "passed",
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "notes": "The runner performs no network operation; network isolation of the agent host remains an operator responsibility recorded as a manual verdict."
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEC-01",
+      "title": "Network isolation is delegated to the operator environment",
+      "severity": "medium",
+      "state": "mitigated",
+      "blocking": false,
+      "evidence_refs": [
+        "local_runs"
+      ],
+      "required_action": "Record external-effect assertions as manual verdicts with the isolation method used.",
+      "owner": "Operator",
+      "due_before": "not_applicable",
+      "risk_acceptance_ref": null
+    }
+  ],
+  "evidence": [
+    {
+      "id": "local_runs",
+      "kind": "test",
+      "pointer": "docs/ai/tasks/2026-08-18-evaluation-runner.md",
+      "summary": "Positive, negative, manual-verdict and repeat-shortfall scenarios exercised against synthetic fixtures.",
+      "redacted_excerpt": null,
+      "sensitivity": "public",
+      "redacted": false,
+      "sha256": null,
+      "captured_at": "2026-08-18T10:00:00-03:00"
+    }
+  ],
+  "acceptance_criteria_added": [],
+  "artifacts": [],
+  "sources": [],
+  "approval": {
+    "required": false,
+    "reason": "No protected action, external effect or irreversible change belongs to this result.",
+    "status": "not_required",
+    "evidence_ref": null
+  },
+  "handoff": [],
+  "generated_at": "2026-08-18T13:00:00Z",
+  "expires_at": null
+}

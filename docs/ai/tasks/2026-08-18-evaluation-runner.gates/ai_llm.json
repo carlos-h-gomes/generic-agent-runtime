@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-08-18-evaluation-runner",
+  "gate": "ai_llm",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "not_applicable",
+  "applicability": {
+    "applicable": false,
+    "reason": "The runner is host neutral and invokes no model; model behavior is supplied by the operator outside the tool."
+  },
+  "summary": "Not applicable for this task.",
+  "checks": [],
+  "findings": [],
+  "evidence": [],
+  "acceptance_criteria_added": [],
+  "artifacts": [],
+  "sources": [],
+  "approval": {
+    "required": false,
+    "reason": "No protected action, external effect or irreversible change belongs to this result.",
+    "status": "not_required",
+    "evidence_ref": null
+  },
+  "handoff": [],
+  "generated_at": "2026-08-18T13:00:00Z",
+  "expires_at": null
+}

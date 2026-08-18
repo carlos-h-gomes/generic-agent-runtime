@@ -90,10 +90,12 @@ semantic architecture quality, and it cannot secure a downstream application,
 host, model, tool, network or deployment by itself. Human architecture review
 and human risk acceptance remain required.
 
-The behavioral evaluation suite in `docs/harness/evaluation-suite.md` is a
-specification. Its cases are pinned to a fixture hash but have not been run
-against a live model, and the file says so. Treat documented gate behavior as
-designed, not as benchmarked.
+The behavioral evaluation suite in `docs/harness/evaluation-suite.md` specifies
+32 cases pinned to a fixture hash. `scripts/run_evaluation.py` makes them
+runnable and gradable, but execution status is per case and recorded in
+`evaluation-run.json`. Until a case appears there with a pass on every required
+repeat, it is specification only and no behavioral claim is made for it. Treat
+undocumented gate behavior as designed, not as benchmarked.
 
 ## Status
 
