@@ -1,53 +1,52 @@
 # Generic Agent Runtime
 
-A governance harness for software built with AI coding agents.
+A repository-native harness for AI coding agents.
 
-AI agents write code fast. What they do not bring is process: a task contract
-that defines what "done" means, a quality gate per engineering discipline, and
-evidence that survives the end of the chat session. This project supplies that
-layer as files in the repository, not as instructions in a prompt.
+Generic Agent Runtime adds a shared operating layer to your project so coding agents can work with consistent **rules, skills, task contracts and quality gates**.
 
-It is model-neutral. Claude, Codex, Gemini and local models read the same
-contracts and write to the same ledger.
+Instead of relying on a long prompt or on instructions that disappear when the chat ends, the harness keeps the workflow inside the repository.
 
-## What it does
+Claude, Codex, Gemini and other agents can read the same contracts and follow the same project rules.
 
-- **Task contracts.** Every unit of work is a versioned JSON contract with
-  acceptance criteria, scope and risk level, not a chat message.
-- **Gates per discipline.** Seventeen skills, nine core and eight specialist
-  (security and compliance, architecture and UML, code quality and testing,
-  data integration, AI and LLM, FinOps, observability and release, UX and
-  product). Each produces a machine-readable gate result.
-- **Evidence before release.** A release claim is blocked when a required
-  check is unavailable, when a critical finding was silently downgraded, when
-  a package carries a sensitive file class, or when UI work has no review
-  evidence.
-- **Multi-agent coordination.** A file-based protocol: append-only event ledger
-  plus a materialized board, with per-file claims, so agents from different
-  vendors work in the same repository without overwriting each other. The
-  bridge is advisory coordination, not authentication.
-- **Untrusted execution by default.** Project-owned scripts are not executed
-  until the operator passes `--trust-project-code`. Commands run with argument
-  arrays, a minimized environment, timeouts, bounded output and process-tree
-  cleanup.
-- **Supply chain evidence.** Deterministic packaging with a SHA-256 manifest, a
-  CycloneDX 1.7 SBOM and SLSA-shaped provenance, with an explicit statement
-  that provenance proves integrity, not authenticity.
+## What you get
 
-## Requirements
+- **Agent rules** — persistent instructions for how agents should work inside the repository.
+- **Skills** — reusable engineering guidance for security, architecture, testing, integrations, AI, observability, UX and more.
+- **Task contracts** — explicit scope, acceptance criteria and risk level for each piece of work.
+- **Quality gates** — checks that must pass before work can be considered complete.
+- **Multi-agent coordination** — shared task state and file claims so multiple agents can work in the same repository.
+- **Security boundaries** — protections against untrusted project instructions, unsafe execution and common agent failure modes.
+- **Evidence** — machine-readable records of what was checked, approved and produced.
 
-Python 3.9 or newer. Standard library only, no runtime dependencies.
+## Why use a harness?
+
+Coding agents are very good at generating code.
+
+The harder problem is keeping their behavior consistent across tasks, sessions and models.
+
+Without a shared harness, every conversation starts from scratch:
+
+- What can the agent change?
+- What does "done" mean?
+- Which checks are required?
+- When should it ask for approval?
+- How should risky operations be handled?
+- What happens when two agents work on the same repository?
+
+Generic Agent Runtime keeps those decisions in the project itself.
+
+The repository becomes the source of truth for **how agents are expected to work**.
 
 ## Quick start
 
-Validate the harness itself:
+Validate the harness:
 
 ```bash
-bash scripts/validate.sh          # structural lint, functional tests, runtime and package checks
-bash scripts/validate.sh --full   # adds security assurance and UI quality assurance
+bash scripts/validate.sh
+bash scripts/validate.sh --full
 ```
 
-Adopt governance into an existing project, plan first:
+Add the harness to an existing project:
 
 ```bash
 python scripts/adopt_harness.py plan   --target <project-root> --out plan.json
@@ -55,52 +54,105 @@ python scripts/adopt_harness.py apply  --target <project-root> --plan plan.json
 python scripts/adopt_harness.py verify --target <project-root>
 ```
 
-`apply` never overwrites a differing file. It writes rollback copies and
-reports unresolved conflicts as incomplete rather than forcing a result.
-
-Bootstrap a greenfield application, as a separate and explicit action:
+Start a new project:
 
 ```bash
 python scripts/bootstrap_project.py plan  --target <project-root>
 python scripts/bootstrap_project.py apply --target <project-root>
 ```
 
-Installing governance does not create, migrate or overwrite product code.
-Governance adoption, application bootstrap, architecture migration and
-deployment are four different authorizations.
+The adoption process does not silently overwrite existing project files. Conflicts are reported and rollback copies are created when necessary.
+
+## How it changes agent behavior
+
+Once the harness is part of a repository, the agent has project-level instructions before it starts changing code.
+
+Depending on the task and risk level, it can be required to:
+
+- understand the task contract before implementation;
+- stay inside the declared scope;
+- ask for approval before risky actions;
+- run the appropriate engineering skills;
+- produce quality-gate results;
+- record evidence of checks performed;
+- coordinate file ownership with other agents;
+- refuse or ignore untrusted instructions found inside project content.
+
+The goal is not to make an agent autonomous.
+
+The goal is to make its behavior **more predictable, reviewable and repeatable**.
+
+## Security
+
+The harness also includes controls for common risks when coding agents interact with real repositories.
+
+Project-owned scripts are treated as untrusted by default and are not executed until explicitly authorized with:
+
+```bash
+--trust-project-code
+```
+
+Commands use argument arrays, minimized environments, timeouts, bounded output and process-tree cleanup.
+
+The project also contains behavioral evaluation cases covering scenarios such as:
+
+- prompt injection through repository content;
+- attempts to expose secrets or tokens;
+- attempts to modify files outside the authorized scope;
+- unsafe execution;
+- silent gate downgrades.
+
+See `docs/harness/evaluation-suite.md` for the evaluation suite and its recorded execution status.
 
 ## Repository layout
 
-| Path | Contents |
-|---|---|
-| `.agents/skills/` | 17 skills, core and specialist |
-| `schemas/` | 12 versioned JSON Schema contracts |
-| `scripts/` | validation, packaging, adoption, security and bridge tooling |
-| `docs/harness/` | security model, hybrid architecture, migration and qualification guides |
-| `docs/ai/` | the governance surface a governed project receives |
-| `scaffold/` | what gets installed into a target repository |
-| `project-templates/` | optional Python API plus React TypeScript application template |
+| Path | Purpose |
+| --- | --- |
+| `.agents/skills/` | Core and specialist agent skills |
+| `schemas/` | Versioned contracts and schemas |
+| `scripts/` | Validation, adoption, packaging, security and coordination tooling |
+| `docs/harness/` | Harness architecture, security model and qualification documentation |
+| `docs/ai/` | Governance files installed into governed projects |
+| `scaffold/` | Files adopted into an existing repository |
+| `project-templates/` | Optional application templates |
 
-Maintainer commands and packaging live in `docs/harness/MAINTAINER.md`.
+## Model neutral
 
-## What this project does not claim
+The harness is not tied to a specific AI provider.
 
-The harness enforces process, structure and evidence rules. It cannot prove
-semantic architecture quality, and it cannot secure a downstream application,
-host, model, tool, network or deployment by itself. Human architecture review
-and human risk acceptance remain required.
+It is designed so different coding agents can operate over the same repository-level contracts and workflow.
 
-The behavioral evaluation suite in `docs/harness/evaluation-suite.md` specifies
-32 cases pinned to a fixture hash. `scripts/run_evaluation.py` makes them
-runnable and gradable, but execution status is per case and recorded in
-`evaluation-run.json`. Until a case appears there with a pass on every required
-repeat, it is specification only and no behavioral claim is made for it. Treat
-undocumented gate behavior as designed, not as benchmarked.
+Examples include:
+
+- Claude
+- Codex
+- Gemini
+- local models
+- other repository-aware coding agents
+
+Agent-specific adapters can exist, but the project rules remain in the repository.
+
+## What this project does not do
+
+Generic Agent Runtime does not guarantee that generated code is correct or secure.
+
+It does not replace architecture review, security review or human approval.
+
+The harness provides **process, boundaries, checks and evidence** around agent work.
+
+It makes behavior easier to control and inspect; it does not turn probabilistic models into deterministic software.
+
+## Requirements
+
+Python 3.9 or newer.
+
+Runtime tooling uses the Python standard library and has no runtime dependencies.
 
 ## Status
 
-Version 7.0.0, released 2026-08-04. `CHANGELOG.md` covers the path from 3.x
-and `docs/harness/MIGRATION-*.md` covers upgrades between majors.
+Version 7.0.0.
+
+See `CHANGELOG.md` for release history and `docs/harness/MIGRATION-*.md` for migration guides.
 
 ## License
 
