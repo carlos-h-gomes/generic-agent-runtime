@@ -2,86 +2,78 @@
 
 A repository-native support and governance layer for software built with AI coding agents.
 
-Generic Agent Runtime (GAR) gives individual builders and engineering teams a
-shared way to define scope, control risky actions, preserve project context,
-run quality checks, and keep evidence of what was actually validated.
+Generic Agent Runtime (GAR) helps individual builders and engineering teams
+define scope, control risky actions, preserve project context, run quality
+checks, and keep evidence of what was actually validated.
 
-Its goal is practical: make AI-assisted development more predictable,
-reviewable, and recoverable without assuming a specific model, tool, or
-application stack. GAR provides useful defaults and reminders for people
-building their engineering workflow, while giving experienced teams contracts
-and gates they can inspect, adapt, and automate.
+Its goal is to make AI-assisted development more predictable, reviewable, and
+recoverable. GAR is model-neutral: Claude, Codex, Gemini, local models, and
+other repository-aware agents can follow the same project rules without
+forcing a specific application stack.
 
-AI agents write code fast, but they do not bring a complete engineering
-process. GAR supplies that operating layer as files in the repository rather
-than instructions that disappear when a prompt or chat session ends.
+## Why use GAR
 
-It is model-neutral. Claude, Codex, Gemini and local models read the same
-contracts and write to the same ledger.
+- **Continuity across sessions and agents.** Project rules, decisions, and
+  evidence remain in the repository instead of disappearing with a chat.
+- **Clear scope and approvals.** Task contracts distinguish analysis from
+  changes and require explicit authorization for risky or external actions.
+- **Fewer forgotten engineering concerns.** Security, privacy, architecture,
+  testing, accessibility, cost, observability, and release checks are part of
+  the workflow.
+- **Evidence before release.** Required checks, unavailable tools, skips, and
+  blockers are recorded instead of being silently treated as passes.
+- **Model and stack neutrality.** Teams keep their chosen tools and
+  architecture while different coding agents use the same operating rules.
+- **Safer adoption and recovery.** GAR plans before writing, avoids silently
+  overwriting differing files, and provides rollback and restoration guidance.
 
-## Who it supports
+## How it works
 
-- **Individual builders** who want practical guardrails, checklists, and safer
-  defaults while working with coding agents.
-- **Engineering teams** that need consistent rules and evidence across models,
-  tools, repositories, and sessions.
-- **Maintainers and reviewers** who need explicit scope, approval boundaries,
-  quality gates, release evidence, and recovery guidance.
+- **Repository rules and memory** give agents persistent project context and
+  authority boundaries.
+- **Proportional task contracts** define the outcome, scope, risk, acceptance
+  criteria, approvals, and validation required for managed changes.
+- **Engineering skills and quality gates** route work through the disciplines
+  that actually apply to the task.
+- **Release evidence** connects claims to tests, artifacts, manifests, and
+  explicit residual risks.
+- **Multi-agent coordination** provides shared task state and file claims. It
+  is an advisory coordination layer, not an authentication system.
 
-GAR supports engineering work; it does not replace technical judgment, human
-review, or the security and privacy controls required by each product.
+## Optional model capability profiles
 
-## What it does
+GAR remains usable without any specific premium or separately provisioned
+model. Optional, dated profiles add model-aware governance only when a project
+chooses them and access is actually available.
 
-- **Proportional task contracts.** Authorized managed changes use versioned
-  JSON contracts with acceptance criteria, scope and risk. Answers,
-  inspections, diagnoses and reviews remain read-only unless persistence is
-  separately authorized.
-- **Gates per discipline.** Eighteen skills, ten core and eight specialist
-  (security and compliance, architecture and UML, code quality and testing,
-  data integration, AI and LLM, FinOps, observability and release, UX and
-  product). Managed change and release evidence uses schema-validated gate
-  results; read-only reviews return the same conclusions inline.
-- **Evidence before release.** A release claim is blocked when a required
-  check is unavailable, when a critical finding was silently downgraded, when
-  a package carries a sensitive file class, or when UI work has no review
-  evidence.
-- **Concrete product safety baseline.** A plain-language checklist covers
-  identity, sessions, authorization, request limits, API and business-flow
-  abuse, browser controls, uploads, SSRF, dependencies, operations, LGPD,
-  retention, data-subject rights, incidents and international transfers.
-- **Multi-agent coordination.** A file-based protocol: append-only event ledger
-  plus a materialized board, with per-file claims, so agents from different
-  vendors work in the same repository without overwriting each other. The
-  bridge is advisory coordination, not authentication.
-- **Untrusted execution by default.** Project-owned scripts are not executed
-  until the operator passes `--trust-project-code`. Commands run with argument
-  arrays, a minimized environment, timeouts, bounded output and process-tree
-  cleanup.
-- **Supply chain evidence.** Deterministic packaging with a SHA-256 manifest, a
-  CycloneDX 1.7 SBOM and SLSA-shaped provenance, with an explicit statement
-  that provenance proves integrity, not authenticity.
-- **User-owned architecture and tools.** Brownfield stacks are preserved;
-  greenfield choices are requested only when missing. Open profiles govern
-  modularity, reuse, solution components and optional model capabilities.
-- **Reversible context hygiene.** Read-only inventory and digest-bound plans
-  precede explicitly authorized local archive moves. Payloads remain indexed,
-  hash-verified and collision-safe to restore; purge is not implemented.
+- **Daybreak Blue.** For users who already have separately approved and
+  provisioned access, GAR includes additional guidance for authorized
+  defensive cybersecurity work: access detection, target and scope boundaries,
+  budgets, safe fallback, and evaluation requirements.
+- **GPT-5.6 Sol.** GAR includes an optional capability profile with access
+  detection, explicit budgets, fallbacks, and representative evaluation
+  requirements.
 
-## Requirements
+GAR does not provide, unlock, request, or prove access to either model. A
+profile never expands task scope, target authorization, production permission,
+or the controlled-adversarial-testing safety boundaries.
 
-Python 3.9 or newer. Standard library only, no runtime dependencies.
+See [Model capability profiles](docs/harness/MODEL-CAPABILITY-PROFILES.md) for
+the complete rules and limitations.
 
 ## Quick start
 
-Validate the harness itself:
+Requirements: Python 3.9 or newer. Runtime tooling uses only the Python
+standard library.
+
+Validate GAR:
 
 ```bash
-bash scripts/validate.sh          # structural lint, functional tests, runtime and package checks
-bash scripts/validate.sh --full   # adds security assurance and UI quality assurance
+bash scripts/validate.sh
+bash scripts/validate.sh --full
 ```
 
-Adopt governance into an existing project, plan first:
+Plan and apply adoption to an existing project:
 
 ```bash
 python scripts/adopt_harness.py plan   --target <project-root> --out plan.json
@@ -89,69 +81,51 @@ python scripts/adopt_harness.py apply  --target <project-root> --plan plan.json
 python scripts/adopt_harness.py verify --target <project-root>
 ```
 
-`apply` never overwrites a differing file. It writes rollback copies and
-reports unresolved conflicts as incomplete rather than forcing a result.
+`apply` does not silently overwrite differing files. Review the plan and every
+conflict before authorizing replacement. Governance adoption does not create,
+migrate, or deploy application code.
 
-After recording the user's stack choice, optionally bootstrap the bundled Python/React profile as a separate action:
+See [Safe installation and adoption](docs/harness/INSTALL.md) for the complete
+workflow.
 
-```bash
-python scripts/bootstrap_project.py plan  --target <project-root>
-python scripts/bootstrap_project.py apply --target <project-root>
-```
+## Security, privacy, and workspace support
 
-Installing governance does not create, migrate or overwrite product code.
-Governance adoption, application bootstrap, architecture migration and
-deployment are four different authorizations.
+GAR includes a practical baseline for identity, sessions, authorization,
+request and resource limits, API and business-flow abuse, browser controls,
+uploads, SSRF, dependencies, incidents, recovery, and LGPD responsibilities.
+Start with [Product security and privacy](docs/harness/PRODUCT-SECURITY-PRIVACY.md).
 
-Inventory workspace lifecycle state without moving anything:
+Workspace hygiene is inventory-first and reversible. Nothing is archived
+automatically, and purge is not implemented. See
+[Workspace hygiene](docs/harness/WORKSPACE-HYGIENE.md).
 
-```bash
-python scripts/workspace_hygiene.py inventory --root <workspace>
-```
+## Limits
 
-Planning, apply, verify and restore are documented in
-`docs/harness/WORKSPACE-HYGIENE.md`. Installing GAR does not create archives.
+GAR supplies rules, contracts, checks, and evidence around agent work. It does
+not secure a downstream application, host, model, network, toolchain, or
+deployment by itself. It does not certify LGPD compliance, provide model
+access, replace human review, or accept security risk on a person's behalf.
 
-For an internet-facing product, start the security and privacy review with
-`docs/harness/PRODUCT-SECURITY-PRIVACY.md`. Unknown applicable controls block
-the release gate rather than being treated as safe defaults.
+Behavioral claims are limited to the cases and executions recorded in the
+[evaluation suite](docs/harness/evaluation-suite.md) and
+[`evaluation-run.json`](evaluation-run.json).
 
-## Repository layout
+## Documentation
 
-| Path | Contents |
-|---|---|
-| `.agents/skills/` | 18 skills, core and specialist |
-| `schemas/` | 19 versioned JSON Schema contracts |
-| `scripts/` | validation, packaging, adoption, security and bridge tooling |
-| `docs/harness/` | architecture, solution, reuse, model, security, migration and qualification guides |
-| `docs/ai/` | the governance surface a governed project receives |
-| `scaffold/` | what gets installed into a target repository |
-| `project-templates/` | optional Python API plus React TypeScript application template |
-
-Maintainer commands and packaging live in `docs/harness/MAINTAINER.md`.
-
-## What this project does not claim
-
-The harness enforces process, structure and evidence rules. It cannot prove
-semantic architecture quality, and it cannot secure a downstream application,
-host, model, tool, network or deployment by itself. Human architecture review
-and human risk acceptance remain required.
-
-The behavioral evaluation suite in `docs/harness/evaluation-suite.md` specifies
-the versioned cases pinned to a fixture hash. `scripts/run_evaluation.py` makes them
-runnable and gradable, but execution status is per case and recorded in
-`evaluation-run.json`. Until a case appears there with a pass on every required
-repeat, it is specification only and no behavioral claim is made for it. Treat
-undocumented gate behavior as designed, not as benchmarked.
+- [User manual](docs/USER-MANUAL.md)
+- [Technical documentation](docs/TECHNICAL-DOCUMENTATION.md)
+- [Security model](docs/harness/SECURITY-MODEL.md)
+- [Maintainer guide](docs/harness/MAINTAINER.md)
+- [Changelog](CHANGELOG.md)
 
 ## Status
 
-Version 8.1.0, released 2026-08-31. `CHANGELOG.md` covers the path from 3.x
-and `docs/harness/MIGRATION-*.md` covers upgrades between majors.
+Version 8.1.0, released 2026-08-31. See the
+[v8.1.0 release](https://github.com/carlos-h-gomes/generic-agent-runtime/releases/tag/v8.1.0).
 
 ## License
 
-MIT. See `LICENSE`.
+MIT. See [LICENSE](LICENSE).
 
 ## Author
 
