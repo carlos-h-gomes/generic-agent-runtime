@@ -1,14 +1,35 @@
 # Generic Agent Runtime
 
-A governance harness for software built with AI coding agents.
+A repository-native support and governance layer for software built with AI coding agents.
 
-AI agents write code fast. What they do not bring is process: a task contract
-that defines what "done" means, a quality gate per engineering discipline, and
-evidence that survives the end of the chat session. This project supplies that
-layer as files in the repository, not as instructions in a prompt.
+Generic Agent Runtime (GAR) gives individual builders and engineering teams a
+shared way to define scope, control risky actions, preserve project context,
+run quality checks, and keep evidence of what was actually validated.
+
+Its goal is practical: make AI-assisted development more predictable,
+reviewable, and recoverable without assuming a specific model, tool, or
+application stack. GAR provides useful defaults and reminders for people
+building their engineering workflow, while giving experienced teams contracts
+and gates they can inspect, adapt, and automate.
+
+AI agents write code fast, but they do not bring a complete engineering
+process. GAR supplies that operating layer as files in the repository rather
+than instructions that disappear when a prompt or chat session ends.
 
 It is model-neutral. Claude, Codex, Gemini and local models read the same
 contracts and write to the same ledger.
+
+## Who it supports
+
+- **Individual builders** who want practical guardrails, checklists, and safer
+  defaults while working with coding agents.
+- **Engineering teams** that need consistent rules and evidence across models,
+  tools, repositories, and sessions.
+- **Maintainers and reviewers** who need explicit scope, approval boundaries,
+  quality gates, release evidence, and recovery guidance.
+
+GAR supports engineering work; it does not replace technical judgment, human
+review, or the security and privacy controls required by each product.
 
 ## What it does
 
