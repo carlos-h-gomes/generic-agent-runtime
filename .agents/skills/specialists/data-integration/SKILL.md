@@ -28,4 +28,4 @@ Use synthetic or sanitized payloads. Evidence may point to schemas, migrations, 
 
 Block implementation when source of truth, schema compatibility, failure/replay semantics, or data-loss behavior is unresolved. Architecture owns system-wide boundaries; Security owns retention/access decisions; Observability owns alerts; FinOps owns cost budgets.
 
-For n8n or hybrid workflows, require the automation decision contract, sanitized versioned export, explicit system of record, idempotency key/window, bounded retry, poison-event/error path, replay safety, reconciliation owner, and versioned API boundary. n8n execution history is not an authoritative ledger.
+For any automation or integration component, require the open solution decision, versioned artifact, explicit system of record, idempotency, bounded retry, poison-event/error path, replay safety, reconciliation owner, and versioned interface. Tool history is not an authoritative ledger. Apply n8n-specific controls only when that optional profile is selected.

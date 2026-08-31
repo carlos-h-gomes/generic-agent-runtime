@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static validation for the mandatory extensible Python/React architecture."""
+"""Static validation for legacy and open, user-selected architecture profiles."""
 
 from __future__ import annotations
 
@@ -182,6 +182,139 @@ def check_extensions(root: Path, policy: dict, failures: list[str]) -> None:
                 failures.append(f"undocumented frontend architectural extension: {path.relative_to(root)}")
 
 
+def owning_module(path: Path, modules: list[dict], root: Path) -> str | None:
+    matches: list[tuple[int, str]] = []
+    for module in modules:
+        base = root / module["path"]
+        try:
+            path.relative_to(base)
+        except ValueError:
+            continue
+        matches.append((len(base.parts), module["id"]))
+    return max(matches)[1] if matches else None
+
+
+def resolve_relative_import(source: Path, specifier: str, root: Path) -> Path | None:
+    if not specifier.startswith("."):
+        return None
+    candidate = (source.parent / specifier).resolve()
+    try:
+        candidate.relative_to(root)
+    except ValueError:
+        return Path("__outside__")
+    return candidate
+
+
+def check_open_dependencies(root: Path, modules: list[dict], failures: list[str]) -> None:
+    allowed = {module["id"]: set(module["may_depend_on"]) for module in modules}
+    for module in modules:
+        base = root / module["path"]
+        if not base.is_dir():
+            continue
+        for path in sorted(item for item in base.rglob("*") if item.suffix in {".js", ".jsx", ".ts", ".tsx"}):
+            text = path.read_text(encoding="utf-8")
+            for specifier in IMPORT_PATTERN.findall(text):
+                target_path = resolve_relative_import(path, specifier, root)
+                if target_path == Path("__outside__"):
+                    failures.append(f"source import escapes project: {path.relative_to(root)} -> {specifier}")
+                    continue
+                if target_path is None:
+                    continue
+                target = owning_module(target_path, modules, root)
+                if target and target != module["id"] and target not in allowed[module["id"]]:
+                    failures.append(
+                        f"dependency reversal: {path.relative_to(root)} imports module {target}; "
+                        f"{module['id']} may depend on {sorted(allowed[module['id']])}"
+                    )
+        for path in sorted(base.rglob("*.py")):
+            try:
+                tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            except (SyntaxError, UnicodeError) as exc:
+                failures.append(f"Python syntax {path.relative_to(root)}: {exc}")
+                continue
+            for imported in python_imports(tree):
+                parts = imported.split(".")
+                target = next((item["id"] for item in modules if item["id"] in parts), None)
+                if target and target != module["id"] and target not in allowed[module["id"]]:
+                    failures.append(
+                        f"dependency reversal: {path.relative_to(root)} imports module {target}; "
+                        f"{module['id']} may depend on {sorted(allowed[module['id']])}"
+                    )
+
+
+def check_open_entrypoint(root: Path, entrypoint: dict, failures: list[str]) -> bool:
+    raw = entrypoint["path"]
+    path = root / raw
+    if not path.is_file():
+        failures.append(f"missing composition root: {raw}")
+        return False
+    limit = int(entrypoint["max_non_comment_lines"])
+    if logical_lines(path) > limit:
+        failures.append(f"composition root exceeds {limit} logical lines: {raw}")
+    adapter = entrypoint["adapter"]
+    allowed = set(entrypoint["allowed_symbols"])
+    if adapter == "manual":
+        return bool(entrypoint["manual_evidence"])
+    text = path.read_text(encoding="utf-8")
+    if adapter == "python":
+        try:
+            tree = ast.parse(text, filename=str(path))
+        except (SyntaxError, UnicodeError) as exc:
+            failures.append(f"Python syntax {raw}: {exc}")
+            return False
+        route_methods = {"get", "post", "put", "patch", "delete", "options", "head", "route", "websocket"}
+        persistence = {"execute", "executemany", "commit", "rollback", "query", "save", "delete"}
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)) and node.name not in allowed:
+                failures.append(f"composition root owns undeclared symbol {node.name}: {raw}")
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                for decorator in node.decorator_list:
+                    target = decorator.func if isinstance(decorator, ast.Call) else decorator
+                    if isinstance(target, ast.Attribute) and target.attr.lower() in route_methods:
+                        failures.append(f"composition root defines HTTP route {node.name}: {raw}")
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr.lower() in persistence:
+                failures.append(f"composition root contains persistence call {node.func.attr}: {raw}")
+    else:
+        forbidden = re.compile(
+            r"\b(fetch\s*\(|axios\b|useState\s*\(|useEffect\s*\(|useReducer\s*\(|"
+            r"(?:app|router)\.(?:get|post|put|patch|delete)\s*\(|"
+            r"(?:query|execute|commit|rollback|save)\s*\()"
+        )
+        if forbidden.search(text):
+            failures.append(f"composition root contains feature, route, persistence, or transport behavior: {raw}")
+        declarations = re.findall(r"(?:function|class)\s+([A-Za-z_$][A-Za-z0-9_$]*)", text)
+        for name in declarations:
+            if name not in allowed:
+                failures.append(f"composition root owns undeclared symbol {name}: {raw}")
+    return True
+
+
+def check_open_profile(root: Path, policy: dict, failures: list[str]) -> bool:
+    organization = policy["organization"]
+    modules = organization["modules"]
+    ids = [module["id"] for module in modules]
+    if len(ids) != len(set(ids)):
+        failures.append("architecture module ids must be unique")
+    known = set(ids)
+    for module in modules:
+        unknown = set(module["may_depend_on"]) - known
+        if unknown or module["id"] in module["may_depend_on"]:
+            failures.append(f"invalid dependency declaration for module {module['id']}: {sorted(unknown)}")
+        if not (root / module["path"]).is_dir():
+            failures.append(f"missing declared module directory: {module['path']}")
+    for raw in organization["roots"]:
+        if not (root / raw).is_dir():
+            failures.append(f"missing architecture root: {raw}")
+    check_open_dependencies(root, modules, failures)
+    complete = True
+    for entrypoint in organization["composition_roots"]:
+        if entrypoint["adapter"] == "manual" and not entrypoint["manual_evidence"]:
+            complete = False
+        if not check_open_entrypoint(root, entrypoint, failures):
+            complete = False
+    return complete
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
     result.add_argument("--root", type=Path, default=DEFAULT_ROOT)
@@ -226,24 +359,40 @@ def main(argv: list[str] | None = None) -> int:
         return 3
     try:
         policy = load_object(policy_path)
-        if policy.get("schema_version") != "1.0" or policy.get("profile") != "python-react-hybrid":
-            raise ValueError("unsupported architecture policy")
         failures: list[str] = []
-        for raw in [*policy["backend"]["required_directories"], *policy["frontend"]["required_directories"]]:
-            if not (root / raw).is_dir():
-                failures.append(f"missing required directory: {raw}")
-        check_python(root, policy, failures)
-        check_frontend(root, policy, failures)
-        check_extensions(root, policy, failures)
-        if arguments.profile == "release" and not (root / policy["contracts"]["api"]).is_file():
-            failures.append(f"release API contract is missing: {policy['contracts']['api']}")
+        schema_version = policy.get("schema_version")
+        complete = True
+        if schema_version == "1.0" and policy.get("profile") == "python-react-hybrid":
+            for raw in [*policy["backend"]["required_directories"], *policy["frontend"]["required_directories"]]:
+                if not (root / raw).is_dir():
+                    failures.append(f"missing required directory: {raw}")
+            check_python(root, policy, failures)
+            check_frontend(root, policy, failures)
+            check_extensions(root, policy, failures)
+            if arguments.profile == "release" and not (root / policy["contracts"]["api"]).is_file():
+                failures.append(f"release API contract is missing: {policy['contracts']['api']}")
+        elif schema_version == "2.0":
+            complete = check_open_profile(root, policy, failures)
+            if policy.get("status") == "migration_required":
+                complete = False
+            if policy.get("selection", {}).get("user_decision_status") == "pending":
+                complete = False
+            if arguments.profile == "release":
+                for raw in policy["contracts"]["interfaces"]:
+                    if not (root / raw).is_file():
+                        failures.append(f"release interface contract is missing: {raw}")
+        else:
+            raise ValueError("unsupported architecture policy")
         if failures:
             for failure in failures[:100]:
                 print(f"FAIL architecture: {failure}")
             if len(failures) > 100:
                 print(f"FAIL architecture: {len(failures) - 100} additional failures omitted")
             return 1
-        print("PASS architecture: hybrid boundaries, minimum topology, dependencies, extensions, and entrypoints")
+        if not complete:
+            print("INCOMPLETE architecture: adapter evidence, user decision, or migration closure is required")
+            return 3
+        print("PASS architecture: declared modules, dependencies, composition roots, contracts, and evidence")
         return 0
     except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
         print(f"FAIL architecture: invalid policy or source: {exc}", file=sys.stderr)

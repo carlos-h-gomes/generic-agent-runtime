@@ -48,28 +48,35 @@
     "contract_versions": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["task", "gate_result", "bridge_event"],
+      "required": ["task", "gate_result", "bridge_event", "archive_plan", "archive_manifest"],
       "properties": {
         "task": { "const": "1.0" },
         "gate_result": { "const": "1.0" },
-        "bridge_event": { "const": "2.0" }
+        "bridge_event": { "const": "2.0" },
+        "archive_plan": { "const": "1.0" },
+        "archive_manifest": { "const": "1.0" }
       }
     },
     "policy_versions": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["security", "authorized_target", "security_test_plan", "ui_review", "architecture_policy", "project_template", "source_of_truth", "release_documentation", "automation_decision", "adoption_plan"],
+      "required": ["security", "authorized_target", "security_test_plan", "ui_review", "architecture_policy", "architecture_profile", "project_template", "source_of_truth", "release_documentation", "automation_decision", "solution_decision", "reuse_decision", "model_capability_profile", "adoption_plan", "workspace_hygiene"],
       "properties": {
         "security": { "const": "1.0" },
         "authorized_target": { "const": "1.0" },
         "security_test_plan": { "const": "1.0" },
         "ui_review": { "const": "1.0" },
         "architecture_policy": { "const": "1.0" },
+        "architecture_profile": { "const": "2.0" },
         "project_template": { "const": "1.0" },
         "source_of_truth": { "const": "1.0" },
         "release_documentation": { "const": "1.0" },
         "automation_decision": { "const": "1.0" },
-        "adoption_plan": { "const": "1.0" }
+        "solution_decision": { "const": "2.0" },
+        "reuse_decision": { "const": "1.0" },
+        "model_capability_profile": { "const": "1.0" },
+        "adoption_plan": { "const": "1.0" },
+        "workspace_hygiene": { "const": "1.0" }
       }
     },
     "instruction_budget": {
@@ -103,9 +110,16 @@
         "security_test_plan",
         "ui_review",
         "architecture_policy",
+        "architecture_profile",
         "project_template",
         "automation_decision",
-        "adoption_plan"
+        "solution_decision",
+        "reuse_decision",
+        "model_capability_profile",
+        "adoption_plan",
+        "workspace_hygiene_policy",
+        "archive_plan",
+        "archive_manifest"
       ],
       "properties": {
         "task": { "const": "schemas/task-contract.schema.json" },
@@ -116,9 +130,16 @@
         "security_test_plan": { "const": "schemas/security-test-plan.schema.json" },
         "ui_review": { "const": "schemas/ui-review.schema.json" },
         "architecture_policy": { "const": "schemas/architecture-policy.schema.json" },
+        "architecture_profile": { "const": "schemas/architecture-profile.schema.json" },
         "project_template": { "const": "schemas/project-template.schema.json" },
         "automation_decision": { "const": "schemas/automation-decision.schema.json" },
-        "adoption_plan": { "const": "schemas/adoption-plan.schema.json" }
+        "solution_decision": { "const": "schemas/solution-decision.schema.json" },
+        "reuse_decision": { "const": "schemas/reuse-decision.schema.json" },
+        "model_capability_profile": { "const": "schemas/model-capability-profile.schema.json" },
+        "adoption_plan": { "const": "schemas/adoption-plan.schema.json" },
+        "workspace_hygiene_policy": { "const": "schemas/workspace-hygiene-policy.schema.json" },
+        "archive_plan": { "const": "schemas/archive-plan.schema.json" },
+        "archive_manifest": { "const": "schemas/archive-manifest.schema.json" }
       }
     },
     "security_policy": { "const": "security-policy.json" },

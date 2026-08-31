@@ -19,6 +19,8 @@ Skipped and unavailable checks are incomplete, never passed. An agent cannot acc
 
 Gate results contain bounded, redacted summaries and evidence pointers—not credentials, raw customer data, private prompts, full response bodies, or exploit payloads.
 
+Gate rigor does not grant write authority. For answer, inspection, diagnosis, or review work, return applicable gate conclusions inline unless the user authorized persistence or an existing governed workflow explicitly requires an update. Reuse an authoritative result before creating another. When a formal GateResult is authorized and required, start from `docs/ai/tasks/_GATE_RESULT_TEMPLATE.json`, validate it against `schemas/gate-result.schema.json`, and cite it as evidence only after validation passes; otherwise its status is incomplete.
+
 For material UI, `ux_product` requires an approved `docs/ai/ui-review.json`. For internet-facing web work, `security_compliance` requires an in-date policy, a threat model, incident response, supported pinned runtime/framework versions, and applicable scanner evidence.
 
 Validation uses at most two corrective retries after the initial attempt. Repeated failure without new evidence pauses the task for review.

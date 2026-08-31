@@ -1,43 +1,63 @@
 {
   "$schema": "schemas/security-policy.schema.json",
   "schema_version": "1.0",
-  "checked_at": "2026-07-30",
-  "expires_at": "2026-08-29",
+  "checked_at": "2026-08-31",
+  "expires_at": "2026-09-30",
   "sources": [
     {
-      "title": "Next.js July 2026 Security Release",
-      "url": "https://nextjs.org/blog/july-2026-security-release",
-      "as_of": "2026-07-30"
+      "title": "Next.js August 2026 Security Release",
+      "url": "https://nextjs.org/blog/august-2026-security-release",
+      "as_of": "2026-08-28"
     },
     {
       "title": "Next.js Support Policy",
       "url": "https://nextjs.org/support-policy",
-      "as_of": "2026-07-30"
+      "as_of": "2026-08-28"
     },
     {
       "title": "Node.js Releases",
       "url": "https://nodejs.org/en/about/previous-releases",
-      "as_of": "2026-07-30"
+      "as_of": "2026-08-28"
     },
     {
       "title": "CPython Supported Versions",
       "url": "https://devguide.python.org/versions/",
-      "as_of": "2026-08-03"
+      "as_of": "2026-08-28"
     },
     {
       "title": "React Versions",
       "url": "https://react.dev/versions",
-      "as_of": "2026-08-03"
+      "as_of": "2026-08-28"
     },
     {
       "title": "Vite Releases",
       "url": "https://vite.dev/releases",
-      "as_of": "2026-08-03"
+      "as_of": "2026-08-28"
     },
     {
       "title": "OWASP ASVS",
       "url": "https://owasp.org/www-project-application-security-verification-standard/",
-      "as_of": "2026-07-30"
+      "as_of": "2026-08-28"
+    },
+    {
+      "title": "OWASP API Security Top 10",
+      "url": "https://owasp.org/API-Security/",
+      "as_of": "2026-08-31"
+    },
+    {
+      "title": "Brazilian General Data Protection Law (LGPD), consolidated",
+      "url": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm",
+      "as_of": "2026-08-31"
+    },
+    {
+      "title": "ANPD Resolution CD/ANPD 15/2024 - Security Incident Communication",
+      "url": "https://www.gov.br/anpd/pt-br/acesso-a-informacao/institucional/atos-normativos/regulamentacoes_anpd/documentos/rcis___anonimizado_final_ocultado_2_parte3.pdf",
+      "as_of": "2026-08-31"
+    },
+    {
+      "title": "ANPD Resolution CD/ANPD 19/2024 - International Data Transfers",
+      "url": "https://www.gov.br/anpd/pt-br/acesso-a-informacao/institucional/atos-normativos/regulamentacoes_anpd/resolucao-cd-anpd-no-19-de-23-de-agosto-de-2024",
+      "as_of": "2026-08-31"
     }
   ],
   "execution": {
@@ -85,16 +105,16 @@
       "supported": [
         {
           "major": 15,
-          "minimum": "15.5.21",
+          "minimum": "15.5.24",
           "support": "maintenance_lts"
         },
         {
           "major": 16,
-          "minimum": "16.2.11",
+          "minimum": "16.3.3",
           "support": "active_lts"
         }
       ],
-      "source": "https://nextjs.org/blog/july-2026-security-release"
+      "source": "https://nextjs.org/blog/august-2026-security-release"
     },
     "react": {
       "stable_major": 19,
@@ -103,8 +123,8 @@
       "source": "https://react.dev/versions"
     },
     "vite": {
-      "default_line": "8.1",
-      "supported_lines": ["8.1", "8.0", "7.3", "6.4"],
+      "default_line": "8.2",
+      "supported_lines": ["8.2", "8.1", "8.0", "7.3", "6.4"],
       "block_prerelease": true,
       "source": "https://vite.dev/releases"
     }

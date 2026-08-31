@@ -31,6 +31,8 @@ Measure the change by:
 
 Delete speculative flexibility, duplicate helpers, unused flags, premature abstraction, and unrelated refactoring. Prefer a local direct implementation until demonstrated repetition or a real boundary justifies abstraction.
 
+For governance artifacts, prefer this order: reuse the authoritative artifact, return an inline review, update one existing review home when authorized, then create the smallest schema-valid formal set only when continuity or a required gate needs it. Read-only review does not authorize task, decision, gate, or `docs/ai` creation. Risk changes the depth of reasoning, not the write boundary or the number of files. Never create per-gate files as a substitute for a concise production-readiness conclusion.
+
 ## Safety floor
 
 Never reduce input validation, authorization, privacy, accessibility, test coverage required by the task, rollback/data-loss handling, rate/cost limits, monitoring required for release, or durable context required for safe handoff.

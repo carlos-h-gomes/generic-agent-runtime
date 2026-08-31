@@ -1,7 +1,9 @@
 # Automation execution-plane policy
 
 Version: 1.0  
-Applies to: Harness 7 application and integration work
+Applies to: the optional Harness 7 n8n compatibility profile retained by Harness 8
+
+This is a tool-specific compatibility policy, not the universal Harness 8 decision model. First use `docs/harness/SOLUTION-DECISION-POLICY.md` and `schemas/solution-decision.schema.json`, which accept user-named tools and architectures. Apply this document only when n8n is among the selected components.
 
 ## Decision rule
 

@@ -15,7 +15,7 @@ Profile only enough of the repository to work safely. Do not scan everything by 
 4. Derive commands only from repository evidence. Run safe discovery flags or existing validation commands when authorized and practical; record exact command, outcome, and environment.
 5. Identify stack, package manager, module and data boundaries, external integrations, important paths, generated artifacts, and material security/cost/operational risks.
 6. Independently classify Harness adoption (`greenfield`, `brownfield`, `upgrade`), existing Harness posture, application posture, and architecture disposition. Missing Python/React directories never proves an application is absent; inspect manifests and source/deployment roots. Preserve a brownfield stack and identify profiling or migration work without creating target directories.
-7. For a project already targeting Python API/React, inventory minimum directories, entrypoint responsibilities, API contract ownership, and documented architectural extensions.
+7. Inventory declared roots, module or feature responsibilities, dependency direction, composition roots, interface ownership, verification adapters, and documented extensions. When the optional Python/React profile applies, retain its specific minimum directories and API boundary.
 8. Distinguish current fact, inference, and unknown. Add an evidence pointer for every non-obvious claim.
 
 ## Write policy

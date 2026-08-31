@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "harness_version": "7.0.0",
+  "harness_version": "8.1.0",
   "excluded_files": [
     "MANIFEST.sha256",
     "SBOM.cdx.json",
@@ -41,7 +41,8 @@
     "docs/ai/tasks/_GATE_RESULT_TEMPLATE.json",
     "docs/ai/tasks/_TASK_CONTRACT_TEMPLATE.task.json",
     "docs/ai/tasks/_TASK_TEMPLATE.md",
-    "harness.json"
+    "harness.json",
+    "workspace-hygiene-policy.json"
   ],
   "harness_owned_prefixes": [
     ".agents/",

@@ -1,70 +1,44 @@
 # Project Conventions
 
-Status: initialize project-specific extensions while preserving this mandatory minimum.
+Status: initialize from repository evidence and the user's recorded choices.
 
-## Hybrid architecture floor
+## Architecture selection
 
-- Application projects use two isolated boundaries: a Python HTTP API under `backend/` and a React client under `frontend/`.
-- FastAPI is the default backend framework. Flask is compatible only with modular Blueprints and the same controllers/services/models separation.
-- React uses TypeScript and Vite by default. A different React toolchain needs an architecture decision and supported dependency evidence.
-- Frontend and backend do not import or execute each other's source. Integration uses a versioned HTTP contract, normally OpenAPI.
-- Authoritative business rules, resource authorization, and persistence remain in the backend. The frontend owns presentation, interaction state, navigation, and browser-side orchestration.
+- Brownfield work preserves the verified language, frameworks, topology, package/runtime, commands, and deployment model unless a separate migration is authorized.
+- Greenfield work reuses any choice the user already made. If a material choice is missing, recommend relevant options with concise reasons and tradeoffs, then wait for the user's decision before generating application code.
+- Record the selected or observed architecture in `docs/ai/architecture-policy.json` using the open architecture profile. Declare roots, modules, responsibilities, permitted dependencies, composition roots, contracts, tests, and extensions.
+- Do not infer a language or framework from the Harness implementation language. The bundled Python/FastAPI and React/TypeScript template is optional.
+- Prefer the smallest structure that expresses real ownership boundaries. Avoid both one-file feature containers and speculative layers with no current responsibility.
 
-This profile is the greenfield generation target. Harness adoption into a brownfield repository preserves the evidence-backed existing stack; governance installation cannot create this topology or claim conformance. A non-target project records an observed architecture policy before application work, and any migration to this profile uses a separate managed task.
+## Reuse before creation
 
-## Automation execution planes
+- Inventory existing modules, contracts, tests, utilities, dependencies, documentation, and generated clients before proposing new code.
+- Classify relevant assets as `reuse`, `extend`, `adapt`, `replace`, or `new`, with evidence and compatibility notes.
+- Prefer reuse or a narrow extension when behavior, ownership, security, license, and support constraints remain compatible.
+- Replacement requires an explicit reason, migration and rollback treatment, and characterization tests where existing behavior matters.
+- Never duplicate an existing responsibility merely because a new implementation is easier to generate.
 
-- Code owns business authority, authorization, tenant isolation, transactional invariants, authoritative persistence, complex state/concurrency, intensive computation, and strict performance.
-- n8n may own bounded edge orchestration only under `docs/harness/AUTOMATION-EXECUTION-POLICY.md` and a valid `automation-decision` contract.
-- Hybrid workflows call versioned code APIs for every authoritative or blocked responsibility.
-- Workflow exports are sanitized and versioned; credentials, direct production editing, unbounded retries/fan-out, and using risky nodes to evade a code boundary are prohibited.
+## Open solution placement
 
-## Required minimum topology
+- Material integrations and automations use `schemas/solution-decision.schema.json`; categories and tool names are open.
+- The user owns technology choice. Recommend options from requirements and verified project context, not from a fixed code/workflow/hybrid menu.
+- Every component declares responsibility, authority, system of record, interfaces, reliability, security, cost, operations, rollback, and kill switch.
+- Connectors, visual workflows, managed services, agents, database features, and generated code gain no business authority by convenience.
+- Tool-specific profiles apply only after selection. The retained n8n policy is one optional compatibility profile.
 
-Backend required paths:
+## Topology and dependency rules
 
-```text
-backend/app/main.py
-backend/app/controllers/
-backend/app/services/
-backend/app/models/
-backend/app/schemas/
-backend/app/repositories/
-backend/tests/
-```
+The architecture profile is the machine-readable minimum, not a universal directory tree. Every declared root and required path must exist; every module must have one coherent responsibility, explicit permitted dependencies, and owned tests. Additional directories are allowed when their responsibility and direction are recorded.
 
-Frontend required paths:
+Dependency direction must point toward stable contracts and owned domain behavior. Transport, UI, persistence, workflow, provider, and framework adapters must not become accidental authorities. Cross-boundary communication uses declared, versioned contracts with authentication, authorization, validation, stable errors, timeouts, volume limits, observability, and compatibility behavior where applicable.
 
-```text
-frontend/src/api/
-frontend/src/assets/
-frontend/src/components/layout/
-frontend/src/components/ui/
-frontend/src/context/
-frontend/src/data/
-frontend/src/hooks/
-frontend/src/pages/
-frontend/src/services/
-frontend/src/utils/
-frontend/tests/
-```
-
-These paths are a minimum required subset, not an allowlist. Additional feature, provider, route, type, configuration, domain, adapter, job, or integration directories are allowed when they have a distinct responsibility. Record every new top-level architectural layer, its owner, and permitted dependencies in this file or `docs/architecture/DIRECTORY-MAP.md`.
-
-## Dependency and responsibility rules
-
-- Backend direction is `controllers -> services -> models/repositories`; DTO validation belongs in `schemas`.
-- Controllers map HTTP input/output and transport errors. They do not contain business rules, database queries, or third-party workflows.
-- Services own use cases and business rules. Repositories own persistence adapters. Models do not depend on controllers or services.
-- Frontend `api` owns HTTP transport and generated clients. Frontend `services` own presentation-side orchestration, not authoritative server rules.
-- Pages compose routes; components are reusable UI; hooks own reusable React behavior; context is reserved for genuine cross-tree state; data contains static or synthetic content; utils remain pure.
-- Utilities cannot import React, pages, context, services, or API transport. Components cannot depend on pages. API transport cannot depend on UI.
+When the optional Python/React template is selected, its version-1 profile retains the detailed `backend/app/controllers -> services -> models/repositories` direction and the frontend `api`, `services`, `pages`, `components`, `hooks`, `context`, `data`, and `utils` responsibilities documented in `docs/harness/HYBRID-ARCHITECTURE.md`.
 
 ## Entrypoints and anti-monolith rule
 
-`App.jsx`, `App.tsx`, `main.py`, and `server.py` may exist only as thin composition roots. They may construct the application, register routes, middleware, providers, layouts, and process startup. They may not contain route implementations, persistence, direct HTTP clients, business rules, large state machines, feature datasets, or reusable UI implementations.
+Application entrypoints such as `App.jsx`, `App.tsx`, `main.py`, `server.py`, `index.ts`, and ecosystem equivalents may exist only as thin composition roots. They may construct the application, register routes or handlers, middleware, providers, layouts, and process startup. They may not own route implementations, persistence queries, direct external transport, business rules, large state machines, feature datasets, reusable UI implementations, or undeclared feature symbols.
 
-When asked to create a single-file monolith, refuse that constraint, explain the violated ownership rule, and propose a compliant decomposition. Do not refuse a valid thin entrypoint merely because of its filename.
+When asked to create a single-file monolith, explain the violated ownership rule and propose a compliant decomposition. Do not reject a valid thin entrypoint merely because of its filename, and do not force a layer-oriented tree when feature-oriented or ecosystem-native modules express the chosen architecture better.
 
 ## Source of truth and documentation
 
@@ -83,5 +57,5 @@ When asked to create a single-file monolith, refuse that constraint, explain the
 ## Formatting, testing, and evidence
 
 - Record verified install, lint, typecheck, test, build, security, architecture, documentation, and release commands in `docs/ai/commands.md`.
-- Prefer focused unit tests within each boundary plus API contract, integration, accessibility, and end-to-end coverage where the risk requires it.
+- Prefer focused unit tests within each boundary plus contract, integration, accessibility, and end-to-end coverage where risk requires it.
 - Never store credentials, customer data, private prompts, full logs, or unredacted production evidence in project memory or documentation.

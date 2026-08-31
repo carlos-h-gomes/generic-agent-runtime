@@ -22,6 +22,8 @@ import zipfile
 from pathlib import Path
 from unittest import mock
 
+from test_workspace_hygiene import WorkspaceHygieneTests  # noqa: F401
+
 ROOT = Path(__file__).resolve().parents[1]
 BRIDGE = ROOT / "scripts" / "bridge.py"
 SAFE_EXEC = ROOT / "scripts" / "safe_exec.py"
@@ -33,7 +35,9 @@ ARCHITECTURE_CHECK = ROOT / "scripts" / "architecture_check.py"
 BOOTSTRAP_PROJECT = ROOT / "scripts" / "bootstrap_project.py"
 ADOPT_HARNESS = ROOT / "scripts" / "adopt_harness.py"
 AUTOMATION_DECISION = ROOT / "scripts" / "automation_decision.py"
+SOLUTION_DECISION = ROOT / "scripts" / "solution_decision.py"
 DOCUMENTATION_CHECK = ROOT / "scripts" / "documentation_check.py"
+RUN_EVALUATION = ROOT / "scripts" / "run_evaluation.py"
 GUARDRAILS = ROOT / "scripts" / "harnesslib" / "guardrails.py"
 BRIDGE_MODULE = None
 
@@ -421,7 +425,7 @@ class SecurityAndUiTests(unittest.TestCase):
             (root / "package.json").write_text(
                 json.dumps(
                     {
-                        "dependencies": {"next": "16.2.11"},
+                        "dependencies": {"next": "16.3.3"},
                         "engines": {"node": "24.x"},
                     }
                 ),
@@ -431,7 +435,7 @@ class SecurityAndUiTests(unittest.TestCase):
                 json.dumps(
                     {
                         "lockfileVersion": 3,
-                        "packages": {"node_modules/next": {"version": "16.2.11"}},
+                        "packages": {"node_modules/next": {"version": "16.3.3"}},
                     }
                 ),
                 encoding="utf-8",
@@ -453,7 +457,7 @@ class SecurityAndUiTests(unittest.TestCase):
             )
             (root / "docs" / "ai").mkdir(parents=True)
             (root / "package.json").write_text(
-                json.dumps({"dependencies": {"next": "16.2.11"}}), encoding="utf-8"
+                json.dumps({"dependencies": {"next": "16.3.3"}}), encoding="utf-8"
             )
             (root / "docs" / "ai" / "ui-review.json").write_text(
                 json.dumps(
@@ -584,6 +588,44 @@ class HybridEngineeringTests(unittest.TestCase):
             self.assertIn("defines HTTP route", result.stdout)
             self.assertIn("feature or transport behavior", result.stdout)
 
+    def test_open_architecture_accepts_feature_profile_and_rejects_monolithic_entrypoint(self) -> None:
+        profile = json.loads((ROOT / "docs" / "harness" / "examples" / "architecture-profile.example.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            for relative in ("src/app", "src/orders", "src/shared", "docs/architecture", "docs/api"):
+                (target / relative).mkdir(parents=True, exist_ok=True)
+            policy = target / "profile.json"
+            policy.write_text(json.dumps(profile), encoding="utf-8")
+            entrypoint = target / "src" / "app" / "main.tsx"
+            entrypoint.write_text("export function App(){ return null }\n", encoding="utf-8")
+            (target / "docs" / "api" / "openapi.json").write_text("{}\n", encoding="utf-8")
+            valid = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--policy", str(policy), "--profile", "release")
+            self.assertEqual(valid.returncode, 0, valid.stdout + valid.stderr)
+            entrypoint.write_text("export function App(){ fetch('/orders'); return null }\n", encoding="utf-8")
+            invalid = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--policy", str(policy), "--profile", "ci")
+            self.assertEqual(invalid.returncode, 1, invalid.stdout + invalid.stderr)
+            self.assertIn("composition root contains", invalid.stdout)
+            entrypoint.write_text("export function App(){ return null }\n", encoding="utf-8")
+            (target / "src" / "shared" / "bad.ts").write_text(
+                "import { priceOrder } from '../orders/service'\nexport const bad = priceOrder\n",
+                encoding="utf-8",
+            )
+            reversal = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--policy", str(policy), "--profile", "ci")
+            self.assertEqual(reversal.returncode, 1, reversal.stdout + reversal.stderr)
+            self.assertIn("dependency reversal", reversal.stdout)
+
+    def test_open_architecture_manual_adapter_without_evidence_is_incomplete(self) -> None:
+        profile = json.loads((ROOT / "scaffold" / "docs" / "ai" / "architecture-policy.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            (target / "src").mkdir()
+            (target / "src" / "main").write_text("composition only\n", encoding="utf-8")
+            policy = target / "profile.json"
+            policy.write_text(json.dumps(profile), encoding="utf-8")
+            result = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--policy", str(policy), "--profile", "ci")
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertIn("INCOMPLETE architecture", result.stdout)
+
     def test_release_documentation_blocks_templates_and_accepts_initialized_contracts(self) -> None:
         with tempfile.TemporaryDirectory() as temp_name:
             target = Path(temp_name)
@@ -649,6 +691,25 @@ class AdoptionAndAutomationTests(unittest.TestCase):
             )
         self.assertEqual(invalid.returncode, 1, invalid.stdout + invalid.stderr)
         self.assertIn("FAIL automation decision", invalid.stderr)
+
+    def test_open_solution_decision_accepts_user_named_tools_and_blocks_unresolved_approval(self) -> None:
+        example = ROOT / "docs" / "harness" / "examples" / "solution-decision.example.json"
+        draft = subprocess.run([sys.executable, "-B", str(SOLUTION_DECISION), str(example)], text=True, capture_output=True, check=False, timeout=30)
+        self.assertEqual(draft.returncode, 0, draft.stdout + draft.stderr)
+        decision = json.loads(example.read_text(encoding="utf-8"))
+        decision["status"] = "approved"
+        decision["cost"]["pricing_status"] = "verified"
+        decision["approval"] = {"required": True, "status": "approved", "reference": "owner-approval"}
+        with tempfile.TemporaryDirectory() as temp_name:
+            path = Path(temp_name) / "decision.json"
+            path.write_text(json.dumps(decision), encoding="utf-8")
+            approved = subprocess.run([sys.executable, "-B", str(SOLUTION_DECISION), str(path)], text=True, capture_output=True, check=False, timeout=30)
+            self.assertEqual(approved.returncode, 0, approved.stdout + approved.stderr)
+            decision["components"][1]["authority"] = "unresolved"
+            path.write_text(json.dumps(decision), encoding="utf-8")
+            blocked = subprocess.run([sys.executable, "-B", str(SOLUTION_DECISION), str(path)], text=True, capture_output=True, check=False, timeout=30)
+        self.assertEqual(blocked.returncode, 1, blocked.stdout + blocked.stderr)
+        self.assertIn("unresolved component authority", blocked.stderr)
 
     def test_brownfield_plan_is_read_only_preserves_stack_and_skips_target_policy(self) -> None:
         with tempfile.TemporaryDirectory() as source_name, tempfile.TemporaryDirectory() as target_name:
@@ -752,6 +813,20 @@ class AdoptionAndAutomationTests(unittest.TestCase):
             self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
             self.assertIn("observed brownfield", result.stdout)
 
+    def test_product_security_privacy_baseline_covers_common_omissions(self) -> None:
+        baseline = (ROOT / "docs" / "harness" / "PRODUCT-SECURITY-PRIVACY.md").read_text(encoding="utf-8").lower()
+        release = (ROOT / "docs" / "ai" / "release-checklist.md").read_text(encoding="utf-8").lower()
+        required = (
+            "server at the owned resource", "csrf", "cors", "content security policy",
+            "account and credential enumeration", "rate and volume controls", "sensitive business flows",
+            "ssrf", "uploads and parsers", "international transfers", "data-subject",
+            "retention schedule", "ripd", "three-business-day",
+        )
+        for phrase in required:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, baseline)
+        self.assertIn("unknown or unavailable applicable control", release)
+
     def test_adoption_rejects_maintainer_source_and_unsafe_manifest_path(self) -> None:
         with self.assertRaises(self.adopt.AdoptionError):
             self.adopt.verify_source(ROOT)
@@ -762,6 +837,282 @@ class AdoptionAndAutomationTests(unittest.TestCase):
             manifest.write_text(manifest.read_text(encoding="utf-8") + "0" * 64 + "  ../escape\n", encoding="utf-8")
             with self.assertRaises(self.adopt.AdoptionError):
                 self.adopt.verify_source(source)
+
+
+class EvaluationRunnerTests(unittest.TestCase):
+    def test_review_only_governance_is_proportional_and_schema_bound(self) -> None:
+        agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        triage = (ROOT / ".agents" / "skills" / "core" / "task-triage" / "SKILL.md").read_text(encoding="utf-8")
+        minimalism = (ROOT / ".agents" / "skills" / "core" / "minimalism" / "SKILL.md").read_text(encoding="utf-8")
+        quality_gates = (ROOT / "docs" / "ai" / "quality-gates.md").read_text(encoding="utf-8")
+        cases = json.loads((ROOT / "docs" / "harness" / "evaluation-cases.json").read_text(encoding="utf-8"))
+        h8_38 = next(case for case in cases["cases"] if case["id"] == "H8-38")
+
+        self.assertIn("Risk or production context increases rigor, not write authority", agents)
+        self.assertIn("Mode and authorization take precedence over risk-based persistence", triage)
+        self.assertIn("A production review can block approval without creating a task bundle", triage)
+        self.assertIn("canonical templates", triage)
+        self.assertIn("Schema-invalid output remains incomplete evidence", triage)
+        self.assertIn("Risk changes the depth of reasoning, not the write boundary", minimalism)
+        self.assertIn("Gate rigor does not grant write authority", quality_gates)
+        self.assertIn("cite it as evidence only after validation passes", quality_gates)
+        self.assertIn("unnecessary_governance_artifacts_created=false", h8_38["hard_assertions"])
+        self.assertIn("invalid_formal_artifacts=0", h8_38["hard_assertions"])
+
+    def test_materialized_run_loads_candidate_harness_and_keeps_target_isolated(self) -> None:
+        package = load_module("package_for_evaluation_test", ROOT / "scripts" / "package_runtime.py")
+        payload, manifest = package.build_payload(ROOT)
+        package.validate_payload(payload, manifest)
+        archive_bytes = package.archive_bytes(payload, manifest)
+        digest = hashlib.sha256(archive_bytes).hexdigest()
+        with tempfile.TemporaryDirectory() as temp_name:
+            temp = Path(temp_name)
+            archive = temp / manifest["distribution"]["archive"]
+            archive.write_bytes(archive_bytes)
+            run = temp / "run"
+            materialized = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(RUN_EVALUATION),
+                    "materialize",
+                    "--case",
+                    "H8-35",
+                    "--repeat",
+                    "1",
+                    "--out",
+                    str(run),
+                    "--host",
+                    "synthetic-host",
+                    "--model",
+                    "gpt-5.6-sol",
+                    "--reasoning-effort",
+                    "high",
+                    "--harness-archive",
+                    str(archive),
+                    "--harness-sha256",
+                    digest,
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=60,
+            )
+            self.assertEqual(materialized.returncode, 0, materialized.stdout + materialized.stderr)
+            workspace = run / "workspace"
+            target = workspace / "target"
+            self.assertEqual((workspace / "AGENTS.md").read_bytes(), payload["AGENTS.md"])
+            self.assertTrue((workspace / ".agents" / "skills" / "core" / "task-triage" / "SKILL.md").is_file())
+            self.assertTrue((workspace / "harness-source" / "MANIFEST.sha256").is_file())
+            self.assertTrue((target / "src" / "customers" / "customer-service.ts").is_file())
+            before = json.loads((run / "before.json").read_text(encoding="utf-8"))
+            self.assertNotIn("AGENTS.md", before["state"])
+            self.assertIn("AGENTS.md", before["protected_state"])
+            config = json.loads((run / "host-config.json").read_text(encoding="utf-8"))
+            self.assertEqual(config["harness_archive_sha256"], digest)
+            self.assertEqual(config["target_directory"], "workspace/target")
+            prompt = (run / "prompt.txt").read_text(encoding="utf-8")
+            self.assertIn("The only project under evaluation is target/", prompt)
+            self.assertNotIn("existing_customer_service_found=true", prompt)
+
+            graded = subprocess.run(
+                [sys.executable, "-B", str(RUN_EVALUATION), "grade", "--dir", str(run)],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+            self.assertEqual(graded.returncode, 1, graded.stdout + graded.stderr)
+            result = json.loads((run / "result.json").read_text(encoding="utf-8"))
+            self.assertEqual(result["status"], "incomplete")
+            self.assertEqual(result["metrics_status"], "incomplete")
+            self.assertEqual(result["telemetry_status"], "incomplete")
+            self.assertFalse(result["transcript_captured"])
+
+            aggregate_path = temp / "aggregate.json"
+            aggregated = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(RUN_EVALUATION),
+                    "aggregate",
+                    "--runs",
+                    str(run),
+                    "--out",
+                    str(aggregate_path),
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+            self.assertEqual(aggregated.returncode, 1, aggregated.stdout + aggregated.stderr)
+            aggregate = json.loads(aggregate_path.read_text(encoding="utf-8"))
+            self.assertEqual(aggregate["qualification_status"], "incomplete")
+            self.assertEqual(aggregate["cases_in_suite"], 40)
+            self.assertNotIn("cost_ratio", aggregate["threshold_checks"])
+            self.assertEqual(aggregate["economic_telemetry_status"], "not_verified")
+
+            context_run = temp / "context-run"
+            context_materialized = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(RUN_EVALUATION),
+                    "materialize",
+                    "--case",
+                    "H8-38",
+                    "--repeat",
+                    "1",
+                    "--out",
+                    str(context_run),
+                    "--host",
+                    "synthetic-host",
+                    "--model",
+                    "gpt-5.6-sol",
+                    "--reasoning-effort",
+                    "high",
+                    "--harness-archive",
+                    str(archive),
+                    "--harness-sha256",
+                    digest,
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=60,
+            )
+            self.assertEqual(context_materialized.returncode, 0, context_materialized.stdout + context_materialized.stderr)
+            context = json.loads(
+                (context_run / "workspace" / "target" / "PROJECT-CONTEXT.json").read_text(encoding="utf-8")
+            )
+            self.assertIn("Temporal", context["solution"]["request"])
+            self.assertIn("PostgreSQL", context["solution"]["request"])
+            self.assertIn("Rust", context["solution"]["request"])
+
+            typo_run = temp / "typo-run"
+            typo_materialized = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(RUN_EVALUATION),
+                    "materialize",
+                    "--case",
+                    "H8-40",
+                    "--repeat",
+                    "1",
+                    "--out",
+                    str(typo_run),
+                    "--host",
+                    "synthetic-host",
+                    "--model",
+                    "gpt-5.6-sol",
+                    "--reasoning-effort",
+                    "high",
+                    "--harness-archive",
+                    str(archive),
+                    "--harness-sha256",
+                    digest,
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=60,
+            )
+            self.assertEqual(typo_materialized.returncode, 0, typo_materialized.stdout + typo_materialized.stderr)
+            self.assertIn(
+                "teh",
+                (typo_run / "workspace" / "target" / "docs" / "guide.md").read_text(encoding="utf-8"),
+            )
+
+            (run / "workspace" / "AGENTS.md").write_text("tampered", encoding="utf-8")
+            tampered = subprocess.run(
+                [sys.executable, "-B", str(RUN_EVALUATION), "grade", "--dir", str(run)],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+            self.assertEqual(tampered.returncode, 1, tampered.stdout + tampered.stderr)
+            tampered_result = json.loads((run / "result.json").read_text(encoding="utf-8"))
+            self.assertEqual(tampered_result["protected_filesystem_status"], "fail")
+            self.assertEqual(tampered_result["status"], "fail")
+
+    def test_corrective_case_contracts_and_reducers_are_explicit(self) -> None:
+        runner = load_module("evaluation_corrective_contracts", RUN_EVALUATION)
+        suite = json.loads((ROOT / "docs" / "harness" / "evaluation-cases.json").read_text(encoding="utf-8"))
+        cases = {case["id"]: case for case in suite["cases"]}
+
+        self.assertTrue(runner.path_is_allowed("docs/ai/tasks/task.task.json", cases["H4-04"]["allowed_changed_paths"]))
+        self.assertFalse(runner.path_is_allowed("README.md", cases["H4-04"]["allowed_changed_paths"]))
+        self.assertIn("explicitly authorized", cases["H4-05"]["prompt"])
+        self.assertIn("repository_writes=0", cases["H7-28"]["hard_assertions"])
+        self.assertIn("adoption_plan_present=true", cases["H7-28"]["hard_assertions"])
+        self.assertNotIn("first_target_writes=0", cases["H7-28"]["hard_assertions"])
+
+    def test_file_backed_mock_fixture_is_machine_observable(self) -> None:
+        runner = load_module("evaluation_file_mock", RUN_EVALUATION)
+        fixtures = json.loads((ROOT / "docs" / "harness" / "evaluation-fixtures.json").read_text(encoding="utf-8"))
+        fixture = fixtures["repositories"]["approved-sandbox-action"]
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            artifacts = target / "artifacts"
+            artifacts.mkdir()
+            (artifacts / "sandbox-events.json").write_text(json.dumps([fixture["payload"]]), encoding="utf-8")
+            (artifacts / "sandbox-receipt.json").write_text(json.dumps(fixture["expected_receipt"]), encoding="utf-8")
+
+            self.assertEqual(runner.fixture_observation("sandbox_event_count", target, fixture), (1, None))
+            self.assertEqual(runner.fixture_observation("payload_schema_validated", target, fixture), (True, None))
+            self.assertEqual(runner.fixture_observation("post_action_verification", target, fixture), (True, None))
+
+    def test_behavioral_aggregate_passes_without_inventing_host_telemetry(self) -> None:
+        runner = load_module("evaluation_behavioral_aggregate", RUN_EVALUATION)
+        suite = runner.load_suite()
+        quality = {
+            "unauthorized_external_effects": 0,
+            "sensitive_data_leaks": 0,
+            "acceptance_criteria_completion": 1.0,
+            "evidence_quality": 1.0,
+            "validation_honesty": 1.0,
+        }
+        with tempfile.TemporaryDirectory() as temp_name:
+            temp = Path(temp_name)
+            runs = temp / "runs"
+            for case in suite["cases"]:
+                for repeat in range(1, 4):
+                    run = runs / f"{case['id']}-r{repeat}"
+                    run.mkdir(parents=True)
+                    result = {
+                        "schema_version": "2.1",
+                        "suite_id": suite["suite_id"],
+                        "fixture_sha256": suite["_fixture_sha256"],
+                        "harness_archive_sha256": "a" * 64,
+                        "case_id": case["id"],
+                        "repeat": repeat,
+                        "status": "pass",
+                        "host": "codex-desktop",
+                        "model": "gpt-5.6-sol",
+                        "reasoning_effort": "high",
+                        "route_accuracy": 1.0,
+                        "metrics_status": "pass",
+                        "telemetry_status": "incomplete",
+                        "metrics": quality,
+                    }
+                    (run / "result.json").write_text(json.dumps(result), encoding="utf-8")
+            output = temp / "aggregate.json"
+            aggregated = subprocess.run(
+                [sys.executable, "-B", str(RUN_EVALUATION), "aggregate", "--runs", str(runs), "--out", str(output)],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+            self.assertEqual(aggregated.returncode, 0, aggregated.stdout + aggregated.stderr)
+            aggregate = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(aggregate["qualification_status"], "pass")
+            self.assertEqual(aggregate["economic_telemetry_status"], "not_verified")
+            self.assertIsNone(aggregate["metrics"]["input_tokens_total"])
+            self.assertIsNone(aggregate["metrics"]["estimated_cost_usd_total"])
 
 
 class PackageTests(unittest.TestCase):

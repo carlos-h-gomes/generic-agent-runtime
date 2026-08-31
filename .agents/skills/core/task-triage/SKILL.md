@@ -1,6 +1,6 @@
 ---
 name: task-triage
-description: "Create a formal task contract only for Level 2/3, multi-session, multi-writer, high-risk, or explicitly governed work; skip ordinary local changes."
+description: "Classify work and create a formal task contract only for authorized managed changes; keep answers, inspections, diagnoses, and reviews read-only."
 ---
 
 # Task triage
@@ -40,19 +40,21 @@ Reject placeholders such as `see above`, `TBD`, or copied boilerplate. Ask only 
 
 - Level 0: a compact working contract may remain in the response.
 - Level 1: use a compact inline or scratch contract unless continuity requires a file.
-- Level 2/3, cross-boundary/system, high/critical risk, multi-session, or multi-writer: create `docs/ai/tasks/YYYY-MM-DD-slug.task.json` plus concise Markdown notes when explanation or diagrams help.
+- For authorized change work, Level 2/3, cross-boundary/system, high/critical risk, multi-session, or multi-writer: create `docs/ai/tasks/YYYY-MM-DD-slug.task.json` plus concise Markdown notes only when explanation or diagrams help. Persist and schema-validate a Level 2/3 contract before implementation, and report the validated contract path in the handoff.
 
-Creating project memory is itself a write. In read-only modes, return the contract in the response and name the proposed path instead.
+Creating project memory is itself a write. Mode and authorization take precedence over risk-based persistence: in answer, inspect, diagnose, or review modes, return the contract, production-readiness decision, gate conclusions, and proposed paths in the response unless the user authorized project writes or an existing governed workflow explicitly requires an update. A production review can block approval without creating a task bundle. Do not initialize `docs/ai`, duplicate existing decisions, or create one file per gate merely because the subject is high risk.
+
+When persistence is authorized, reuse an active contract or decision when it remains authoritative. Create a new formal artifact only for a real continuity, ownership, approval, or release-evidence need. Start from the canonical templates under `docs/ai/tasks/` and validate task, decision, and GateResult JSON against their canonical schemas before returning or citing them. Schema-invalid output remains incomplete evidence and must not be presented as a completed control.
 
 ## 4. Route gates
 
-Trigger gates from actual scope and risk, using the canonical IDs in the schema. Design-phase UX, architecture, data, security, and AI artifacts must exist before implementation when applicable. Record `not_applicable` only with a specific reason; do not use it to bypass a control.
+Trigger gates from actual scope and risk, using the canonical IDs in the schema. Design-phase UX, architecture, data, security, and AI artifacts must exist before authorized implementation when applicable; a read-only review may report the same conclusions inline. Record `not_applicable` only with a specific reason; do not use it to bypass a control.
 
 Use `docs/ai/quality-gates.md` for result semantics. A specialist is a procedure, not automatically a separate agent.
 
-For greenfield application generation, require the `python-react-hybrid` target profile. For brownfield work, preserve the observed stack and require an evidence-backed project architecture policy; migration to Python/React is a separate managed outcome. Trigger `architecture_uml` and add observable criteria for the applicable boundaries, entrypoints, contracts, compatibility, and validation. A request for a single-file monolith is not an approvable task constraint; record the compliant decomposition instead.
+For brownfield application work, preserve the observed stack and require an evidence-backed architecture profile; migration is separate. For greenfield work, reuse an explicit user choice. If a material language, stack, platform, or tool choice is missing, record user decision as pending, present relevant options and tradeoffs, and block only application implementation until the user decides. Trigger `architecture_uml` and require boundaries, responsibilities, dependency direction, thin composition roots, contracts, compatibility, and validation. A single-file monolith is not approvable; record the modular decomposition instead. `python-react-hybrid` remains an optional bundled compatibility profile.
 
-Material automation triggers architecture, data, security, FinOps, code-quality, and release review. Require a `code`, `n8n`, or `hybrid` decision conforming to `schemas/automation-decision.schema.json`; unknown facts keep the decision draft.
+Material automation or integration triggers architecture, data, security, FinOps, code-quality, and release review. Require an open component decision conforming to `schemas/solution-decision.schema.json`; user-named tools are allowed, but unknown authority, system-of-record, recovery, security, or cost facts keep it draft.
 
 ## 5. Set a typed state
 

@@ -28,4 +28,4 @@ Evidence may include dated pricing links, formulas, aggregate usage, and cost re
 
 Block cost-increasing execution when worst-case exposure is unbounded, a material increase lacks approval, or no owner/kill switch exists. Security and product constraints take precedence over savings.
 
-For n8n or hybrid workflows include edition/license capabilities, executions, workers, concurrency, retries, replay, retention, binary storage, egress, and every external API billing unit. A workflow cannot be approved while pricing or volume remains unknown unless the cost is demonstrably not applicable.
+For every selected component include its license/edition, execution or request units, workers, concurrency, retries, replay, retention, storage, egress, and external API billing units. A solution cannot be approved while material pricing or volume remains unknown unless cost is demonstrably not applicable. Apply vendor-specific fields only through an optional profile.

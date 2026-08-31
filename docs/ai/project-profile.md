@@ -11,12 +11,16 @@ Status: uninitialized. Fill only from repository evidence.
 ## Stack and boundaries
 
 - Languages/frameworks:
+- User choice status/evidence:
+- Architecture profile/status:
 - Package/runtime:
 - Storage/data ownership:
 - Auth/permissions:
 - Jobs/queues:
 - External integrations:
+- Selected solution tools and decision paths:
 - AI/LLM:
+- Optional model capabilities and access evidence:
 - Deployment/observability:
 
 ## Important paths

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Workspace Hygiene"
+  short_description: "Inventory and reversibly archive inactive workspace material"
+policy:
+  allow_implicit_invocation: false

@@ -1,4 +1,4 @@
-Apply AGENTS.md, SOURCE-OF-TRUTH.md, docs/ai/architecture-policy.json, docs/ai/conventions.md, core/implementation, specialists/software-architecture-uml, specialists/risk-security-compliance, and specialists/ux-product.
+Use this optional profile only after the user explicitly selects Python/FastAPI and React or an existing project already conforms. Apply AGENTS.md, SOURCE-OF-TRUTH.md, docs/ai/architecture-policy.json, docs/ai/conventions.md, core/implementation, specialists/software-architecture-uml, specialists/risk-security-compliance, and specialists/ux-product.
 
 Generate or evolve the application with two isolated boundaries:
 

@@ -32,4 +32,4 @@ Prefer the existing authoritative document. Create the smallest new file only wh
 - Never store secrets, personal/customer data, private prompts, chain-of-thought, or full logs.
 - Keep commands in `commands.md` only after they actually run or are verified from an authoritative project source.
 
-Documentation writes require task authorization. Finish by checking links, paths, version numbers, and consistency with the task contract, schemas, and actual implementation.
+Documentation writes require task authorization. A request to answer, inspect, diagnose, review, or assess production readiness does not authorize durable documentation or governance initialization; return the result inline unless persistence was separately authorized or an existing governed workflow explicitly requires an update. Reuse an authoritative document before creating a new one. When a formal artifact is required, use its canonical template and validate it against the canonical schema before treating it as evidence. Finish by checking links, paths, version numbers, and consistency with the task contract, schemas, and actual implementation.

@@ -19,9 +19,9 @@ Return a `GateResult` conforming to `schemas/gate-result.schema.json`.
 
 Inspect current code and documented decisions first. Do not design from generic best practice alone.
 
-For greenfield generation and projects already targeting it, enforce the `python-react-hybrid` boundary unless a newer owner-approved profile supersedes it. Brownfield admission preserves the verified existing architecture; migration to Python/React requires a separate approved decision. Review minimum directories as a required subset when the profile applies, never an allowlist. Treat entry files as composition roots and block single-file monoliths while allowing thin startup, provider, router, and layout assembly.
+Brownfield admission preserves the verified architecture; migration requires a separate approved decision. For greenfield work, reuse an explicit user choice or present relevant options when a material choice is missing. Review the approved open profile's roots, modules, responsibilities, dependency direction, contracts, and verification adapters. Treat entry files as composition roots and block single-file monoliths while allowing thin startup, provider, router, middleware, and layout assembly. `python-react-hybrid` is an optional compatibility profile.
 
-For automation, identify the system of record and authority before choosing code, n8n, or hybrid. Authorization, transactional invariants, complex state/concurrency, intensive computation, and strict performance stay in code. n8n may coordinate versioned APIs at the edge only.
+For integrations and automation, identify the system of record and authority before recommending any user-named component. Category or connector availability never grants authority; record component contracts, failure behavior, security, cost, rollback, and ownership in the open solution decision.
 
 ## Artifact
 

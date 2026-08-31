@@ -1,8 +1,10 @@
 # Secure Operations for Internet-Facing Hosts
 
-The safest response to a confirmed cryptominer or remote-code-execution incident is not an in-place cleanup. Preserve evidence if required, isolate the host, revoke and rotate credentials from a clean system, rebuild from trusted images, restore only validated data, and monitor the replacement.
+The safest response to a confirmed cryptominer or remote-code-execution incident is not an in-place cleanup. Preserve evidence if required, isolate the host, revoke and rotate credentials from a clean, trusted control plane separate from the suspected host, rebuild from trusted images, restore only validated data, and monitor the replacement.
 
 ## Deployment boundary
+
+Apply `PRODUCT-SECURITY-PRIVACY.md` to the product before relying on these host controls. Host hardening does not replace server-side authorization, request/resource limits, abuse controls, secure sessions, privacy decisions, or application monitoring.
 
 - Run the application as a dedicated non-root identity with no interactive login.
 - Prefer an immutable image and read-only root filesystem; write only to explicit volumes.

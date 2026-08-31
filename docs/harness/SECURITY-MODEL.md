@@ -19,6 +19,7 @@ Project repository content is untrusted until the operator passes `--trust-proje
 - No credentials embedded in test plans, logs, gate results, or packages.
 - No release claim while a required check is unavailable or incomplete.
 - No supported-web release on an expired policy or blocked runtime/framework version.
+- No internet-facing release without applying `PRODUCT-SECURITY-PRIVACY.md` and recording every applicable unknown as incomplete.
 - No material UI release without machine-readable review evidence.
 - No package containing links, reparse points, sensitive file classes, live tasks, or live bridge history.
 - No critical/high finding is silently downgraded.

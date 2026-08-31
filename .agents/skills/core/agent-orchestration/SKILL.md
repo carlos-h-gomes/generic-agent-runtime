@@ -11,7 +11,7 @@ Use parallel agents only when they improve the result enough to justify extra to
 
 ## Suitability test
 
-Delegate only when all are true:
+Delegate only when the user or active task contract explicitly authorizes native subagents and all are true:
 
 1. At least two workstreams are concrete and independently executable.
 2. Each worker can receive bounded context and return a compact result.

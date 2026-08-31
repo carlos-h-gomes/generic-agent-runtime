@@ -17,10 +17,10 @@ This file is the authoritative index of current project facts and their detailed
 
 ## Architecture profile
 
-- Profile: `python-react-hybrid`
-- Frontend: React with TypeScript and Vite under `frontend/`
-- Backend: Python API under `backend/`; FastAPI is the default and modular Flask is compatible
-- API contract: `backend/openapi.json` or the project-specific path recorded here
+- Profile: selection or observation pending; record the approved `profile_id`
+- Languages/frameworks/platforms: record the user's choice or verified brownfield stack
+- Organization: record layered, feature, mixed, or ecosystem-native responsibilities and dependency direction
+- Interface contracts: record the project-specific paths here
 - Directory policy: `docs/ai/architecture-policy.json`
 - Directory responsibilities: `docs/architecture/DIRECTORY-MAP.md`
 
@@ -30,8 +30,8 @@ This file is the authoritative index of current project facts and their detailed
 |---|---|---|
 | Product scope and release | This file | uninitialized |
 | Architecture constraints | `docs/ai/architecture-policy.json` and `docs/ai/conventions.md` | initialize |
-| API surface | `backend/openapi.json` | create or replace pointer |
-| Data model and migrations | `backend/app/models/` and project migration path | initialize |
+| Interface surface | project architecture profile | create or replace pointer |
+| Data model and migrations | project-owned model and migration paths | initialize |
 | Current work | `docs/ai/tasks/` | task-specific |
 | Durable decisions | `docs/ai/decision-log.md` | initialize |
 | Verified commands | `docs/ai/commands.md` | initialize |
@@ -43,7 +43,7 @@ This file is the authoritative index of current project facts and their detailed
 
 - Active task: none recorded
 - Last completed milestone: none recorded
-- Current architecture decision: hybrid profile initialization pending
+- Current architecture decision: user selection or brownfield observation pending
 
 ## Risks and unknowns
 

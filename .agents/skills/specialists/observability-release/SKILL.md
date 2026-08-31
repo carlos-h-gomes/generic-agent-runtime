@@ -25,4 +25,6 @@ Evidence may point to dashboards/queries, sanitized sample logs, deployment iden
 
 Block release when required gates are stale/blocked, rollback is not credible, required alerts have no owner, or the production action lacks approval.
 
-For n8n or hybrid workflows require correlation propagation, bounded execution retention, error workflow/dead-letter behavior, alert ownership, protected promotion, reviewed workflow identity, rollback export, instance/database restore evidence, and an activation kill switch. Workflow history alone is not durable business audit evidence.
+For destructive production planning, require concrete rollback prerequisites, a measurable trigger, ordered reversal or restore actions, and a restored-state check. A generic statement that rollback is required is not a rollback plan. For a suspected host compromise, revoke and rotate credentials only from a clean, trusted control plane separate from the suspected host.
+
+For integrations and automation require correlation propagation, bounded retention, error/dead-letter behavior, alert ownership, protected promotion, reviewed artifact identity, rollback, restore evidence, and a kill switch. Tool history alone is not durable business audit evidence; add vendor-specific controls through the selected optional profile.

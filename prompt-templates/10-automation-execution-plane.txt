@@ -1,7 +1,7 @@
-Apply the nearest AGENTS.md and `docs/harness/AUTOMATION-EXECUTION-POLICY.md`. Inspect the proposed automation and authoritative project sources read-only before recommending `code`, `n8n`, or `hybrid`.
+Apply the nearest AGENTS.md and `docs/harness/SOLUTION-DECISION-POLICY.md`. Inspect the workload and authoritative project sources read-only. Reuse a tool choice the user already made; otherwise recommend relevant options without limiting the decision to code, n8n, or hybrid.
 
-Identify the system of record, business authority, triggers, schemas, trust boundaries, latency/throughput, state/concurrency, idempotency/replay, failure behavior, sensitive data, node capabilities, environment/version control, observability, retention, rollback, kill switch, and expected/burst/worst-case billing units. Label unknown facts and abstain rather than defaulting to n8n.
+For each user-named component identify category, technology, responsibility, authority, system of record, interfaces, trust boundaries, state/concurrency, idempotency/replay, failure behavior, sensitive data, environment/version control, observability, retention, rollback, kill switch, and expected/burst/worst-case billing units. Label unknowns and abstain rather than choosing silently.
 
-Any authorization, tenant, financial/transactional, strict performance, complex state/concurrency, intensive compute/data, missing production control, or unbounded-cost requirement blocks pure n8n. Use hybrid only when every blocked responsibility remains behind a versioned code API.
+Vendor category or connector availability never grants business authority. Reject a placement when authoritative rules, transactional invariants, security, reliability, performance, recovery, or cost requirements cannot be met; explain the smallest viable alternative and leave the product choice to the user.
 
-Return or update a decision conforming to `schemas/automation-decision.schema.json`. Do not activate a workflow, create credentials, call external services, edit production, or claim security/reliability from the schema alone.
+Return or update a decision conforming to `schemas/solution-decision.schema.json`. Use the legacy automation schema only to read v7 decisions. Do not activate workflows, create credentials, call services, edit production, or claim security/reliability from the schema alone.

@@ -1,8 +1,8 @@
-# Hybrid application architecture
+# Optional Python/React hybrid application profile
 
-Harness v7 greenfield application projects have two isolated deployable boundaries: a Python HTTP API and a React TypeScript/Vite client. The frontend never imports Python source; the backend never owns React presentation. Integration is through a versioned, validated API contract. Brownfield governance adoption preserves the observed stack; this profile is applied only when already present or through a separately authorized application bootstrap or migration.
+This retained Harness v7 compatibility profile has two isolated deployable boundaries: a Python HTTP API and a React TypeScript/Vite client. It is used in Harness 8 only when the user selects it, an existing project already conforms, or a separate migration authorizes it. The frontend never imports Python source; the backend never owns React presentation. Integration is through a versioned, validated API contract. Brownfield governance adoption preserves the observed stack.
 
-The minimum topology is defined in `docs/ai/conventions.md` and `docs/ai/architecture-policy.json`. It is not a closed list. Add a directory when it has a distinct responsibility that does not fit an existing layer, then record its owner and permitted dependencies.
+The profile topology is defined by `project-templates/python-react-hybrid/` and its version-1 architecture contract. It is not a closed list. Add a directory when it has a distinct responsibility that does not fit an existing layer, then record its owner and permitted dependencies.
 
 Backend direction is controllers to services to models/repositories. Controllers map HTTP, services own use cases, repositories own persistence adapters, models own domain/persistence representation, and schemas own DTO validation.
 

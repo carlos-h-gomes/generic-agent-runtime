@@ -1,0 +1,3 @@
+Apply AGENTS.md and core/minimalism. Before a material dependency, helper, abstraction, module, or implementation, inspect matching current code, platform or standard-library capability, installed dependencies, and established project patterns.
+
+Record only the useful evidence and remaining gap. Choose reuse, adapt, replace, or create. Prefer the smallest coherent surface, but never remove security, accessibility, tests, rollback, observability, or documentation merely to reduce line count. For managed or disputed decisions, conform to `schemas/reuse-decision.schema.json`.

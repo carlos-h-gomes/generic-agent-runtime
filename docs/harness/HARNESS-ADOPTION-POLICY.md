@@ -1,7 +1,7 @@
 # Harness adoption and reconciliation policy
 
-Version: 1.0  
-Applies to: Harness 7 installation, adoption, and upgrade
+Version: 2.0
+Applies to: Harness 8 installation, adoption, and upgrade
 
 ## Non-negotiable separation
 
@@ -20,7 +20,7 @@ Classify independently:
 
 - adoption mode: `greenfield`, `brownfield`, or `upgrade`;
 - Harness posture: absent, current, prior supported, or modified/unknown;
-- application posture: empty, compliant Python/React hybrid, observed existing stack, or unknown;
+- application posture: empty, architecture profile recorded, observed existing stack, or unknown;
 - architecture disposition: initialize target, preserve, profile required, or migration required.
 
 Missing `backend/` or `frontend/` is not evidence that an existing application is absent. Inspect manifests, source roots, deployment files, and current project memory.
@@ -30,8 +30,9 @@ Missing `backend/` or `frontend/` is not evidence that an existing application i
 ### Greenfield
 
 - Install governance and clean project-memory templates.
-- The Python API plus React TypeScript/Vite profile is the default application target.
-- Application directories are created only by the separate `bootstrap_project.py plan/apply` flow after explicit application-bootstrap authorization.
+- Reuse any language, framework, topology, and tool choice already made by the user.
+- If a material choice is missing, present relevant options with recommendations and tradeoffs, then wait for the user's decision before generating application code.
+- The bundled Python API plus React TypeScript/Vite template is optional. Its directories are created only by the separate `bootstrap_project.py plan/apply` flow after that profile is selected and application bootstrap is explicitly authorized.
 
 ### Brownfield without Harness
 
@@ -39,7 +40,7 @@ Missing `backend/` or `frontend/` is not evidence that an existing application i
 - Install only non-conflicting governance content.
 - Do not create `backend/`, `frontend/`, application entrypoints, or dependency manifests.
 - Do not copy the default `docs/ai/architecture-policy.json`; project profiling must record an observed policy before architecture validation can pass.
-- A desired Python/React migration becomes a separate Level 2/3 task with characterization, compatibility, staged movement, and rollback.
+- Any desired architecture migration becomes a separate Level 2/3 task with characterization, compatibility, staged movement, and rollback.
 
 ### Upgrade from an older Harness
 

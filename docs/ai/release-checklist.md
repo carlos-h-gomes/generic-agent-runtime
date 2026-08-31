@@ -12,13 +12,27 @@
 
 ## Security and containment
 
+- [ ] [B] `docs/harness/PRODUCT-SECURITY-PRIVACY.md` was applied; every unknown or unavailable applicable control remains incomplete rather than passed.
 - [ ] [B] Security policy is current; runtime/framework pins satisfy it.
 - [ ] [B] Fresh dependency, secret, and SAST results have no unresolved high/critical finding.
-- [ ] [B] Threat model covers public entrypoints, trust boundaries, authorization, upload/render paths, SSRF/RCE, dependency scripts, and agent tools where applicable.
+- [ ] [B] Threat model covers public entrypoints, trust boundaries, server-side resource/tenant/function authorization, sessions/recovery, upload/render paths, injection, SSRF/RCE, dependency scripts, API inventory/webhooks, and agent tools where applicable.
+- [ ] [B] Authentication, account recovery, privileged MFA, session rotation/expiry/revocation, secure cookies, CSRF, CORS, browser headers, and anti-enumeration controls are evidenced where applicable.
+- [ ] [B] Request/body/file/query/pagination/batch/response/time/concurrency limits and rate/volume quotas cover source, account, tenant, operation, destination, and cost dimensions where applicable.
+- [ ] [B] Sensitive business flows have explicit anti-automation, replay/idempotency, fraud/abuse monitoring, degradation, reconciliation, and kill-switch decisions.
 - [ ] [B] Secrets are absent from source/build/logs and have scoped rotation/revocation procedures.
 - [ ] [B] Production runs as non-root with minimum filesystem/process/network authority and resource quotas.
 - [ ] [B] Incident response names containment, credential rotation, rebuild, evidence, communication, and owner.
 - [ ] [B] Adversarial traffic, if any, used an exact, bounded, unexpired authorized target contract.
+
+## Privacy and personal data
+
+- [ ] [B] Personal-data categories, sources, purposes, systems of record, controller/operator/suboperator roles, recipients, jurisdictions, owners, and applicable legal-basis inputs are recorded.
+- [ ] [B] Necessity and minimization cover product fields, telemetry, logs, prompts/model context, analytics, support, test data, backups, and exports.
+- [ ] [B] Privacy notice and data-subject workflows cover applicable access, correction, sharing information, consent withdrawal, opposition, automated-decision review, deletion/anonymization, verification, and lawful exceptions.
+- [ ] [B] Retention and deletion define triggers, periods, reasons, backups, holds, execution evidence, and owner; sensitive and child data receive applicable heightened review.
+- [ ] [B] Vendors and international transfers have purpose, access, suboperator, security, deletion/return, incident, jurisdiction, and applicable transfer-mechanism evidence.
+- [ ] [B] A privacy impact/RIPD decision and required privacy/legal approval exist for high-risk or uncertain processing.
+- [ ] [B] Personal-data incident handling records the knowledge time, risk/harm assessment, current notification rules and owners without placing personal data in Harness evidence.
 
 ## Product and UI
 

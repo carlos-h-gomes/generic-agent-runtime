@@ -7,9 +7,9 @@ description: "Implement an authorized repository change with the smallest cohere
 
 Implementation follows the user request and established repository evidence. Fast-path work may use an inline plan; managed work follows its task contract.
 
-For greenfield or already conformant application work, preserve the Python API/React boundary and minimum extensible topology in `docs/ai/architecture-policy.json`. Brownfield adoption preserves the observed stack until a separate migration is authorized. Keep `main.py`, `server.py`, `App.jsx`, and `App.tsx` as thin composition roots when that profile applies. If a request would centralize routes, persistence, HTTP clients, business rules, feature state/data, or reusable UI in one of them, reject that constraint and implement or propose the compliant modular decomposition.
+Preserve a brownfield stack until migration is authorized. For greenfield work, implement the user's approved architecture profile; if a material choice is missing, stop only application implementation and present relevant options. Keep every declared entrypoint as a thin composition root. If a request would centralize routes, persistence, external clients, business rules, feature state/data, or reusable UI there, reject that constraint and implement or propose the profile's modular decomposition.
 
-Do not implement a material automation until its execution-plane decision is schema-valid. Keep authoritative behavior in code, and implement n8n only as bounded orchestration under the recorded reliability, security, operations, cost, rollback, and kill-switch controls.
+Do not implement a material integration or automation until its open solution decision is schema-valid. Preserve declared authority and system of record regardless of whether components use code, automation, low-code, managed services, database-native capability, agents, SaaS, or user-named tools.
 
 Additional directories are allowed when a distinct responsibility needs them; document the new layer and permitted dependencies rather than forcing unrelated behavior into an existing folder.
 
@@ -29,12 +29,13 @@ If a precondition is missing, return to task triage or the owning specialist. Do
 ## Execution
 
 1. Inspect the narrow code path and existing conventions.
-2. Apply `core/minimalism`: prefer no new concept, then platform/standard library, then an existing dependency/pattern, then the smallest coherent new implementation.
-3. Keep one writer per file. Read-only workers may research or review; the root integrates and verifies.
-4. Validate all external input and model/tool output. Preserve authorization, privacy, accessibility, compatibility, and data-loss controls.
-5. Handle expected failures explicitly. Add tests at the lowest useful level for changed behavior, authority boundaries, malicious inputs, and recovery.
-6. Avoid unrelated cleanup, dependency additions, generated artifacts, commits, pushes, deployments, or external actions unless explicitly in scope.
-7. Update task status and material handoff facts without copying logs or sensitive payloads.
+2. For a material addition, record a bounded reuse inventory: current code, platform/standard library, installed dependencies, project patterns, and remaining gap.
+3. Apply `core/minimalism`: prefer no new concept, then reuse, then adaptation, then the smallest coherent new implementation.
+4. Keep one writer per file. Read-only workers may research or review; the root integrates and verifies.
+5. Validate all external input and model/tool output. Preserve authorization, privacy, accessibility, compatibility, and data-loss controls.
+6. Handle expected failures explicitly. Add tests at the lowest useful level for changed behavior, authority boundaries, malicious inputs, and recovery.
+7. Avoid unrelated cleanup, dependency additions, generated artifacts, commits, pushes, deployments, or external actions unless explicitly in scope.
+8. Update task status and material handoff facts without copying logs or sensitive payloads.
 
 Use `apply_patch` or the repository's safe edit mechanism. Preserve pre-existing user changes. Never use destructive reset, checkout, or recursive delete to simplify integration. Do not pass the full host environment to project commands; use the Harness policy allowlist unless a separately reviewed command requires a named value.
 

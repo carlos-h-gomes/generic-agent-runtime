@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/solution-decision-v2.json",
+  "title": "Harness open solution decision v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "decision_id", "status", "workload", "selection", "components", "contracts", "reliability", "security", "operations", "cost", "evidence", "approval", "decided_at"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": "2.0"},
+    "decision_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"},
+    "status": {"enum": ["draft", "approved", "rejected", "superseded"]},
+    "workload": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "selection": {
+      "type": "object", "additionalProperties": false,
+      "required": ["user_choice_known", "recommendation_required", "candidates", "rationale"],
+      "properties": {
+        "user_choice_known": {"type": "boolean"},
+        "recommendation_required": {"type": "boolean"},
+        "candidates": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "rationale": {"type": "string", "minLength": 1, "maxLength": 3000}
+      }
+    },
+    "components": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/component"}},
+    "contracts": {"$ref": "#/$defs/contracts"},
+    "reliability": {"$ref": "#/$defs/reliability"},
+    "security": {"$ref": "#/$defs/security"},
+    "operations": {"$ref": "#/$defs/operations"},
+    "cost": {"$ref": "#/$defs/cost"},
+    "evidence": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "approval": {"$ref": "#/$defs/approval"},
+    "decided_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "component": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "category", "technology", "responsibilities", "authority", "system_of_record", "owner", "interfaces"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$"},
+        "category": {"type": "string", "minLength": 1, "maxLength": 100},
+        "technology": {"type": "string", "minLength": 1, "maxLength": 200},
+        "responsibilities": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "authority": {"enum": ["authoritative", "orchestration", "derived", "external", "unresolved"]},
+        "system_of_record": {"type": ["string", "null"]},
+        "owner": {"type": "string", "minLength": 1},
+        "interfaces": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "contracts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["input_schema", "output_schema", "versioning", "validation_failure", "compatibility"],
+      "properties": {
+        "input_schema": {"type": "string", "minLength": 1}, "output_schema": {"type": "string", "minLength": 1},
+        "versioning": {"type": "string", "minLength": 1}, "validation_failure": {"type": "string", "minLength": 1},
+        "compatibility": {"type": "string", "minLength": 1}
+      }
+    },
+    "reliability": {
+      "type": "object", "additionalProperties": false,
+      "required": ["timeout_seconds", "max_attempts", "idempotency", "replay", "partial_failure", "reconciliation_owner"],
+      "properties": {
+        "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 86400}, "max_attempts": {"type": "integer", "minimum": 1, "maximum": 20},
+        "idempotency": {"type": "string", "minLength": 1}, "replay": {"type": "string", "minLength": 1},
+        "partial_failure": {"type": "string", "minLength": 1}, "reconciliation_owner": {"type": "string", "minLength": 1}
+      }
+    },
+    "security": {
+      "type": "object", "additionalProperties": false,
+      "required": ["credentials_external", "least_privilege", "input_validation", "egress_scoped", "sensitive_data_minimized", "risky_capabilities_reviewed"],
+      "properties": {
+        "credentials_external": {"type": "boolean"}, "least_privilege": {"type": "boolean"}, "input_validation": {"type": "boolean"},
+        "egress_scoped": {"type": "boolean"}, "sensitive_data_minimized": {"type": "boolean"}, "risky_capabilities_reviewed": {"type": "boolean"}
+      }
+    },
+    "operations": {
+      "type": "object", "additionalProperties": false,
+      "required": ["versioned_artifact", "environment_separation", "correlation", "error_path", "retention", "rollback", "kill_switch"],
+      "properties": {
+        "versioned_artifact": {"type": "string", "minLength": 1}, "environment_separation": {"type": "boolean"},
+        "correlation": {"type": "string", "minLength": 1}, "error_path": {"type": "string", "minLength": 1},
+        "retention": {"type": "string", "minLength": 1}, "rollback": {"type": "string", "minLength": 1}, "kill_switch": {"type": "string", "minLength": 1}
+      }
+    },
+    "cost": {
+      "type": "object", "additionalProperties": false,
+      "required": ["pricing_status", "billing_units", "expected_volume", "burst_volume", "worst_case", "hard_cap", "alert_owner", "unbounded_exposure"],
+      "properties": {
+        "pricing_status": {"enum": ["verified", "unknown", "not_applicable"]}, "billing_units": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "expected_volume": {"type": "string", "minLength": 1}, "burst_volume": {"type": "string", "minLength": 1}, "worst_case": {"type": "string", "minLength": 1},
+        "hard_cap": {"type": "string", "minLength": 1}, "alert_owner": {"type": "string", "minLength": 1}, "unbounded_exposure": {"type": "boolean"}
+      }
+    },
+    "approval": {
+      "type": "object", "additionalProperties": false, "required": ["required", "status", "reference"],
+      "properties": {"required": {"type": "boolean"}, "status": {"enum": ["not_required", "pending", "approved", "rejected"]}, "reference": {"type": ["string", "null"]}}
+    }
+  }
+}

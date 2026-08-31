@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/reuse-decision-v1.json",
+  "title": "Harness reuse-first decision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "decision_id", "material_change", "inventory", "remaining_gap", "decision", "new_surface", "evidence"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": "1.0"},
+    "decision_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"},
+    "material_change": {"type": "boolean"},
+    "inventory": {
+      "type": "object", "additionalProperties": false,
+      "required": ["current_code", "platform", "dependencies", "project_patterns"],
+      "properties": {
+        "current_code": {"$ref": "#/$defs/check"}, "platform": {"$ref": "#/$defs/check"},
+        "dependencies": {"$ref": "#/$defs/check"}, "project_patterns": {"$ref": "#/$defs/check"}
+      }
+    },
+    "remaining_gap": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "decision": {"enum": ["reuse", "adapt", "replace", "create"]},
+    "new_surface": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "evidence": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "check": {
+      "type": "object", "additionalProperties": false, "required": ["status", "evidence"],
+      "properties": {"status": {"enum": ["found", "not_found", "not_applicable"]}, "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}}}
+    }
+  }
+}

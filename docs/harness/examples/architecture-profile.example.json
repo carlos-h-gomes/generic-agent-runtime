@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../schemas/architecture-profile.schema.json",
+  "schema_version": "2.0",
+  "status": "approved",
+  "profile_id": "example-typescript-feature",
+  "selection": {
+    "source": "user_selected",
+    "user_decision_required": true,
+    "user_decision_status": "approved",
+    "languages": ["typescript"],
+    "frameworks": ["user-selected-web-framework"],
+    "platforms": ["nodejs"],
+    "rationale": "The owner selected TypeScript after reviewing team fit, deployment, ecosystem, support, security, and cost tradeoffs.",
+    "decision_ref": "docs/ai/decision-log.md"
+  },
+  "organization": {
+    "style": "feature",
+    "roots": ["src"],
+    "modules": [
+      {"id": "app", "path": "src/app", "responsibility": "Composition, routing, and providers only.", "may_depend_on": ["orders", "shared"]},
+      {"id": "orders", "path": "src/orders", "responsibility": "Orders feature behavior and UI.", "may_depend_on": ["shared"]},
+      {"id": "shared", "path": "src/shared", "responsibility": "Stable cross-feature primitives without feature authority.", "may_depend_on": []}
+    ],
+    "composition_roots": [
+      {"path": "src/app/main.tsx", "adapter": "typescript", "max_non_comment_lines": 120, "allowed_symbols": ["App"], "manual_evidence": []}
+    ]
+  },
+  "contracts": {
+    "source_of_truth": "SOURCE-OF-TRUTH.md",
+    "technical_documentation": "docs/TECHNICAL-DOCUMENTATION.md",
+    "user_manual": "docs/USER-MANUAL.md",
+    "directory_map": "docs/architecture/DIRECTORY-MAP.md",
+    "interfaces": ["docs/api/openapi.json"]
+  },
+  "extensions": {"allow": true, "require_responsibility": true, "require_dependency_direction": true, "authority": "docs/architecture/DIRECTORY-MAP.md"}
+}

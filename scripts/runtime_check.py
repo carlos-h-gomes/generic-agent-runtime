@@ -272,6 +272,19 @@ def validate_json_schemas(
         automation_decision = json.loads(
             (root / "docs" / "harness" / "examples" / "automation-decision.example.json").read_text(encoding="utf-8")
         )
+        architecture_profile = json.loads(
+            (root / "docs" / "harness" / "examples" / "architecture-profile.example.json").read_text(encoding="utf-8")
+        )
+        solution_decision = json.loads(
+            (root / "docs" / "harness" / "examples" / "solution-decision.example.json").read_text(encoding="utf-8")
+        )
+        reuse_decision = json.loads(
+            (root / "docs" / "harness" / "examples" / "reuse-decision.example.json").read_text(encoding="utf-8")
+        )
+        model_profiles = [
+            json.loads(path.read_text(encoding="utf-8"))
+            for path in sorted((root / "docs" / "harness" / "model-profiles").glob("*.json"))
+        ]
         adoption_plan = json.loads(
             (root / "docs" / "harness" / "examples" / "adoption-plan.example.json").read_text(encoding="utf-8")
         )
@@ -284,9 +297,15 @@ def validate_json_schemas(
         schema_lite.validate(ui_review, schemas["ui-review.schema.json"])
         schema_lite.validate(target_example, schemas["authorized-target.schema.json"])
         schema_lite.validate(plan_example, schemas["security-test-plan.schema.json"])
-        schema_lite.validate(architecture_policy, schemas["architecture-policy.schema.json"])
+        architecture_schema = "architecture-profile.schema.json" if architecture_policy.get("schema_version") == "2.0" else "architecture-policy.schema.json"
+        schema_lite.validate(architecture_policy, schemas[architecture_schema])
+        schema_lite.validate(architecture_profile, schemas["architecture-profile.schema.json"])
         schema_lite.validate(project_template, schemas["project-template.schema.json"])
         schema_lite.validate(automation_decision, schemas["automation-decision.schema.json"])
+        schema_lite.validate(solution_decision, schemas["solution-decision.schema.json"])
+        schema_lite.validate(reuse_decision, schemas["reuse-decision.schema.json"])
+        for profile in model_profiles:
+            schema_lite.validate(profile, schemas["model-capability-profile.schema.json"])
         schema_lite.validate(adoption_plan, schemas["adoption-plan.schema.json"])
         template = json.loads((root / "docs" / "ai" / "tasks" / "_GATE_RESULT_TEMPLATE.json").read_text(encoding="utf-8"))
         schema_lite.validate(template, schemas["gate-result.schema.json"])
@@ -316,9 +335,14 @@ def validate_json_schemas(
         jsonschema.Draft202012Validator(schemas["ui-review.schema.json"], format_checker=format_checker).validate(ui_review)
         jsonschema.Draft202012Validator(schemas["authorized-target.schema.json"], format_checker=format_checker).validate(target_example)
         jsonschema.Draft202012Validator(schemas["security-test-plan.schema.json"], format_checker=format_checker).validate(plan_example)
-        jsonschema.Draft202012Validator(schemas["architecture-policy.schema.json"], format_checker=format_checker).validate(architecture_policy)
+        jsonschema.Draft202012Validator(schemas[architecture_schema], format_checker=format_checker).validate(architecture_policy)
+        jsonschema.Draft202012Validator(schemas["architecture-profile.schema.json"], format_checker=format_checker).validate(architecture_profile)
         jsonschema.Draft202012Validator(schemas["project-template.schema.json"], format_checker=format_checker).validate(project_template)
         jsonschema.Draft202012Validator(schemas["automation-decision.schema.json"], format_checker=format_checker).validate(automation_decision)
+        jsonschema.Draft202012Validator(schemas["solution-decision.schema.json"], format_checker=format_checker).validate(solution_decision)
+        jsonschema.Draft202012Validator(schemas["reuse-decision.schema.json"], format_checker=format_checker).validate(reuse_decision)
+        for profile in model_profiles:
+            jsonschema.Draft202012Validator(schemas["model-capability-profile.schema.json"], format_checker=format_checker).validate(profile)
         jsonschema.Draft202012Validator(schemas["adoption-plan.schema.json"], format_checker=format_checker).validate(adoption_plan)
         jsonschema.Draft202012Validator(schemas["gate-result.schema.json"], format_checker=format_checker).validate(template)
     except Exception as exc:  # jsonschema exposes several validation exception types
@@ -343,6 +367,7 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "GEMINI.md",
         "harness.json",
         "adoption-policy.json",
+        "workspace-hygiene-policy.json",
         "schemas/harness.schema.json",
         "schemas/task-contract.schema.json",
         "schemas/gate-result.schema.json",
@@ -358,7 +383,9 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "scripts/bootstrap_project.py",
         "scripts/adopt_harness.py",
         "scripts/automation_decision.py",
+        "scripts/solution_decision.py",
         "scripts/documentation_check.py",
+        "scripts/run_evaluation.py",
         "scripts/schema_lite.py",
         "security-policy.json",
         "schemas/security-policy.schema.json",
@@ -366,15 +393,26 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "schemas/security-test-plan.schema.json",
         "schemas/ui-review.schema.json",
         "schemas/architecture-policy.schema.json",
+        "schemas/architecture-profile.schema.json",
         "schemas/project-template.schema.json",
         "schemas/automation-decision.schema.json",
+        "schemas/solution-decision.schema.json",
+        "schemas/reuse-decision.schema.json",
+        "schemas/model-capability-profile.schema.json",
         "schemas/adoption-plan.schema.json",
+        "schemas/workspace-hygiene-policy.schema.json",
+        "schemas/archive-plan.schema.json",
+        "schemas/archive-manifest.schema.json",
+        "scripts/workspace_hygiene.py",
+        ".agents/skills/core/workspace-hygiene/SKILL.md",
+        "docs/harness/WORKSPACE-HYGIENE.md",
         "docs/ai/ui-review.json",
         "docs/ai/threat-model.md",
         "docs/ai/incident-response.md",
         "docs/harness/MIGRATION-4.2-5.0.md",
         "docs/harness/SECURITY-MODEL.md",
         "docs/harness/SECURITY-OPERATIONS.md",
+        "docs/harness/PRODUCT-SECURITY-PRIVACY.md",
         "docs/harness/ADVERSARIAL-TESTING.md",
         "docs/harness/UI-QUALITY.md",
         "docs/harness/QUALIFICATION-5.0.md",
@@ -382,9 +420,22 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "docs/harness/QUALIFICATION-6.0.md",
         "docs/harness/MIGRATION-6.0-7.0.md",
         "docs/harness/QUALIFICATION-7.0.md",
+        "docs/harness/MIGRATION-7.0-8.0.md",
+        "docs/harness/QUALIFICATION-8.0.md",
         "docs/harness/AUTOMATION-EXECUTION-POLICY.md",
         "docs/harness/HARNESS-ADOPTION-POLICY.md",
+        "docs/harness/ARCHITECTURE-PROFILE-POLICY.md",
+        "docs/harness/SOLUTION-DECISION-POLICY.md",
+        "docs/harness/REUSE-FIRST-POLICY.md",
+        "docs/harness/MODEL-CAPABILITY-PROFILES.md",
         "docs/harness/examples/automation-decision.example.json",
+        "docs/harness/examples/architecture-profile.example.json",
+        "docs/harness/examples/solution-decision.example.json",
+        "docs/harness/examples/reuse-decision.example.json",
+        "docs/harness/examples/evaluation-manual-verdicts.example.json",
+        "docs/harness/examples/evaluation-run-metrics.example.json",
+        "docs/harness/model-profiles/gpt-5.6-sol.json",
+        "docs/harness/model-profiles/daybreak-blue-latest.json",
         "docs/harness/examples/adoption-plan.example.json",
         "docs/harness/HYBRID-ARCHITECTURE.md",
         "docs/harness/PROJECT-TRUTH.md",
@@ -395,7 +446,7 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         "docs/harness/evaluation-fixtures.json",
     ]
     if maintainer_source:
-        required_paths += [maintainer_marker, "README.md", "CHANGELOG.md", "scripts/package_runtime.py", "scaffold/docs/ai/constitution.md"]
+        required_paths += [maintainer_marker, "README.md", "CHANGELOG.md", "docs/TECHNICAL-DOCUMENTATION.md", "docs/USER-MANUAL.md", "scripts/package_runtime.py", "scaffold/docs/ai/constitution.md"]
     else:
         required_paths += ["docs/harness/INSTALL.md", "docs/harness/CHANGELOG.md"]
     missing = [item for item in required_paths if not (root / item).is_file()]
@@ -404,7 +455,11 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         return manifest
 
     report.check(bool(re.fullmatch(r"\d+\.\d+\.\d+", str(manifest.get("version", "")))), "manifest uses semantic version")
-    report.check(manifest.get("contract_versions") == {"task": "1.0", "gate_result": "1.0", "bridge_event": "2.0"}, "manifest contract versions preserve v4.2 compatibility")
+    report.check(
+        manifest.get("contract_versions")
+        == {"task": "1.0", "gate_result": "1.0", "bridge_event": "2.0", "archive_plan": "1.0", "archive_manifest": "1.0"},
+        "manifest contract versions preserve compatibility and declare archive contracts",
+    )
     report.check(
         manifest.get("policy_versions")
         == {
@@ -413,11 +468,16 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
             "security_test_plan": "1.0",
             "ui_review": "1.0",
             "architecture_policy": "1.0",
+            "architecture_profile": "2.0",
             "project_template": "1.0",
             "source_of_truth": "1.0",
             "release_documentation": "1.0",
             "automation_decision": "1.0",
+            "solution_decision": "2.0",
+            "reuse_decision": "1.0",
+            "model_capability_profile": "1.0",
             "adoption_plan": "1.0",
+            "workspace_hygiene": "1.0",
         },
         "manifest policy versions are canonical",
     )
@@ -439,8 +499,8 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         evaluation
         and fixtures
         and evaluation.get("execution_status") == "specification_only_not_executed"
-        and evaluation.get("suite_id") == "harness-v7-behavior-1"
-        and len(evaluation.get("cases") or []) >= 32
+        and evaluation.get("suite_id") == "harness-v8-behavior-1"
+        and len(evaluation.get("cases") or []) >= 40
         and evaluation.get("fixture", {}).get("revision") == fixtures.get("fixture_revision")
         and evaluation.get("fixture", {}).get("sha256") == hashlib.sha256(fixtures_path.read_bytes()).hexdigest()
     )
@@ -451,7 +511,8 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
     budget = manifest.get("instruction_budget") or {}
     report.check(len(agents) <= budget.get("agents_md_max_bytes", 0), f"AGENTS.md byte budget ({len(agents)}/{budget.get('agents_md_max_bytes')})")
     report.check(line_count <= budget.get("agents_md_max_lines", 0), f"AGENTS.md line budget ({line_count}/{budget.get('agents_md_max_lines')})")
-    report.check(b"Version: 7.0" in agents, "AGENTS.md version matches release family")
+    release_family = ".".join(str(manifest.get("version", "")).split(".")[:2]).encode("ascii", errors="ignore")
+    report.check(b"Version: " + release_family in agents, "AGENTS.md version matches release family")
     claude = (root / "CLAUDE.md").read_text(encoding="utf-8")
     report.check("@AGENTS.md" in claude and len(claude.encode("utf-8")) <= 4096, "CLAUDE.md is a thin AGENTS adapter")
     gemini = (root / "GEMINI.md").read_text(encoding="utf-8")
@@ -469,8 +530,12 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
             "security-test-plan.schema.json",
             "ui-review.schema.json",
             "architecture-policy.schema.json",
+            "architecture-profile.schema.json",
             "project-template.schema.json",
             "automation-decision.schema.json",
+            "solution-decision.schema.json",
+            "reuse-decision.schema.json",
+            "model-capability-profile.schema.json",
             "adoption-plan.schema.json",
         )
     ]
@@ -526,6 +591,7 @@ def source_checks(root: Path, report: Report, static_only: bool, strict: bool) -
         root / "docs" / "ai" / "release-checklist.md",
         root / "docs" / "ai" / "standards.md",
         root / "docs" / "ai" / "conventions.md",
+        root / "docs" / "harness" / "PRODUCT-SECURITY-PRIVACY.md",
     ]
     forbidden = {"prompt injection is prevented", "prompt injection prevented", "checkout tested end-to-end in production with a real card"}
     unsafe: list[str] = []
@@ -655,11 +721,13 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
                 "PROVENANCE.intoto.json",
                 "security-policy.json",
                 "adoption-policy.json",
+                "workspace-hygiene-policy.json",
                 "docs/harness/INSTALL.md",
                 "docs/harness/CHANGELOG.md",
                 "docs/harness/MIGRATION-4.2-5.0.md",
                 "docs/harness/SECURITY-MODEL.md",
                 "docs/harness/SECURITY-OPERATIONS.md",
+                "docs/harness/PRODUCT-SECURITY-PRIVACY.md",
                 "docs/harness/ADVERSARIAL-TESTING.md",
                 "docs/harness/UI-QUALITY.md",
                 "docs/harness/QUALIFICATION-5.0.md",
@@ -670,6 +738,11 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
                 "docs/harness/AUTOMATION-EXECUTION-POLICY.md",
                 "docs/harness/HARNESS-ADOPTION-POLICY.md",
                 "docs/harness/examples/automation-decision.example.json",
+                "docs/harness/examples/architecture-profile.example.json",
+                "docs/harness/examples/solution-decision.example.json",
+                "docs/harness/examples/reuse-decision.example.json",
+                "docs/harness/model-profiles/gpt-5.6-sol.json",
+                "docs/harness/model-profiles/daybreak-blue-latest.json",
                 "docs/harness/examples/adoption-plan.example.json",
                 "docs/harness/HYBRID-ARCHITECTURE.md",
                 "docs/harness/PROJECT-TRUTH.md",
@@ -684,8 +757,12 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
                 "schemas/security-test-plan.schema.json",
                 "schemas/ui-review.schema.json",
                 "schemas/architecture-policy.schema.json",
+                "schemas/architecture-profile.schema.json",
                 "schemas/project-template.schema.json",
                 "schemas/automation-decision.schema.json",
+                "schemas/solution-decision.schema.json",
+                "schemas/reuse-decision.schema.json",
+                "schemas/model-capability-profile.schema.json",
                 "schemas/adoption-plan.schema.json",
                 ".agents/skills/core/task-triage/SKILL.md",
                 "docs/ai/constitution.md",
@@ -704,11 +781,23 @@ def archive_checks(root: Path, archive: Path, manifest: dict | None, report: Rep
                 "scripts/bootstrap_project.py",
                 "scripts/adopt_harness.py",
                 "scripts/automation_decision.py",
+                "scripts/solution_decision.py",
                 "scripts/documentation_check.py",
+                "scripts/run_evaluation.py",
                 "project-templates/python-react-hybrid/template-manifest.json",
                 "prompt-templates/09-generate-python-react-application.txt",
                 "prompt-templates/10-automation-execution-plane.txt",
                 "prompt-templates/11-adopt-harness.txt",
+                "prompt-templates/12-reuse-first.txt",
+                "prompt-templates/13-model-capability-profile.txt",
+                "docs/harness/MIGRATION-7.0-8.0.md",
+                "docs/harness/QUALIFICATION-8.0.md",
+                "docs/harness/ARCHITECTURE-PROFILE-POLICY.md",
+                "docs/harness/SOLUTION-DECISION-POLICY.md",
+                "docs/harness/REUSE-FIRST-POLICY.md",
+                "docs/harness/examples/evaluation-manual-verdicts.example.json",
+                "docs/harness/examples/evaluation-run-metrics.example.json",
+                "docs/harness/MODEL-CAPABILITY-PROFILES.md",
             }
             report.check(required.issubset(names), "archive contains the portable runtime and clean memory templates")
             report.check("README.md" not in names and "CHANGELOG.md" not in names, "archive does not overwrite a consumer project's root README or changelog")
