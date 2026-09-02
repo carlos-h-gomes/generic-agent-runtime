@@ -1,0 +1,36 @@
+name: Feature request
+description: Suggest an idea or improvement for the Generic Agent Runtime (GAR)
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement. GAR aims to stay model-neutral and stack-neutral, so please describe how your idea fits that goal.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What's missing, unclear, or painful in the current workflow?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like this to work? Reference relevant AGENTS.md sections, skills, or gates if applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this hasn't been requested yet
+          required: true
