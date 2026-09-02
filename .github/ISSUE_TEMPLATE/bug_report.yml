@@ -1,0 +1,59 @@
+name: Bug report
+description: Report a problem with the Generic Agent Runtime (GAR)
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill in as much detail as you can.
+  - type: input
+    id: version
+    attributes:
+      label: GAR version
+      description: Which version of Generic Agent Runtime are you using? (see CHANGELOG.md or harness.json)
+      placeholder: "e.g. 8.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Which agent were you using?
+      options:
+        - Claude
+        - Codex
+        - Gemini
+        - Other / not agent-specific
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Commands run, target project structure, or relevant excerpts from docs/ai/, AGENTS.md, or task contracts.
+    validations:
+      required: false
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Relevant output / evidence
+      description: Output of scripts/validate.sh, error messages, or logs. Please redact secrets and any project-specific data.
+      render: shell
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this hasn't been reported yet
+          required: true
+        - label: I removed any secrets, credentials, or private project data from this report
+          required: true
