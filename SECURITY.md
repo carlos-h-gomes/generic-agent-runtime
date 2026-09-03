@@ -14,7 +14,8 @@ Only the latest released version receives fixes.
 
 | Version | Supported |
 |---------|-----------|
-| 7.0.x   | yes       |
+| 8.1.x   | yes       |
+| 7.0.x   | no        |
 | < 7.0   | no        |
 
 ## Reporting a vulnerability
