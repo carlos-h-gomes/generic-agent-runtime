@@ -8,7 +8,7 @@ Date: 2026-11-10. Status: **release blocked**. Candidate source: `agent-runtime-
 - Immutable v8.1 archive SHA-256: `5d7f083a4ccd8bed2a3df6c4023be41606a41611175facd33478c6fdfb7932f6`.
 - Immutable v9-dev.2 archive SHA-256: `9c90c56c89ab53a223d04cab242b94bef7125e8c56bbfb8a6fc1e24d55b7ec49`.
 - Source candidate derived from the verified v10-dev.4 distribution; dev.1–dev.4 and all historical evidence remain unchanged. dev.4 archive SHA-256: `d04811ab071b0618e9e0c0473604f25411bb18d753b4d80e8b669f7d2a7913b0`.
-- dev.5 maintainer tree: 287 files; deterministic tree fingerprint `8ad5e10b766731f29d91673dd439234ec9c9270a07112695fdf8c0346102fbfc`.
+- dev.5 maintainer source tree (excluding the active qualification task bundle, archive and temporary extraction): 276 files; deterministic fingerprint `fc0bcc02fe5449d0932b11a6ce7c7455bacad68de15633eb562ede83e682ad15`.
 - Final dev.5 package candidate: `agent-runtime-v10-dev.5/agent-runtime-v10.0.zip`, 248 files, 370777 bytes; SHA-256 `ba330e5376808f820d34fbb82171f7552117030fed0aed18966efae8bc4d386e`.
 - `harness.json`: version `10.0.0`, `release_status: candidate`, build date `2026-11-10`, release date `null`. It is not an official release.
 
@@ -28,6 +28,10 @@ Date: 2026-11-10. Status: **release blocked**. Candidate source: `agent-runtime-
 ## Skills inventory
 
 GAR contains 19 first-party skills: 11 core and 8 specialist. Against the local v8.1 tree and public GitHub `main`, 32 skill files are byte-for-byte the same; four local skill texts have evolved (`core/context-memory`, `core/task-triage`, `core/validation`, `specialists/observability-release`) and `core/grill-me` is new. No remote-first-party skill update was discovered in the exact current `main` tree. The three user-installed game skills belong to another project and remain excluded. Playwright, axe-core, OSV-Scanner, Gitleaks, and third-party skills remain research candidates pending exact artifact, license, provenance, permissions and maintenance review.
+
+## GitHub synchronization
+
+Created draft PR [#1](https://github.com/carlos-h-gomes/generic-agent-runtime/pull/1) from `codex/gar10-dev5-review-20261110` to `main`. It adds 288 files under the versioned candidate directory, preserves main and the v8.1 release, and excludes the unqualified ZIP and generated temp/extraction folders. Git committed bytes were compared to all 288 local candidate files with zero mismatches. No GitHub checks/workflow runs are configured for this commit. The PR remains draft and unmerged.
 
 ## Release blockers
 

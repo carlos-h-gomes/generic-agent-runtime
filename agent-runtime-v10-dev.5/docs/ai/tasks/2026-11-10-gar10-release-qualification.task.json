@@ -1,5 +1,5 @@
 {
-  "$schema": "../../../schemas/task-contract.schema.json",
+  "$schema": "../../../agent-runtime-v10-dev.4/schemas/task-contract.schema.json",
   "schema_version": "1.0",
   "task_id": "2026-11-10-gar10-release-qualification",
   "status": "in_progress",
@@ -185,11 +185,11 @@
     "task_file": "docs/ai/tasks/2026-11-10-gar10-release-qualification.task.json",
     "references": [
       "AGENTS.md",
-      "docs/harness/MAINTAINER.md",
-      "docs/harness/QUALIFICATION-10.0.md",
-      "docs/harness/VIBECODER-10.md",
-      "docs/ai/tasks/2026-11-10-gar10-release-qualification-plan.md",
-      "docs/ai/tasks/2026-11-10-gar10-release-qualification-report.md"
+      "docs/ai/project-profile.md",
+      "docs/ai/tasks/2026-10-10-gar-vibecoder-evolution.md",
+      "docs/ai/tasks/2026-10-12-gar10-behavior-security-report.md",
+      "agent-runtime-v10-dev.4/AGENTS.md",
+      "agent-runtime-v10-dev.4/harness.json"
     ],
     "assumptions": [
       "The public GitHub main branch remains the released GAR 8.1 line; local dev.5 is an unpublished candidate derived from the internally manifested dev.4 distribution.",
@@ -266,5 +266,5 @@
       }
     ]
   },
-  "next_action": "Create an isolated review branch/PR for the dev.5 candidate, verify the full diff and current local archive hash, and keep merge/tag/publication blocked until every mandatory gate passes."
+  "next_action": "Keep draft PR #1 open and unmerged. Obtain independent security review, representative comprehension evidence, complete permitted final-artifact behavior grading, and authenticated publisher provenance before any merge, tag or release."
 }

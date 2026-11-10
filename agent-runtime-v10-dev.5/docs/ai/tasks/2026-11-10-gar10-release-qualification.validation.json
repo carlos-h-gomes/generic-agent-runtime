@@ -3,8 +3,8 @@
   "release_status": "blocked",
   "candidate": {
     "source_directory": "agent-runtime-v10-dev.5",
-    "source_files": 287,
-    "source_tree_fingerprint": "8ad5e10b766731f29d91673dd439234ec9c9270a07112695fdf8c0346102fbfc",
+    "source_files": 276,
+    "source_tree_fingerprint": "fc0bcc02fe5449d0932b11a6ce7c7455bacad68de15633eb562ede83e682ad15",
     "archive": "agent-runtime-v10-dev.5/agent-runtime-v10.0.zip",
     "archive_sha256": "ba330e5376808f820d34fbb82171f7552117030fed0aed18966efae8bc4d386e",
     "archive_entries": 248,
@@ -77,5 +77,18 @@
     "human_comprehension": "not_verified",
     "final_behavioral_grading": "not_verified"
   },
-  "release_decision": "blocked until independent security review, host boundary, human comprehension, final behavior grading, authenticated publisher provenance and reviewed PR evidence are complete."
+  "release_decision": "blocked until independent security review, host boundary, human comprehension, final behavior grading, authenticated publisher provenance and reviewed PR evidence are complete.",
+  "github_sync": {
+    "pr": "https://github.com/carlos-h-gomes/generic-agent-runtime/pull/1",
+    "number": 1,
+    "state": "open",
+    "draft": true,
+    "branch": "codex/gar10-dev5-review-20261110",
+    "base": "main",
+    "changed_files": 288,
+    "all_changes_under": "agent-runtime-v10-dev.5/",
+    "archive_in_pr": false,
+    "git_blob_mismatches": 0,
+    "checks": []
+  }
 }
