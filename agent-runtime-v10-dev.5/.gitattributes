@@ -1,0 +1,3 @@
+# Preserve exact candidate source bytes so the recorded deterministic archive
+# can be reproduced from this reviewed commit on Windows and Unix hosts.
+* -text

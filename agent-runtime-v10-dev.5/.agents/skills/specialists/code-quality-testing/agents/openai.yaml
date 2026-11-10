@@ -1,0 +1,5 @@
+interface:
+  display_name: "Code Quality Testing"
+  short_description: "Explicit specialist review for meaningful logic, shared refactors, edge cases, and regression-sensitive changes."
+policy:
+  allow_implicit_invocation: false

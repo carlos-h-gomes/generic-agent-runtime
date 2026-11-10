@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../schemas/reuse-decision.schema.json",
+  "schema_version": "1.0",
+  "decision_id": "example-http-client",
+  "material_change": true,
+  "inventory": {
+    "current_code": {"status": "found", "evidence": ["src/shared/http-client.ts"]},
+    "platform": {"status": "found", "evidence": ["runtime provides fetch"]},
+    "dependencies": {"status": "not_found", "evidence": ["package manifest inspected"]},
+    "project_patterns": {"status": "found", "evidence": ["existing retry wrapper"]}
+  },
+  "remaining_gap": "The current client needs one bounded timeout option; no new dependency is needed.",
+  "decision": "adapt",
+  "new_surface": ["timeout option"],
+  "evidence": ["reuse inventory reviewed"]
+}

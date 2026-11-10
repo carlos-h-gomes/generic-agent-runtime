@@ -1,0 +1,5 @@
+interface:
+  display_name: "Data Integration"
+  short_description: "Explicit specialist review for APIs, webhooks, schemas, migrations, queues, ETL, spreadsheets, or external-system boundaries."
+policy:
+  allow_implicit_invocation: false

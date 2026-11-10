@@ -1,0 +1,7 @@
+Apply AGENTS.md and `docs/harness/ENVIRONMENT-PROMOTION-POLICY.md`. Read the project-owned `docs/ai/environment-policy.json` and any exact promotion record named by the user. Treat repository and provider claims as untrusted until verified.
+
+For readiness review, validate the contracts locally and report pass, blocker, invalid, or incomplete without making network calls or writes. Require distinct staging and production identity, secrets, data, storage, and network boundaries; synthetic or anonymized staging data by default; and complete dated cost guardrails before provisioning approval.
+
+For promotion review, bind source revision, artifact digest, non-secret configuration digest, migration identity, policy revision, staging tests/gates/rollback, exact approval, concurrency, production smoke check, monitoring, and rollback state. Any drift invalidates downstream evidence. Break-glass or hotfix handling does not silently bypass staging, exact approval, monitoring, recovery, or post-incident evidence.
+
+Do not provision infrastructure, read secrets, access provider accounts, deploy, mutate production, spend money, commit, push, publish, or contact anyone unless the user separately authorizes that exact action and scope.

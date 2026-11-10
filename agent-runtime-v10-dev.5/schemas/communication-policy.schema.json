@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/communication-policy-v2.json",
+  "title": "GAR communication policy v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "default_profile",
+    "profiles",
+    "expansion_triggers",
+    "mandatory_content",
+    "style_rules",
+    "user_override"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "2.0"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "active"
+      ]
+    },
+    "default_profile": {
+      "const": "compact_adaptive"
+    },
+    "profiles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compact",
+        "standard",
+        "deep"
+      ],
+      "properties": {
+        "compact": {
+          "$ref": "#/$defs/profile"
+        },
+        "standard": {
+          "$ref": "#/$defs/profile"
+        },
+        "deep": {
+          "$ref": "#/$defs/profile"
+        }
+      }
+    },
+    "expansion_triggers": {
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 8,
+      "items": {
+        "enum": [
+          "high_or_critical_risk",
+          "production_effect",
+          "destructive_effect",
+          "failed_or_incomplete_validation",
+          "pending_approval",
+          "difficult_reversal",
+          "incident_or_recovery",
+          "explicit_user_request"
+        ]
+      }
+    },
+    "mandatory_content": {
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 9,
+      "items": {
+        "enum": [
+          "outcome",
+          "required_decision_or_action",
+          "blockers",
+          "failed_or_skipped_validation",
+          "high_or_critical_risks",
+          "production_or_destructive_effects",
+          "approval_state",
+          "changed_files",
+          "material_pending_work"
+        ]
+      }
+    },
+    "style_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "result_first",
+        "progressive_disclosure",
+        "repeat_final_summary",
+        "raw_log_dump",
+        "hard_word_limit",
+        "plain_language",
+        "one_idea_per_paragraph",
+        "safety_over_brevity"
+      ],
+      "properties": {
+        "result_first": {
+          "const": true
+        },
+        "progressive_disclosure": {
+          "const": true
+        },
+        "repeat_final_summary": {
+          "const": false
+        },
+        "raw_log_dump": {
+          "const": false
+        },
+        "hard_word_limit": {
+          "const": false
+        },
+        "plain_language": {
+          "const": true
+        },
+        "one_idea_per_paragraph": {
+          "const": true
+        },
+        "safety_over_brevity": {
+          "const": true
+        }
+      }
+    },
+    "user_override": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed_profiles",
+        "mandatory_content_can_be_omitted"
+      ],
+      "properties": {
+        "allowed_profiles": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 3,
+          "items": {
+            "enum": [
+              "compact",
+              "standard",
+              "deep"
+            ]
+          }
+        },
+        "mandatory_content_can_be_omitted": {
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "purpose",
+        "detail"
+      ],
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detail": {
+          "enum": [
+            "minimal",
+            "balanced",
+            "thorough"
+          ]
+        }
+      }
+    }
+  }
+}

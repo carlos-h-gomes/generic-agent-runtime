@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://generic-agent-runtime.local/schemas/ui-review-v1.json",
+  "title": "Harness UI review v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "applicability"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": "1.0" },
+    "status": { "enum": ["uninitialized", "draft", "ready", "approved"] },
+    "applicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applicable", "reason"],
+      "properties": {
+        "applicable": { "type": "boolean" },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 1000 }
+      }
+    },
+    "review_id": { "type": "string", "minLength": 1 },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_users", "user_outcome", "critical_journeys"],
+      "properties": {
+        "target_users": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "user_outcome": { "type": "string", "minLength": 1 },
+        "critical_journeys": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "name", "primary_action"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "name": { "type": "string", "minLength": 1 },
+              "primary_action": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "design_system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tokens", "components", "exceptions"],
+      "properties": {
+        "tokens": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "components": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "exceptions": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "states": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "default",
+        "loading",
+        "empty",
+        "success",
+        "validation_error",
+        "system_error",
+        "disabled",
+        "permission",
+        "destructive",
+        "recovery",
+        "degraded_offline",
+        "content_stress"
+      ],
+      "properties": {
+        "default": { "$ref": "#/$defs/state" },
+        "loading": { "$ref": "#/$defs/state" },
+        "empty": { "$ref": "#/$defs/state" },
+        "success": { "$ref": "#/$defs/state" },
+        "validation_error": { "$ref": "#/$defs/state" },
+        "system_error": { "$ref": "#/$defs/state" },
+        "disabled": { "$ref": "#/$defs/state" },
+        "permission": { "$ref": "#/$defs/state" },
+        "destructive": { "$ref": "#/$defs/state" },
+        "recovery": { "$ref": "#/$defs/state" },
+        "degraded_offline": { "$ref": "#/$defs/state" },
+        "content_stress": { "$ref": "#/$defs/state" }
+      }
+    },
+    "responsive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["viewports", "stress_cases"],
+      "properties": {
+        "viewports": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "width", "height"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "width": { "type": "integer", "minimum": 240, "maximum": 10000 },
+              "height": { "type": "integer", "minimum": 240, "maximum": 10000 }
+            }
+          }
+        },
+        "stress_cases": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["standard", "automated", "manual_checks"],
+      "properties": {
+        "standard": { "const": "WCAG 2.2 AA" },
+        "automated": { "$ref": "#/$defs/check_evidence" },
+        "manual_checks": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "$ref": "#/$defs/check_evidence" }
+        }
+      }
+    },
+    "visual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool", "command", "environment", "baselines", "diff_status", "evidence_ref"],
+      "properties": {
+        "tool": { "type": "string", "minLength": 1 },
+        "command": { "type": "string", "minLength": 1 },
+        "environment": { "type": "string", "minLength": 1 },
+        "baselines": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "diff_status": { "enum": ["passed", "reviewed_changes"] },
+        "evidence_ref": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "pointer", "status"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "pointer": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["passed", "reviewed"] }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewer", "reviewed_at"],
+      "properties": {
+        "reviewer": { "type": "string", "minLength": 1 },
+        "reviewed_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "enum": ["draft", "ready", "approved"] } },
+        "required": ["status"]
+      },
+      "then": {
+        "required": [
+          "review_id",
+          "product",
+          "design_system",
+          "states",
+          "responsive",
+          "accessibility",
+          "visual",
+          "evidence",
+          "review"
+        ],
+        "properties": {
+          "applicability": {
+            "properties": { "applicable": { "const": true } }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason", "evidence_refs"],
+      "properties": {
+        "status": { "enum": ["covered", "not_applicable"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "evidence_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "check_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "evidence_ref"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "status": { "const": "passed" },
+        "evidence_ref": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

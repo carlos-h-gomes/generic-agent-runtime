@@ -1,0 +1,5 @@
+interface:
+  display_name: "Project Profiling"
+  short_description: "Profile an unfamiliar repository only when commands, boundaries, or project facts are materially unknown or stale."
+policy:
+  allow_implicit_invocation: true

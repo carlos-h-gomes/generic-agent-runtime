@@ -1,0 +1,5 @@
+interface:
+  display_name: "Implementation"
+  short_description: "Implement an authorized repository change with the smallest coherent diff while preserving existing work and established boundaries."
+policy:
+  allow_implicit_invocation: true

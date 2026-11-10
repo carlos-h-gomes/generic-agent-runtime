@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/workspace-hygiene-policy-v1.json",
+  "title": "Harness workspace hygiene policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "archive_directory", "index_file", "manifest_file", "journal_file", "payload_directory", "default_mode", "follow_links", "automatic_purge", "classification", "protected_exact", "protected_prefixes", "protected_names", "protected_suffixes", "sensitive_names", "sensitive_suffixes", "reference_extensions", "max_reference_file_bytes", "max_hash_file_bytes", "max_index_file_bytes", "active_discovery_excludes", "restore_overwrite"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": "1.0"},
+    "archive_directory": {"const": "_archives"},
+    "index_file": {"const": "index.jsonl"},
+    "manifest_file": {"const": "archive-manifest.json"},
+    "journal_file": {"const": "move-journal.jsonl"},
+    "payload_directory": {"const": "content"},
+    "default_mode": {"const": "plan_only"},
+    "follow_links": {"const": false},
+    "automatic_purge": {"const": false},
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["states", "positive_candidate_signals", "age_alone_is_sufficient", "unknown_state"],
+      "properties": {
+        "states": {"type": "array", "const": ["active", "reference", "archive_candidate", "archived", "protected", "purge_eligible"]},
+        "positive_candidate_signals": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "age_alone_is_sufficient": {"const": false},
+        "unknown_state": {"const": "protected"}
+      }
+    },
+    "protected_exact": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "protected_prefixes": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "protected_names": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "protected_suffixes": {"type": "array", "items": {"type": "string", "pattern": "^\\."}},
+    "sensitive_names": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "sensitive_suffixes": {"type": "array", "items": {"type": "string", "pattern": "^\\."}},
+    "reference_extensions": {"type": "array", "items": {"type": "string", "pattern": "^\\."}},
+    "max_reference_file_bytes": {"type": "integer", "minimum": 1024, "maximum": 8388608},
+    "max_hash_file_bytes": {"type": "integer", "minimum": 1024, "maximum": 67108864},
+    "max_index_file_bytes": {"type": "integer", "minimum": 1024, "maximum": 67108864},
+    "active_discovery_excludes": {"type": "array", "const": ["**/_archives/**/content/**"]},
+    "restore_overwrite": {"const": false}
+  }
+}

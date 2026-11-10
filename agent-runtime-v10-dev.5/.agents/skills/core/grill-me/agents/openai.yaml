@@ -1,0 +1,6 @@
+interface:
+  display_name: "Grill Me"
+  short_description: "Challenge material decisions one question at a time without writing or expanding authority"
+policy:
+  allow_implicit_invocation: false
+

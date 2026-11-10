@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://generic-agent-runtime.local/schemas/authorized-target-v1.json",
+  "title": "Authorized defensive-test target v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "scope_id",
+    "owner",
+    "environment",
+    "target_origin",
+    "allowed_methods",
+    "allowed_path_prefixes",
+    "max_requests",
+    "max_response_bytes",
+    "request_timeout_seconds",
+    "valid_from",
+    "expires_at",
+    "approval_ref",
+    "destructive_actions_allowed",
+    "stop_conditions"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": "1.0" },
+    "scope_id": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "owner": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "environment": { "enum": ["local", "disposable", "staging"] },
+    "target_origin": { "type": "string", "format": "uri", "maxLength": 500 },
+    "allowed_methods": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["GET", "HEAD", "OPTIONS", "POST"] }
+    },
+    "allowed_path_prefixes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^/" }
+    },
+    "max_requests": { "type": "integer", "minimum": 1, "maximum": 200 },
+    "max_response_bytes": { "type": "integer", "minimum": 1, "maximum": 1048576 },
+    "request_timeout_seconds": { "type": "integer", "minimum": 1, "maximum": 30 },
+    "valid_from": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "approval_ref": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "destructive_actions_allowed": { "const": false },
+    "stop_conditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1, "maxLength": 300 }
+    }
+  }
+}

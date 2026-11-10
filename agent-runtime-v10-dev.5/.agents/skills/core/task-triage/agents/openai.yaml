@@ -1,0 +1,5 @@
+interface:
+  display_name: "Task Triage"
+  short_description: "Create contracts for authorized managed changes; keep review-only work read-only"
+policy:
+  allow_implicit_invocation: false

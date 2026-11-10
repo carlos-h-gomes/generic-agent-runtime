@@ -1,0 +1,103 @@
+{
+  "$schema": "../../../schemas/environment-policy.schema.json",
+  "schema_version": "2.0",
+  "status": "active",
+  "project_id": "synthetic-orders",
+  "policy_revision": 3,
+  "environments": {
+    "staging": {
+      "state": "verified",
+      "owner": "platform-team",
+      "identity_boundary": "identity://synthetic-orders/staging",
+      "secrets_boundary": "secrets://synthetic-orders/staging",
+      "data_boundary": "database://synthetic-orders/staging",
+      "storage_boundary": "storage://synthetic-orders/staging",
+      "network_boundary": "network://synthetic-orders/staging",
+      "configuration_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "topology_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "capacity_class": "small"
+    },
+    "production": {
+      "state": "verified",
+      "owner": "platform-team",
+      "identity_boundary": "identity://synthetic-orders/production",
+      "secrets_boundary": "secrets://synthetic-orders/production",
+      "data_boundary": "database://synthetic-orders/production",
+      "storage_boundary": "storage://synthetic-orders/production",
+      "network_boundary": "network://synthetic-orders/production",
+      "configuration_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "topology_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+      "capacity_class": "medium"
+    }
+  },
+  "isolation": {
+    "identity": "separate",
+    "secrets": "separate",
+    "data": "separate",
+    "storage": "separate",
+    "network": "separate"
+  },
+  "staging_data": {
+    "strategy": "synthetic",
+    "production_data_exception_ref": null
+  },
+  "allowed_structural_differences": [
+    "domain",
+    "scale",
+    "credentials",
+    "quotas",
+    "data"
+  ],
+  "promotion": {
+    "staging_required": true,
+    "same_artifact_required": true,
+    "configuration_bound": true,
+    "migration_bound": true,
+    "policy_bound": true,
+    "gates_bound": true,
+    "exact_approval_required": true,
+    "max_concurrent_production": 1,
+    "rollback_rehearsal_required": true,
+    "monitoring_required": true,
+    "hotfix_staging_required": true
+  },
+  "cost_guardrails": {
+    "status": "complete",
+    "provider": "synthetic-provider",
+    "region": "synthetic-region-1",
+    "currency": "USD",
+    "pricing_source": "https://example.invalid/official-pricing-fixture",
+    "pricing_as_of": "2026-09-04",
+    "expected_monthly_formula": "fixed_runtime + expected_usage",
+    "burst_monthly_formula": "fixed_runtime + bounded_burst_usage",
+    "worst_case_monthly_formula": "monthly_hard_cap",
+    "monthly_hard_cap": 250,
+    "alert_owner": "finops-owner",
+    "degradation": "disable non-critical workers at 80 percent",
+    "kill_switch": "suspend non-production resources and block new production promotions"
+  },
+  "parity": {
+    "policy_revision": 3,
+    "method": "reviewed_normalized_topology_v1",
+    "reviewer": "platform-reviewer",
+    "reviewed_at": "2026-09-04T11:00:00Z",
+    "evidence_ref": "evidence://synthetic-orders/parity-003",
+    "staging": {
+      "configuration_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "topology_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "normalized_topology_sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+    },
+    "production": {
+      "configuration_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "topology_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+      "normalized_topology_sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+    },
+    "observed_differences": [
+      "domain",
+      "scale",
+      "credentials",
+      "quotas",
+      "data"
+    ]
+  }
+}

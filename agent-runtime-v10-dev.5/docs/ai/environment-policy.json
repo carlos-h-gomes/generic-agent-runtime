@@ -1,0 +1,80 @@
+{
+  "$schema": "../../schemas/environment-policy.schema.json",
+  "schema_version": "2.0",
+  "status": "planned",
+  "project_id": "uninitialized-project",
+  "policy_revision": 1,
+  "environments": {
+    "staging": {
+      "state": "planned",
+      "owner": null,
+      "identity_boundary": null,
+      "secrets_boundary": null,
+      "data_boundary": null,
+      "storage_boundary": null,
+      "network_boundary": null,
+      "configuration_sha256": null,
+      "topology_sha256": null,
+      "capacity_class": null
+    },
+    "production": {
+      "state": "planned",
+      "owner": null,
+      "identity_boundary": null,
+      "secrets_boundary": null,
+      "data_boundary": null,
+      "storage_boundary": null,
+      "network_boundary": null,
+      "configuration_sha256": null,
+      "topology_sha256": null,
+      "capacity_class": null
+    }
+  },
+  "isolation": {
+    "identity": "unknown",
+    "secrets": "unknown",
+    "data": "unknown",
+    "storage": "unknown",
+    "network": "unknown"
+  },
+  "staging_data": {
+    "strategy": "unknown",
+    "production_data_exception_ref": null
+  },
+  "allowed_structural_differences": [
+    "domain",
+    "scale",
+    "credentials",
+    "quotas",
+    "data"
+  ],
+  "promotion": {
+    "staging_required": true,
+    "same_artifact_required": true,
+    "configuration_bound": true,
+    "migration_bound": true,
+    "policy_bound": true,
+    "gates_bound": true,
+    "exact_approval_required": true,
+    "max_concurrent_production": 1,
+    "rollback_rehearsal_required": true,
+    "monitoring_required": true,
+    "hotfix_staging_required": true
+  },
+  "cost_guardrails": {
+    "status": "planned",
+    "provider": null,
+    "region": null,
+    "currency": null,
+    "pricing_source": null,
+    "pricing_as_of": null,
+    "expected_monthly_formula": null,
+    "burst_monthly_formula": null,
+    "worst_case_monthly_formula": null,
+    "monthly_hard_cap": null,
+    "alert_owner": null,
+    "degradation": null,
+    "kill_switch": null
+  },
+  "parity": null
+}

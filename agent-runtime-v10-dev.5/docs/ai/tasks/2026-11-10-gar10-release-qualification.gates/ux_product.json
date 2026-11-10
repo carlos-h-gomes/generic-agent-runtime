@@ -1,0 +1,66 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-11-10-gar10-release-qualification",
+  "gate": "ux_product",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "blocked",
+  "applicability": {
+    "applicable": true,
+    "reason": "No GAR GUI exists, so visual UI review is not applicable. Required representative comprehension evidence for GAR communication remains missing."
+  },
+  "summary": "No GAR GUI exists, so visual UI review is not applicable. Required representative comprehension evidence for GAR communication remains missing.",
+  "checks": [
+    {
+      "id": "gar-ui-applicability",
+      "status": "not_applicable",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "The GAR package has no user interface to render."
+    },
+    {
+      "id": "representative-comprehension",
+      "status": "not_verified",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "No observed representative comprehension results are recorded."
+    }
+  ],
+  "findings": [
+    {
+      "id": "human-comprehension",
+      "title": "Representative comprehension not verified",
+      "severity": "medium",
+      "state": "open",
+      "blocking": true,
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "required_action": "Observe representative users interpreting compact, standard and failure/blocker outputs; record comprehension and revise if needed.",
+      "due_before": "release",
+      "owner": "Product owner"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "LOCAL",
+      "kind": "file",
+      "pointer": "docs/ai/tasks/2026-11-10-gar10-release-qualification-report.md",
+      "summary": "dev.5 source, package, archive, clean extraction and current local checks.",
+      "sensitivity": "internal",
+      "redacted": false,
+      "captured_at": "2026-11-10T14:20:00Z"
+    }
+  ],
+  "approval": {
+    "required": true,
+    "reason": "Representative participant evidence is needed; author review is insufficient.",
+    "status": "pending"
+  },
+  "handoff": [],
+  "generated_at": "2026-11-10T14:20:00Z",
+  "expires_at": null
+}

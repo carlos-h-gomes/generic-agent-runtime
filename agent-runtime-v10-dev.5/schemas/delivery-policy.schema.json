@@ -1,0 +1,478 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact",
+    "controls"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "VC-01",
+        "VC-02",
+        "VC-03",
+        "VC-04",
+        "VC-05",
+        "VC-06",
+        "VC-07",
+        "VC-08",
+        "VC-09",
+        "VC-10",
+        "VC-11",
+        "VC-12",
+        "VC-13",
+        "VC-14",
+        "VC-15"
+      ],
+      "properties": {
+        "VC-01": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-02": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-03": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-04": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-05": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-06": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-07": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-08": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-09": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-10": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-11": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-12": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-13": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-14": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        },
+        "VC-15": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicable",
+            "rationale",
+            "checks"
+          ],
+          "properties": {
+            "applicable": {
+              "type": "boolean"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "checks": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "manual",
+                  "automated"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/delivery-policy-v1.json"
+}

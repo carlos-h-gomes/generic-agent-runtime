@@ -1,0 +1,5 @@
+interface:
+  display_name: "Validation"
+  short_description: "Validate an authorized change with the smallest relevant evidence set, bounded commands, honest skips, and no automatic repeated failures."
+policy:
+  allow_implicit_invocation: true

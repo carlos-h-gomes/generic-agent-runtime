@@ -1,0 +1,586 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/environment-policy-v2.json",
+  "title": "GAR environment policy v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "project_id",
+    "policy_revision",
+    "environments",
+    "isolation",
+    "staging_data",
+    "allowed_structural_differences",
+    "promotion",
+    "cost_guardrails",
+    "parity"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "2.0"
+    },
+    "status": {
+      "enum": [
+        "planned",
+        "active",
+        "suspended"
+      ]
+    },
+    "project_id": {
+      "$ref": "#/$defs/id"
+    },
+    "policy_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "environments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "staging",
+        "production"
+      ],
+      "properties": {
+        "staging": {
+          "$ref": "#/$defs/environment"
+        },
+        "production": {
+          "$ref": "#/$defs/environment"
+        }
+      }
+    },
+    "isolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity",
+        "secrets",
+        "data",
+        "storage",
+        "network"
+      ],
+      "properties": {
+        "identity": {
+          "$ref": "#/$defs/isolation_state"
+        },
+        "secrets": {
+          "$ref": "#/$defs/isolation_state"
+        },
+        "data": {
+          "$ref": "#/$defs/isolation_state"
+        },
+        "storage": {
+          "$ref": "#/$defs/isolation_state"
+        },
+        "network": {
+          "$ref": "#/$defs/isolation_state"
+        }
+      }
+    },
+    "staging_data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strategy",
+        "production_data_exception_ref"
+      ],
+      "properties": {
+        "strategy": {
+          "enum": [
+            "synthetic",
+            "anonymized",
+            "production_data_exception",
+            "unknown"
+          ]
+        },
+        "production_data_exception_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      }
+    },
+    "allowed_structural_differences": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "domain",
+          "scale",
+          "credentials",
+          "quotas",
+          "data"
+        ]
+      }
+    },
+    "promotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "staging_required",
+        "same_artifact_required",
+        "configuration_bound",
+        "migration_bound",
+        "policy_bound",
+        "gates_bound",
+        "exact_approval_required",
+        "max_concurrent_production",
+        "rollback_rehearsal_required",
+        "monitoring_required",
+        "hotfix_staging_required"
+      ],
+      "properties": {
+        "staging_required": {
+          "const": true
+        },
+        "same_artifact_required": {
+          "const": true
+        },
+        "configuration_bound": {
+          "const": true
+        },
+        "migration_bound": {
+          "const": true
+        },
+        "policy_bound": {
+          "const": true
+        },
+        "gates_bound": {
+          "const": true
+        },
+        "exact_approval_required": {
+          "const": true
+        },
+        "max_concurrent_production": {
+          "const": 1
+        },
+        "rollback_rehearsal_required": {
+          "const": true
+        },
+        "monitoring_required": {
+          "const": true
+        },
+        "hotfix_staging_required": {
+          "const": true
+        }
+      }
+    },
+    "cost_guardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "provider",
+        "region",
+        "currency",
+        "pricing_source",
+        "pricing_as_of",
+        "expected_monthly_formula",
+        "burst_monthly_formula",
+        "worst_case_monthly_formula",
+        "monthly_hard_cap",
+        "alert_owner",
+        "degradation",
+        "kill_switch"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "planned",
+            "complete"
+          ]
+        },
+        "provider": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "region": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "currency": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Z]{3}$"
+        },
+        "pricing_source": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "pricing_as_of": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "expected_monthly_formula": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "burst_monthly_formula": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "worst_case_monthly_formula": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "monthly_hard_cap": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "alert_owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "degradation": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "kill_switch": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "complete"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "provider": {
+                "type": "string",
+                "minLength": 1
+              },
+              "region": {
+                "type": "string",
+                "minLength": 1
+              },
+              "currency": {
+                "type": "string",
+                "pattern": "^[A-Z]{3}$"
+              },
+              "pricing_source": {
+                "type": "string",
+                "format": "uri"
+              },
+              "pricing_as_of": {
+                "type": "string",
+                "format": "date"
+              },
+              "expected_monthly_formula": {
+                "type": "string",
+                "minLength": 1
+              },
+              "burst_monthly_formula": {
+                "type": "string",
+                "minLength": 1
+              },
+              "worst_case_monthly_formula": {
+                "type": "string",
+                "minLength": 1
+              },
+              "monthly_hard_cap": {
+                "type": "number",
+                "minimum": 0
+              },
+              "alert_owner": {
+                "type": "string",
+                "minLength": 1
+              },
+              "degradation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kill_switch": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "parity": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "policy_revision",
+            "method",
+            "reviewer",
+            "reviewed_at",
+            "evidence_ref",
+            "staging",
+            "production",
+            "observed_differences"
+          ],
+          "properties": {
+            "policy_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "method": {
+              "const": "reviewed_normalized_topology_v1"
+            },
+            "reviewer": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "maxLength": 1500,
+              "pattern": "\\S"
+            },
+            "reviewed_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            },
+            "evidence_ref": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "maxLength": 1500,
+              "pattern": "\\S"
+            },
+            "staging": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "configuration_sha256",
+                "topology_sha256",
+                "normalized_topology_sha256"
+              ],
+              "properties": {
+                "configuration_sha256": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "topology_sha256": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "normalized_topology_sha256": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            },
+            "production": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "configuration_sha256",
+                "topology_sha256",
+                "normalized_topology_sha256"
+              ],
+              "properties": {
+                "configuration_sha256": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "topology_sha256": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "normalized_topology_sha256": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            },
+            "observed_differences": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "domain",
+                  "scale",
+                  "credentials",
+                  "quotas",
+                  "data"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "digest": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "isolation_state": {
+      "enum": [
+        "separate",
+        "shared",
+        "unknown"
+      ]
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "owner",
+        "identity_boundary",
+        "secrets_boundary",
+        "data_boundary",
+        "storage_boundary",
+        "network_boundary",
+        "configuration_sha256",
+        "topology_sha256",
+        "capacity_class"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "planned",
+            "provisioned",
+            "verified",
+            "suspended"
+          ]
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "identity_boundary": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "secrets_boundary": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "data_boundary": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "storage_boundary": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "network_boundary": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "configuration_sha256": {
+          "$ref": "#/$defs/digest"
+        },
+        "topology_sha256": {
+          "$ref": "#/$defs/digest"
+        },
+        "capacity_class": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "artifact": {
+    "path": "REPLACE-WITH-REVIEWED-ARTIFACT",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "controls": {
+    "VC-01": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-02": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-03": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-04": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-05": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-06": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-07": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-08": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-09": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-10": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-11": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-12": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-13": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-14": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    },
+    "VC-15": {
+      "applicable": true,
+      "rationale": "Review actual applicability before use; default remains mandatory.",
+      "checks": {
+        "scope_review": "manual"
+      }
+    }
+  }
+}

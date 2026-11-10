@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "example-task-id",
+  "gate": "architecture_uml",
+  "phase": "design",
+  "revision": 1,
+  "status": "not_applicable",
+  "applicability": {
+    "applicable": false,
+    "reason": "Replace with the concrete trigger analysis for this task."
+  },
+  "summary": "Replace with a bounded evidence-backed conclusion.",
+  "checks": [],
+  "findings": [],
+  "evidence": [],
+  "acceptance_criteria_added": [],
+  "artifacts": [],
+  "sources": [],
+  "approval": {
+    "required": false,
+    "reason": "No protected action belongs to this example result.",
+    "status": "not_required",
+    "evidence_ref": null
+  },
+  "handoff": [],
+  "generated_at": "2000-01-01T00:00:00Z",
+  "expires_at": null
+}

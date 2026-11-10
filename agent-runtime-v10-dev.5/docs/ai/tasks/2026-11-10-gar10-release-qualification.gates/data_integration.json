@@ -1,0 +1,44 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-11-10-gar10-release-qualification",
+  "gate": "data_integration",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "not_applicable",
+  "applicability": {
+    "applicable": false,
+    "reason": "No new live data service, browser, scanner, external skill or tool integration was selected or bundled; integrations remain a separate reviewed evolution track."
+  },
+  "summary": "No new live data service, browser, scanner, external skill or tool integration was selected or bundled; integrations remain a separate reviewed evolution track.",
+  "checks": [
+    {
+      "id": "external-integration-selection",
+      "status": "not_applicable",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "No external integration admitted for this candidate."
+    }
+  ],
+  "findings": [],
+  "evidence": [
+    {
+      "id": "LOCAL",
+      "kind": "file",
+      "pointer": "docs/ai/tasks/2026-11-10-gar10-release-qualification-report.md",
+      "summary": "dev.5 source, package, archive, clean extraction and current local checks.",
+      "sensitivity": "internal",
+      "redacted": false,
+      "captured_at": "2026-11-10T14:20:00Z"
+    }
+  ],
+  "approval": {
+    "required": false,
+    "reason": "No separate approval is needed for this gate record.",
+    "status": "not_required"
+  },
+  "handoff": [],
+  "generated_at": "2026-11-10T14:20:00Z",
+  "expires_at": null
+}

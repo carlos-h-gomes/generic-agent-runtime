@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/project-template-v1.json",
+  "title": "Harness project template manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "template_id", "profile", "minimum_directories", "files", "extension_policy", "collision_policy"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": "1.0"},
+    "template_id": {"const": "python-react-hybrid"},
+    "profile": {"const": "python-react-hybrid"},
+    "minimum_directories": {
+      "type": "array",
+      "minItems": 18,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/portable_path"}
+    },
+    "files": {
+      "type": "array",
+      "minItems": 18,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/portable_path"}
+    },
+    "extension_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allow_additional_directories", "authority"],
+      "properties": {
+        "allow_additional_directories": {"const": true},
+        "authority": {"const": "docs/ai/conventions.md"}
+      }
+    },
+    "collision_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preflight", "overwrite", "differing_existing_file"],
+      "properties": {
+        "preflight": {"const": true},
+        "overwrite": {"const": false},
+        "differing_existing_file": {"enum": ["block", "skip_with_explicit_merge"]}
+      }
+    }
+  },
+  "$defs": {
+    "portable_path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\)[A-Za-z0-9._/-]+$"
+    }
+  }
+}
