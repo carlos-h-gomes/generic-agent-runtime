@@ -1,0 +1,9 @@
+{
+  "$schema": "../../schemas/ui-review.schema.json",
+  "schema_version": "1.0",
+  "status": "uninitialized",
+  "applicability": {
+    "applicable": false,
+    "reason": "Initialize this contract when the project contains material user-facing web UI."
+  }
+}

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Finops Cost"
+  short_description: "Explicit specialist review for paid APIs, models, compute, storage, network, recurring jobs, or high-volume variable cost."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,52 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-11-10-gar10-release-qualification",
+  "gate": "finops",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed_with_conditions",
+  "applicability": {
+    "applicable": true,
+    "reason": "No new model/API spend, credit purchase or reset occurred. Existing behavioral cost telemetry is incomplete and remains an AI/LLM qualification gap."
+  },
+  "summary": "No new model/API spend, credit purchase or reset occurred. Existing behavioral cost telemetry is incomplete and remains an AI/LLM qualification gap.",
+  "checks": [
+    {
+      "id": "new-spend-boundary",
+      "status": "passed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "No new spend or capacity expansion used."
+    },
+    {
+      "id": "model-cost-measurement",
+      "status": "not_applicable",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "No new model run was performed in this phase; no cost-savings claim is made."
+    }
+  ],
+  "findings": [],
+  "evidence": [
+    {
+      "id": "LOCAL",
+      "kind": "file",
+      "pointer": "docs/ai/tasks/2026-11-10-gar10-release-qualification-report.md",
+      "summary": "dev.5 source, package, archive, clean extraction and current local checks.",
+      "sensitivity": "internal",
+      "redacted": false,
+      "captured_at": "2026-11-10T14:20:00Z"
+    }
+  ],
+  "approval": {
+    "required": false,
+    "reason": "No separate approval is needed for this gate record.",
+    "status": "not_required"
+  },
+  "handoff": [],
+  "generated_at": "2026-11-10T14:20:00Z",
+  "expires_at": null
+}

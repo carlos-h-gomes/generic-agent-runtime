@@ -1,0 +1,67 @@
+{
+  "$schema": "../../../schemas/automation-decision.schema.json",
+  "schema_version": "1.0",
+  "decision_id": "customer-sync-hybrid",
+  "status": "draft",
+  "execution_plane": "hybrid",
+  "workload": "Receive a CRM webhook, call the authoritative customer service, and notify the account channel.",
+  "owner": "integration team",
+  "system_of_record": "customer service database",
+  "authority_location": "code_service",
+  "triggers": ["webhook"],
+  "hard_blockers": ["authorization_or_tenant_rule"],
+  "blocker_handling": ["Tenant authorization and writes remain in the versioned customer API."],
+  "eligibility": {
+    "edge_orchestration": true,
+    "bounded_flow": true,
+    "visual_operations_value": true,
+    "supported_integrations": true,
+    "authoritative_logic_in_code": true,
+    "version_controlled": true,
+    "environment_separation": true,
+    "idempotent_side_effects": true
+  },
+  "contracts": {
+    "input_schema": "contracts/crm-customer-event-v1.json",
+    "output_schema": "contracts/customer-sync-result-v1.json",
+    "api_version": "customer-api/v1",
+    "validation_failure": "Reject without side effects and route a redacted event to the error workflow."
+  },
+  "reliability": {
+    "timeout_seconds": 30,
+    "max_attempts": 3,
+    "idempotency_key": "provider event ID plus tenant ID",
+    "replay_safe": true,
+    "partial_failure": "The API write is authoritative; notification failure is reconciled independently.",
+    "reconciliation_owner": "integration operations"
+  },
+  "security": {
+    "credentials_external": true,
+    "least_privilege": true,
+    "webhook_protected": true,
+    "risky_nodes_reviewed": true,
+    "egress_scoped": true,
+    "sensitive_data_minimized": true
+  },
+  "operations": {
+    "workflow_export": "automation/n8n/customer-sync.json",
+    "protected_production": true,
+    "correlation_id": "provider event ID",
+    "error_workflow": "customer-sync-error-v1",
+    "retention_days": 30,
+    "rollback": "Disable the workflow and restore the last reviewed export.",
+    "kill_switch": "Deactivate customer-sync in the protected production instance."
+  },
+  "cost": {
+    "pricing_status": "unknown",
+    "billing_units": ["workflow executions", "customer API requests", "notification API requests"],
+    "expected_volume": "Measure approved daily webhook forecast before activation.",
+    "burst_volume": "Bound by ingress rate limit and worker concurrency.",
+    "hard_cap": "Provider and workflow concurrency caps must be recorded before activation.",
+    "alert_owner": "integration operations",
+    "unbounded_exposure": false
+  },
+  "evidence": ["Reviewed workflow export", "API contract tests", "Synthetic replay test", "Security audit summary"],
+  "approval": {"required": true, "status": "pending", "reference": null},
+  "decided_at": "2026-08-04T14:00:00-03:00"
+}

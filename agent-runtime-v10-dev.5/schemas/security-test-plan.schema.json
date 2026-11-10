@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://generic-agent-runtime.local/schemas/security-test-plan-v1.json",
+  "title": "Controlled HTTP security contract plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "plan_id", "target_origin", "max_requests", "scenarios"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": "1.0" },
+    "plan_id": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "target_origin": { "type": "string", "format": "uri", "maxLength": 500 },
+    "max_requests": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "purpose",
+          "method",
+          "path",
+          "side_effect_free",
+          "expected_status",
+          "required_headers",
+          "forbidden_body_markers"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "purpose": { "type": "string", "minLength": 1, "maxLength": 500 },
+          "method": { "enum": ["GET", "HEAD", "OPTIONS", "POST"] },
+          "path": {
+            "type": "string",
+            "pattern": "^/(?!/)[^\\\\?#\\u0000-\\u001f]*$",
+            "maxLength": 1000
+          },
+          "side_effect_free": { "const": true },
+          "headers": {
+            "type": "object",
+            "additionalProperties": { "type": "string", "maxLength": 1000 }
+          },
+          "body": { "type": ["string", "null"], "maxLength": 4096 },
+          "expected_status": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "integer", "minimum": 100, "maximum": 599 }
+          },
+          "required_headers": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1, "maxLength": 120 }
+          },
+          "forbidden_body_markers": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1, "maxLength": 200 }
+          }
+        }
+      }
+    }
+  }
+}

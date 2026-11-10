@@ -1,0 +1,74 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-11-10-gar10-release-qualification",
+  "gate": "ai_llm",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "blocked",
+  "applicability": {
+    "applicable": true,
+    "reason": "Existing H9 observations are limited and internally graded. Complete final-artifact behavior qualification, required repeats and independent grading remain outstanding; no new model spend or reset was used."
+  },
+  "summary": "Existing H9 observations are limited and internally graded. Complete final-artifact behavior qualification, required repeats and independent grading remain outstanding; no new model spend or reset was used.",
+  "checks": [
+    {
+      "id": "final-artifact-behavior",
+      "status": "not_verified",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "No complete fresh final-artifact comparative run was produced in this phase."
+    },
+    {
+      "id": "independent-grading",
+      "status": "not_verified",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "No independent grader result is recorded."
+    },
+    {
+      "id": "spend-boundary",
+      "status": "passed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "No additional account credits, reset or API spend used."
+    }
+  ],
+  "findings": [
+    {
+      "id": "behavioral-qualification",
+      "title": "Final artifact behavioral qualification incomplete",
+      "severity": "medium",
+      "state": "open",
+      "blocking": true,
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "required_action": "Complete permitted pinned cases/repeats and independent grading on the exact final artifact within existing account and attempt limits.",
+      "due_before": "release",
+      "owner": "AI evaluation owner"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "LOCAL",
+      "kind": "file",
+      "pointer": "docs/ai/tasks/2026-11-10-gar10-release-qualification-report.md",
+      "summary": "dev.5 source, package, archive, clean extraction and current local checks.",
+      "sensitivity": "internal",
+      "redacted": false,
+      "captured_at": "2026-11-10T14:20:00Z"
+    }
+  ],
+  "approval": {
+    "required": false,
+    "reason": "No separate approval is needed for this gate record.",
+    "status": "not_required"
+  },
+  "handoff": [],
+  "generated_at": "2026-11-10T14:20:00Z",
+  "expires_at": null
+}

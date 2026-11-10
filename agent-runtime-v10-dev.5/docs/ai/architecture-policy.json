@@ -1,0 +1,24 @@
+{
+  "$schema": "../../schemas/architecture-profile.schema.json",
+  "schema_version": "2.0",
+  "status": "draft",
+  "profile_id": "project-selection-pending",
+  "selection": {
+    "source": "user_selected",
+    "user_decision_required": true,
+    "user_decision_status": "pending",
+    "languages": ["selection-pending"],
+    "frameworks": [],
+    "platforms": [],
+    "rationale": "For greenfield application work, present relevant options and record the user's decision. Brownfield adoption replaces this draft with an observed profile without migrating the stack.",
+    "decision_ref": null
+  },
+  "organization": {
+    "style": "ecosystem_native",
+    "roots": ["src"],
+    "modules": [{"id": "application", "path": "src", "responsibility": "Replace with the approved or observed project module structure.", "may_depend_on": []}],
+    "composition_roots": [{"path": "src/main", "adapter": "manual", "max_non_comment_lines": 120, "allowed_symbols": [], "manual_evidence": []}]
+  },
+  "contracts": {"source_of_truth": "SOURCE-OF-TRUTH.md", "technical_documentation": "docs/TECHNICAL-DOCUMENTATION.md", "user_manual": "docs/USER-MANUAL.md", "directory_map": "docs/architecture/DIRECTORY-MAP.md", "interfaces": []},
+  "extensions": {"allow": true, "require_responsibility": true, "require_dependency_direction": true, "authority": "docs/architecture/DIRECTORY-MAP.md"}
+}

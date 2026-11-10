@@ -1,0 +1,270 @@
+{
+  "$schema": "../../../schemas/task-contract.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-11-10-gar10-release-qualification",
+  "status": "in_progress",
+  "mode": "change",
+  "work_level": 3,
+  "outcome": "Qualify GAR 10.0.0 from a preserved successor, resolve release metadata and skill maintenance gaps, synchronize through a reviewed GitHub change, and publish only if every mandatory release gate has fresh passing evidence.",
+  "acceptance_criteria": [
+    "The exact published v8.1 baseline and active dev.4 candidate hashes, source-tree fingerprints, archive manifests, and lineage are recorded before implementation; old releases and evidence remain unchanged.",
+    "A new versioned successor is created from the verified dev.4 consumer archive; dev.1 through dev.4 remain immutable, and the release directory and archive agree on version, provenance, release date, documentation, and skills.",
+    "All 19 GAR skills are inventoried for freshness, applicability, source and maintenance ownership; selectively updated content has exact origin, license, revision, digest and safe attribution, and game-specific user-local skills are not mistaken for packaged GAR skills.",
+    "Known GAR10 findings are corrected or explicitly shown not to block the scoped release by fresh evidence and independent review; no failure, skip, low scanner finding, host limitation, or unknown is silently marked passed.",
+    "Fresh relevant regression and negative checks pass; external scanners and dependencies have bounded, reproducible provenance; the final archive is deterministic, manifest-complete, path-safe, secret-free, and passes validation from a clean extraction.",
+    "All applicable architecture, security, UX, quality, AI, data, FinOps, and release gates have current evidence and no unresolved blocker; independent review and required human comprehension evidence are recorded.",
+    "The reviewed source is synchronized to a GitHub branch and pull request; v10.0.0 is merged, tagged, and released with the exact qualified archive and hashes only after the release bar is met."
+  ],
+  "scope": {
+    "size": "system",
+    "in": [
+      "Read-only baseline comparison and source-of-truth reconciliation across the public repository, v8.1 release archive, and local dev.4 candidate.",
+      "A new immutable GAR10 successor, release corrections, skill inventory/update review, documentation, tests, gates, package and clean-extraction qualification.",
+      "A reviewed GitHub branch/pull request and v10.0.0 merge, tag and release if gates pass."
+    ],
+    "out": [
+      "Editing or replacing v8.1, GAR9, dev.1-dev.4, historical run evidence, or unrelated user/project skills.",
+      "Production/VPS deployment, credential changes, destructive operations, unrelated external security scans, extra model credits, credit reset, or API spending.",
+      "Directly bypassing review or releasing with unresolved critical/high security findings, failed mandatory gates, or unverifiable artifacts."
+    ]
+  },
+  "risk": {
+    "level": "critical",
+    "reversibility": "partial",
+    "external_effect": "shared",
+    "triggers": [
+      "Public repository synchronization and software release.",
+      "Agent security, supply-chain provenance, external skills and tool adapters.",
+      "Historical validation blockers, host isolation evidence, and user-facing completion claims."
+    ]
+  },
+  "authorization": {
+    "writes": {
+      "allowed": true,
+      "scope": [
+        "Create a new dated task bundle under docs/ai/tasks/.",
+        "Create a new GAR10 successor directory and, only after qualification, a new agent-runtime-v10.0 release directory/archive.",
+        "Update shared docs/ai project profile, commands, and release evidence to reflect verified results."
+      ]
+    },
+    "external_actions": {
+      "allowed": true,
+      "scope": [
+        "Read public sources and the connected GitHub repository; create a feature branch and pull request; merge and publish the v10.0.0 tag/release asset only after all mandatory gates pass.",
+        "No direct main-branch bypass, production deployment, messages to people, credential changes, purchases, reset, or unrelated external target testing."
+      ]
+    }
+  },
+  "files": {
+    "owned": [
+      "docs/ai/tasks/2026-11-10-gar10-release-qualification*",
+      "agent-runtime-v10-dev.5/**",
+      "agent-runtime-v10.0/**"
+    ],
+    "shared": [
+      "docs/ai/project-profile.md",
+      "docs/ai/commands.md",
+      "docs/ai/risks.md"
+    ],
+    "do_not_touch": [
+      "AGENTS.md",
+      "agent-runtime-v8.1/**",
+      "agent-runtime-v8.1.zip",
+      "agent-runtime-v9-dev.1/**",
+      "agent-runtime-v9-dev.2/**",
+      "agent-runtime-v10-dev.1/**",
+      "agent-runtime-v10-dev.2/**",
+      "agent-runtime-v10-dev.3/**",
+      "agent-runtime-v10-dev.4/**",
+      "_archive/**",
+      "existing GAR7-GAR10 qualification runs and historical evidence",
+      "C:/Users/Carlos/.codex/skills/**",
+      "E:/Projetos pessoais/Oh Sheets!/**"
+    ],
+    "discover": [
+      "Canonical task/gate schemas, release and packaging scripts, final candidate source and archives, recorded scanner findings, skill provenance, GitHub main/tag/release state, and applicable current official advisories."
+    ]
+  },
+  "gates": [
+    {
+      "id": "architecture_uml",
+      "status": "required",
+      "reason": "Release provenance, version boundaries, compatibility and failure ownership require a current architecture decision.",
+      "artifact": "docs/ai/tasks/2026-11-10-gar10-release-qualification.gates/architecture_uml.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "security_compliance",
+      "status": "required",
+      "reason": "Known host-boundary and SAST findings, external components, secrets, dependencies and release integrity remain unresolved.",
+      "artifact": "docs/ai/tasks/2026-11-10-gar10-release-qualification.gates/security_compliance.json",
+      "owner": "primary agent plus independent reviewer",
+      "approval_ref": null
+    },
+    {
+      "id": "ux_product",
+      "status": "required",
+      "reason": "GAR10 changes novice-facing status/completion communication and its comprehension evidence is still missing.",
+      "artifact": "docs/ai/tasks/2026-11-10-gar10-release-qualification.gates/ux_product.json",
+      "owner": "primary agent plus observed participants",
+      "approval_ref": null
+    },
+    {
+      "id": "code_quality_testing",
+      "status": "required",
+      "reason": "Fresh final-artifact regression, negative tests, deterministic packaging and clean-extraction proof are required.",
+      "artifact": "docs/ai/tasks/2026-11-10-gar10-release-qualification.gates/code_quality_testing.json",
+      "owner": "primary agent plus independent grader",
+      "approval_ref": null
+    },
+    {
+      "id": "ai_llm",
+      "status": "required",
+      "reason": "Final-artifact behavioral qualification and model/host/configuration-bound evidence are incomplete.",
+      "artifact": "docs/ai/tasks/2026-11-10-gar10-release-qualification.gates/ai_llm.json",
+      "owner": "primary agent plus independent grader",
+      "approval_ref": null
+    },
+    {
+      "id": "data_integration",
+      "status": "required",
+      "reason": "External skill/tool adapters and their provenance, permissions, data flow and failure behavior require review if admitted.",
+      "artifact": "docs/ai/tasks/2026-11-10-gar10-release-qualification.gates/data_integration.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "finops",
+      "status": "required",
+      "reason": "External tools and any account-only behavior evaluation need bounded cost, telemetry and no-spend evidence.",
+      "artifact": "docs/ai/tasks/2026-11-10-gar10-release-qualification.gates/finops.json",
+      "owner": "primary agent",
+      "approval_ref": null
+    },
+    {
+      "id": "observability_release",
+      "status": "required",
+      "reason": "Publication requires verified lineage, provenance, rollback, archive integrity, release evidence and no unresolved blocker.",
+      "artifact": "docs/ai/tasks/2026-11-10-gar10-release-qualification.gates/observability_release.json",
+      "owner": "primary agent plus release owner",
+      "approval_ref": null
+    }
+  ],
+  "skills": [
+    "core/task-triage",
+    "core/project-profiling",
+    "core/implementation",
+    "core/validation",
+    "core/documentation",
+    "core/context-memory",
+    "core/agent-orchestration",
+    "specialists/software-architecture-uml",
+    "specialists/risk-security-compliance",
+    "specialists/ux-product",
+    "specialists/code-quality-testing",
+    "specialists/ai-llm",
+    "specialists/data-integration",
+    "specialists/finops-cost",
+    "specialists/observability-release"
+  ],
+  "approvals": [
+    {
+      "action": "Synchronize the qualified GAR10 source through a reviewed GitHub branch/pull request and publish the v10.0.0 tag/release asset after all mandatory gates pass.",
+      "required": true,
+      "status": "approved",
+      "reason": "The workspace owner explicitly instructed: 'corrija, e sincronize local com github... faça o necessário pra lançar o v10'.",
+      "granted_by": "workspace owner",
+      "scope": [
+        "Only this repository and v10.0.0 source, tag and release artifact.",
+        "Branch/PR review first; no publication if a mandatory gate remains blocked."
+      ]
+    }
+  ],
+  "context": {
+    "task_file": "docs/ai/tasks/2026-11-10-gar10-release-qualification.task.json",
+    "references": [
+      "AGENTS.md",
+      "docs/harness/MAINTAINER.md",
+      "docs/harness/QUALIFICATION-10.0.md",
+      "docs/harness/VIBECODER-10.md",
+      "docs/ai/tasks/2026-11-10-gar10-release-qualification-plan.md",
+      "docs/ai/tasks/2026-11-10-gar10-release-qualification-report.md"
+    ],
+    "assumptions": [
+      "The public GitHub main branch remains the released GAR 8.1 line; local dev.5 is an unpublished candidate derived from the internally manifested dev.4 distribution.",
+      "The verified dev.4 archive, not its full maintainer directory, is the candidate source snapshot; archive/directory differences must be classified before derivation.",
+      "Independent security review and participant comprehension evidence cannot be manufactured by the primary agent; unresolved evidence keeps the release blocked.",
+      "No model spend beyond existing account capacity; no additional credits or reset."
+    ],
+    "missing_information": [
+      "Independent reviewer identity and availability for the existing security findings.",
+      "Observed representative vibecoder comprehension evidence."
+    ]
+  },
+  "coordination": {
+    "strategy": "single_agent",
+    "run_id": null,
+    "claims": [],
+    "max_depth": 0,
+    "max_concurrency": 1
+  },
+  "documentation_impact": {
+    "level": "both",
+    "reason": "A release requires current technical, installation, migration, skill-maintenance and user-facing status documentation.",
+    "required_artifacts": [
+      "agent-runtime-v10-dev.5/CHANGELOG.md",
+      "agent-runtime-v10.0/README.md",
+      "docs/ai/tasks/2026-11-10-gar10-release-qualification-report.md"
+    ]
+  },
+  "validation": {
+    "commands": [
+      "python -B scripts/test_runtime.py",
+      "python -B scripts/runtime_check.py --strict",
+      "python -B scripts/security_assurance.py --profile release",
+      "python -B scripts/package_runtime.py --check",
+      "python -B scripts/runtime_check.py --strict --archive agent-runtime-v10.0.zip",
+      "Static/strict validation from a newly inspected clean extraction.",
+      "Pinned external SAST/dependency/SBOM/provenance checks where applicable; record unavailable tools as not_verified."
+    ],
+    "manual_checks": [
+      "Reconcile GitHub source, release tags, local v8.1 archive, v9 source anchor and dev.4 artifact hashes; preserve all historical artifacts.",
+      "Review all changed skills and component admissions for exact source, revision, license, dependencies, permissions, maintenance and rollback.",
+      "Independently review the 49 Bandit low findings, host network-boundary result, critical/high claims and provenance before release.",
+      "Inspect final repository diff, PR checks/review, release notes, tag target and uploaded archive hash before publication."
+    ],
+    "max_attempts": 5,
+    "evidence": [
+      "docs/ai/tasks/2026-11-10-gar10-release-qualification.validation.json",
+      "docs/ai/tasks/2026-11-10-gar10-release-qualification.gates/"
+    ],
+    "not_validated": [
+      {
+        "area": "Final GAR10 release qualification",
+        "reason": "Local dev.5 checks pass, but official release qualification is blocked by independent security, behavioral, comprehension and provenance evidence.",
+        "disposition": "blocked",
+        "acceptance_ref": null
+      },
+      {
+        "area": "Independent security review",
+        "reason": "Existing scanner and host-boundary findings have not received fresh independent review.",
+        "disposition": "blocked",
+        "acceptance_ref": null
+      },
+      {
+        "area": "Human comprehension",
+        "reason": "No observed representative participant results are recorded.",
+        "disposition": "blocked",
+        "acceptance_ref": null
+      },
+      {
+        "area": "GitHub release publication",
+        "reason": "The public repository currently remains at the v8.1 line; publish only after all release gates pass.",
+        "disposition": "blocked",
+        "acceptance_ref": null
+      }
+    ]
+  },
+  "next_action": "Create an isolated review branch/PR for the dev.5 candidate, verify the full diff and current local archive hash, and keep merge/tag/publication blocked until every mandatory gate passes."
+}

@@ -1,0 +1,40 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://generic-agent-runtime.local/harness/deterministic-zip/v1",
+      "externalParameters": {
+        "buildDate": "2026-11-10",
+        "releaseDate": null,
+        "releaseStatus": "candidate",
+        "version": "10.0.0"
+      },
+      "internalParameters": {},
+      "resolvedDependencies": [
+        {
+          "digest": {
+            "sha256": "9c90c56c89ab53a223d04cab242b94bef7125e8c56bbfb8a6fc1e24d55b7ec49"
+          },
+          "uri": "file:agent-runtime-v9.0.zip"
+        }
+      ]
+    },
+    "runDetails": {
+      "builder": {
+        "id": "https://generic-agent-runtime.local/harness/package-runtime/v10"
+      },
+      "metadata": {
+        "invocationId": "deterministic-local-build"
+      }
+    }
+  },
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "subject": [
+    {
+      "digest": {
+        "sha256": "07163634493a020c1941ef1ff7742e54ac4e9b711ae52f235acadbeb50064d8e"
+      },
+      "name": "generic-agent-runtime-10.0.0-payload-tree"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "../../../schemas/promotion-record.schema.json",
+  "schema_version": "2.0",
+  "promotion_id": "promotion-2026-09-04-001",
+  "project_id": "synthetic-orders",
+  "state": "completed",
+  "policy_revision": 3,
+  "correlation_id": "release-2026-09-04-001",
+  "source_revision": "git:0123456789abcdef",
+  "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "configuration_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "migration_id": "migration-2026-09-04-001",
+  "concurrency": {
+    "active_production_promotion_id": "promotion-2026-09-04-001"
+  },
+  "staging": {
+    "deployment_id": "staging-deployment-001",
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "configuration_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "migration_id": "migration-2026-09-04-001",
+    "deployed_at": "2026-09-04T12:00:00Z",
+    "tests": "passed",
+    "gates": "passed",
+    "rollback_rehearsed": true,
+    "verified_at": "2026-09-04T12:30:00Z",
+    "valid_until": "2026-09-04T18:00:00Z",
+    "checks_evidence_ref": "evidence://synthetic-orders/staging-checks-001"
+  },
+  "approval": {
+    "status": "approved",
+    "approver": "release-owner",
+    "approved_at": "2026-09-04T13:00:00Z",
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "configuration_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "migration_id": "migration-2026-09-04-001",
+    "policy_revision": 3,
+    "environment_policy_sha256": "0bc53781c0002c84148ed9fabceb961c37555321b2a1baa12d00bca91f067ce5",
+    "staging_evidence_sha256": "c8f705d5b6c18340aa781a6b2a225f6cf77c2662337d85c1e14d5be0e99a2a61",
+    "source_revision": "git:0123456789abcdef"
+  },
+  "production": {
+    "deployment_id": "production-deployment-001",
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "configuration_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "migration_id": "migration-2026-09-04-001",
+    "deployed_at": "2026-09-04T14:00:00Z",
+    "tests": "passed",
+    "gates": "passed",
+    "rollback_rehearsed": true,
+    "smoke_check": "passed",
+    "monitoring_status": "passed",
+    "monitoring_owner": "operations-owner",
+    "monitoring_window_minutes": 30,
+    "rollback_status": "available",
+    "rollback_plan_ref": "runbook://synthetic-orders/restore-001",
+    "rollback_trigger": "Rollback if smoke fails or error rate exceeds the reviewed incident threshold."
+  },
+  "environment_policy_sha256": "0bc53781c0002c84148ed9fabceb961c37555321b2a1baa12d00bca91f067ce5"
+}

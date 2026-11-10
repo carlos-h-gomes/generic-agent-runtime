@@ -1,0 +1,46 @@
+{
+  "$schema": "../../schemas/security-test-plan.schema.json",
+  "schema_version": "1.0",
+  "plan_id": "example-loopback-passive-contract",
+  "target_origin": "http://127.0.0.1:8080",
+  "max_requests": 2,
+  "scenarios": [
+    {
+      "id": "root-security-headers",
+      "purpose": "Verify a local disposable target returns its expected public page and baseline headers.",
+      "method": "GET",
+      "path": "/",
+      "side_effect_free": true,
+      "headers": {
+        "Accept-Language": "en"
+      },
+      "body": null,
+      "expected_status": [200],
+      "required_headers": [
+        "content-type",
+        "x-content-type-options"
+      ],
+      "forbidden_body_markers": [
+        "BEGIN PRIVATE KEY",
+        "DATABASE_URL="
+      ]
+    },
+    {
+      "id": "permission-denial",
+      "purpose": "Verify a synthetic protected route fails closed without embedded credentials.",
+      "method": "GET",
+      "path": "/synthetic-protected",
+      "side_effect_free": true,
+      "headers": {},
+      "body": null,
+      "expected_status": [401, 403],
+      "required_headers": [
+        "content-type"
+      ],
+      "forbidden_body_markers": [
+        "stack trace",
+        "DATABASE_URL="
+      ]
+    }
+  ]
+}

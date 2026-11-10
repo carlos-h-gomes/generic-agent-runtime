@@ -1,0 +1,76 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-11-10-gar10-release-qualification",
+  "gate": "code_quality_testing",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed_with_conditions",
+  "applicability": {
+    "applicable": true,
+    "reason": "Fresh dev.5 regression, source validation, deterministic package, archive and clean-extraction checks passed. Optional meta-schema and ordinary symlink checks remain skipped."
+  },
+  "summary": "Fresh dev.5 regression, source validation, deterministic package, archive and clean-extraction checks passed. Optional meta-schema and ordinary symlink checks remain skipped.",
+  "checks": [
+    {
+      "id": "full-regression",
+      "status": "passed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Exit 0; 112 tests, 110 passed, 2 expected skips."
+    },
+    {
+      "id": "source-strict",
+      "status": "passed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Exit 0; 29 pass, 1 optional jsonschema meta-schema skip."
+    },
+    {
+      "id": "deterministic-package",
+      "status": "passed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Package plan and final candidate ZIP SHA-256 ba330e5376808f820d34fbb82171f7552117030fed0aed18966efae8bc4d386e."
+    },
+    {
+      "id": "archive-strict",
+      "status": "passed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Exit 0; 43 pass, 1 optional jsonschema meta-schema skip."
+    },
+    {
+      "id": "clean-extraction",
+      "status": "passed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Exit 0; 17 pass, 2 expected skips (no active consumer task; optional jsonschema)."
+    }
+  ],
+  "findings": [],
+  "evidence": [
+    {
+      "id": "LOCAL",
+      "kind": "file",
+      "pointer": "docs/ai/tasks/2026-11-10-gar10-release-qualification-report.md",
+      "summary": "dev.5 source, package, archive, clean extraction and current local checks.",
+      "sensitivity": "internal",
+      "redacted": false,
+      "captured_at": "2026-11-10T14:20:00Z"
+    }
+  ],
+  "approval": {
+    "required": false,
+    "reason": "No separate approval is needed for this gate record.",
+    "status": "not_required"
+  },
+  "handoff": [],
+  "generated_at": "2026-11-10T14:20:00Z",
+  "expires_at": null
+}

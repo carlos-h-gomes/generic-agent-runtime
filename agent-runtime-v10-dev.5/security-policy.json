@@ -1,0 +1,171 @@
+{
+  "$schema": "schemas/security-policy.schema.json",
+  "schema_version": "1.0",
+  "checked_at": "2026-11-10",
+  "expires_at": "2026-12-10",
+  "sources": [
+    {
+      "title": "Next.js November 2026 Security Release",
+      "url": "https://nextjs.org/blog/november-2026-security-release",
+      "as_of": "2026-11-03"
+    },
+    {
+      "title": "Next.js Support Policy",
+      "url": "https://nextjs.org/support-policy",
+      "as_of": "2026-11-10"
+    },
+    {
+      "title": "Node.js Releases",
+      "url": "https://nodejs.org/en/about/previous-releases",
+      "as_of": "2026-10-28"
+    },
+    {
+      "title": "CPython Supported Versions",
+      "url": "https://devguide.python.org/versions/",
+      "as_of": "2026-11-10"
+    },
+    {
+      "title": "React Versions",
+      "url": "https://react.dev/versions",
+      "as_of": "2026-11-10"
+    },
+    {
+      "title": "Vite Releases",
+      "url": "https://vite.dev/releases",
+      "as_of": "2026-11-10"
+    },
+    {
+      "title": "OWASP ASVS",
+      "url": "https://owasp.org/www-project-application-security-verification-standard/",
+      "as_of": "2026-08-28"
+    },
+    {
+      "title": "OWASP API Security Top 10",
+      "url": "https://owasp.org/API-Security/",
+      "as_of": "2026-08-31"
+    },
+    {
+      "title": "Brazilian General Data Protection Law (LGPD), consolidated",
+      "url": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm",
+      "as_of": "2026-08-31"
+    },
+    {
+      "title": "ANPD Resolution CD/ANPD 15/2024 - Security Incident Communication",
+      "url": "https://www.gov.br/anpd/pt-br/acesso-a-informacao/institucional/atos-normativos/regulamentacoes_anpd/documentos/rcis___anonimizado_final_ocultado_2_parte3.pdf",
+      "as_of": "2026-08-31"
+    },
+    {
+      "title": "ANPD Resolution CD/ANPD 19/2024 - International Data Transfers",
+      "url": "https://www.gov.br/anpd/pt-br/acesso-a-informacao/institucional/atos-normativos/regulamentacoes_anpd/resolucao-cd-anpd-no-19-de-23-de-agosto-de-2024",
+      "as_of": "2026-08-31"
+    },
+    {
+      "title": "Next.js October 2026 upstream security update",
+      "url": "https://nextjs.org/blog/nextjs-security-update-october-14-2026",
+      "as_of": "2026-10-14"
+    }
+  ],
+  "execution": {
+    "require_explicit_project_trust": true,
+    "inherit_environment": false,
+    "allowed_environment": [
+      "APPDATA",
+      "CI",
+      "ComSpec",
+      "HOME",
+      "LANG",
+      "LC_ALL",
+      "LOCALAPPDATA",
+      "NODE_ENV",
+      "PATH",
+      "PATHEXT",
+      "PROGRAMDATA",
+      "SystemRoot",
+      "TEMP",
+      "TERM",
+      "TMP",
+      "TMPDIR",
+      "USERPROFILE",
+      "WINDIR",
+      "XDG_CACHE_HOME"
+    ],
+    "secret_name_pattern": "(?i)(secret|token|password|passwd|credential|private[_-]?key|api[_-]?key|access[_-]?key|session|cookie|authorization)"
+  },
+  "runtimes": {
+    "node": {
+      "allowed_lts_majors": [
+        22,
+        24,
+        26
+      ],
+      "require_deployment_pin": true,
+      "source": "https://nodejs.org/en/about/previous-releases"
+    },
+    "python": {
+      "default_bugfix_minors": [
+        "3.14"
+      ],
+      "supported_security_minors": [
+        "3.13",
+        "3.12",
+        "3.11"
+      ],
+      "require_deployment_pin": true,
+      "source": "https://devguide.python.org/versions/"
+    }
+  },
+  "frameworks": {
+    "next": {
+      "block_prerelease": true,
+      "supported": [
+        {
+          "major": 15,
+          "minimum": "15.5.29",
+          "support": "maintenance_lts"
+        },
+        {
+          "major": 16,
+          "minimum": "16.4.5",
+          "support": "active_lts"
+        }
+      ],
+      "source": "https://nextjs.org/blog/november-2026-security-release"
+    },
+    "react": {
+      "stable_major": 19,
+      "stable_minor": "19.3",
+      "block_prerelease": true,
+      "source": "https://react.dev/versions"
+    },
+    "vite": {
+      "default_line": "8.3",
+      "supported_lines": [
+        "8.3",
+        "8.2",
+        "7.3",
+        "8.1",
+        "6.4"
+      ],
+      "block_prerelease": true,
+      "source": "https://vite.dev/releases"
+    }
+  },
+  "release": {
+    "block_high_or_critical": true,
+    "require_lockfile": true,
+    "required_web_artifacts": [
+      "docs/ai/threat-model.md",
+      "docs/ai/incident-response.md",
+      "docs/ai/ui-review.json",
+      "docs/ai/architecture-policy.json",
+      "SOURCE-OF-TRUTH.md",
+      "docs/TECHNICAL-DOCUMENTATION.md",
+      "docs/USER-MANUAL.md"
+    ],
+    "required_scanner_classes": [
+      "dependency",
+      "secret",
+      "sast"
+    ]
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-11-10-gar10-release-qualification",
+  "gate": "security_compliance",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "blocked",
+  "applicability": {
+    "applicable": true,
+    "reason": "Fresh local secret/source scan and current policy pass; host loopback boundary, Bandit triage and authenticated publisher provenance remain unresolved."
+  },
+  "summary": "Fresh local secret/source scan and current policy pass; host loopback boundary, Bandit triage and authenticated publisher provenance remain unresolved.",
+  "checks": [
+    {
+      "id": "local-security-assurance",
+      "status": "passed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Exit 0: policy fresh through 2026-12-10; built-in secret/source checks pass."
+    },
+    {
+      "id": "host-network-boundary",
+      "status": "failed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Prior network-disabled WSL/Codex profile reached a loopback listener; independent boundary review required."
+    },
+    {
+      "id": "independent-sast-review",
+      "status": "not_verified",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Bandit 1.9.4 previously exited 1 with 49 LOW findings; 13 runtime findings lack contextual independent disposition."
+    },
+    {
+      "id": "publisher-attestation",
+      "status": "not_verified",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Bundled provenance is unsigned and does not authenticate the publisher."
+    }
+  ],
+  "findings": [
+    {
+      "id": "host-egress-control",
+      "title": "Network-disabled local profile allowed loopback",
+      "severity": "high",
+      "state": "open",
+      "blocking": true,
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "required_action": "Obtain independent review and scoped fresh boundary evidence, or correct the claim and document the supported host limitation.",
+      "due_before": "release",
+      "owner": "Independent security reviewer"
+    },
+    {
+      "id": "bandit-low-findings",
+      "title": "Runtime SAST findings lack independent contextual disposition",
+      "severity": "low",
+      "state": "open",
+      "blocking": true,
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "required_action": "Triage all findings, fix actionable issues and obtain independent review of exact final source.",
+      "due_before": "release",
+      "owner": "Independent security reviewer"
+    },
+    {
+      "id": "provenance-attestation",
+      "title": "Candidate provenance is unsigned and unverified",
+      "severity": "medium",
+      "state": "open",
+      "blocking": true,
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "required_action": "Bind final source and archive to authenticated publisher/build provenance before release.",
+      "due_before": "release",
+      "owner": "Release owner"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "LOCAL",
+      "kind": "file",
+      "pointer": "docs/ai/tasks/2026-11-10-gar10-release-qualification-report.md",
+      "summary": "dev.5 source, package, archive, clean extraction and current local checks.",
+      "sensitivity": "internal",
+      "redacted": false,
+      "captured_at": "2026-11-10T14:20:00Z"
+    }
+  ],
+  "approval": {
+    "required": true,
+    "reason": "Independent human security review is required; an agent cannot self-certify these findings.",
+    "status": "pending"
+  },
+  "handoff": [
+    "Do not merge, tag or publish while the security gate is blocked."
+  ],
+  "generated_at": "2026-11-10T14:20:00Z",
+  "expires_at": null
+}

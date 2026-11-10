@@ -1,0 +1,81 @@
+{
+  "captured_at": "2026-11-10T14:20:00+00:00",
+  "release_status": "blocked",
+  "candidate": {
+    "source_directory": "agent-runtime-v10-dev.5",
+    "source_files": 287,
+    "source_tree_fingerprint": "8ad5e10b766731f29d91673dd439234ec9c9270a07112695fdf8c0346102fbfc",
+    "archive": "agent-runtime-v10-dev.5/agent-runtime-v10.0.zip",
+    "archive_sha256": "ba330e5376808f820d34fbb82171f7552117030fed0aed18966efae8bc4d386e",
+    "archive_entries": 248,
+    "archive_bytes": 370777,
+    "build_date": "2026-11-10",
+    "released": null
+  },
+  "baselines": {
+    "v8_1_sha256": "5d7f083a4ccd8bed2a3df6c4023be41606a41611175facd33478c6fdfb7932f6",
+    "v9_dev2_sha256": "9c90c56c89ab53a223d04cab242b94bef7125e8c56bbfb8a6fc1e24d55b7ec49",
+    "v10_dev4_sha256": "d04811ab071b0618e9e0c0473604f25411bb18d753b4d80e8b669f7d2a7913b0",
+    "github_main_commit": "1d6a4b372bb6db81fa774039d05d967de863743d"
+  },
+  "windows_tests": {
+    "exit_code": 0,
+    "ran": 112,
+    "passed": 110,
+    "skipped": 2,
+    "runner": "scripts/safe_exec.py --timeout 180 --tail-lines 100"
+  },
+  "strict_source": {
+    "exit_code": 0,
+    "passed": 64,
+    "skipped": 1
+  },
+  "security_assurance": {
+    "exit_code": 0,
+    "passed": 4,
+    "not_applicable": 3,
+    "incomplete": 0,
+    "security_policy_expires": "2026-12-10"
+  },
+  "ui_quality": {
+    "exit_code": 0,
+    "passed": 0,
+    "not_applicable": 1,
+    "incomplete": 0
+  },
+  "package_plan": {
+    "exit_code": 0,
+    "entries": 248,
+    "bytes": 370777,
+    "sha256": "ba330e5376808f820d34fbb82171f7552117030fed0aed18966efae8bc4d386e"
+  },
+  "archive_validation": {
+    "exit_code": 0,
+    "passed": 43,
+    "skipped": 1,
+    "failed": 0
+  },
+  "fresh_extraction": {
+    "directory": "agent-runtime-v10-dev.5/gar-v10-dev5-clean-extract-20261110-final",
+    "exit_code": 0,
+    "passed": 17,
+    "skipped": 2,
+    "failed": 0
+  },
+  "skips": [
+    "Optional jsonschema meta-schema validation unavailable; bundled schema subset validator passed.",
+    "Ordinary Windows symlink fixture unavailable without privilege; 2 expected test skips include this and optional jsonschema.",
+    "Fresh consumer archive has no active maintainer task contract."
+  ],
+  "environment_attempts": [
+    "Initial sandboxed full test attempt failed before assertions because synthetic temporary directories were denied; final bounded run was executed with authorized workspace access and passed."
+  ],
+  "independent_evidence": {
+    "bandit": "previous dev.4 run exit 1 with 49 LOW findings; 13 runtime findings not fully triaged. No fresh exact-dev.5 scan: Bandit absent in active Windows Python; WSL status returned access denied.",
+    "host_network_boundary": "prior network-disabled WSL/Codex profile connected to loopback; independent review pending",
+    "publisher_attestation": "unsigned/not_verified",
+    "human_comprehension": "not_verified",
+    "final_behavioral_grading": "not_verified"
+  },
+  "release_decision": "blocked until independent security review, host boundary, human comprehension, final behavior grading, authenticated publisher provenance and reviewed PR evidence are complete."
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schemas/authorized-target.schema.json",
+  "schema_version": "1.0",
+  "scope_id": "replace-with-approved-scope",
+  "owner": "replace-with-named-owner",
+  "environment": "staging",
+  "target_origin": "https://staging.example.invalid",
+  "allowed_methods": ["GET", "HEAD", "OPTIONS"],
+  "allowed_path_prefixes": ["/synthetic-security-test/"],
+  "max_requests": 20,
+  "max_response_bytes": 262144,
+  "request_timeout_seconds": 5,
+  "valid_from": "2000-01-01T00:00:00Z",
+  "expires_at": "2000-01-01T01:00:00Z",
+  "approval_ref": "replace-with-explicit-human-approval-reference",
+  "destructive_actions_allowed": false,
+  "stop_conditions": [
+    "Target origin, address, method, or path differs from the approved scope.",
+    "Authorization expires or the request budget is exhausted.",
+    "Secret-like output, instability, or unexpected state change is observed."
+  ]
+}

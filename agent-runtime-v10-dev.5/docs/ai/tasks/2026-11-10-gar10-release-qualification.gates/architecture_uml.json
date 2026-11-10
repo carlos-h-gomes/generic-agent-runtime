@@ -1,0 +1,52 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-11-10-gar10-release-qualification",
+  "gate": "architecture_uml",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "passed_with_conditions",
+  "applicability": {
+    "applicable": true,
+    "reason": "Archive-derived successor boundaries, candidate/release metadata, compatibility and migration documentation reviewed. Git ancestry is not claimed; final remote diff still needs review."
+  },
+  "summary": "Archive-derived successor boundaries, candidate/release metadata, compatibility and migration documentation reviewed. Git ancestry is not claimed; final remote diff still needs review.",
+  "checks": [
+    {
+      "id": "immutable-baselines",
+      "status": "passed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Prior releases/candidates were preserved; dev.5 derives from inspected dev.4 distribution."
+    },
+    {
+      "id": "migration-and-compatibility",
+      "status": "passed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Candidate status and null release date are explicit; migration and rollback remain documented."
+    }
+  ],
+  "findings": [],
+  "evidence": [
+    {
+      "id": "LOCAL",
+      "kind": "file",
+      "pointer": "docs/ai/tasks/2026-11-10-gar10-release-qualification-report.md",
+      "summary": "dev.5 source, package, archive, clean extraction and current local checks.",
+      "sensitivity": "internal",
+      "redacted": false,
+      "captured_at": "2026-11-10T14:20:00Z"
+    }
+  ],
+  "approval": {
+    "required": false,
+    "reason": "No separate approval is needed for this gate record.",
+    "status": "not_required"
+  },
+  "handoff": [],
+  "generated_at": "2026-11-10T14:20:00Z",
+  "expires_at": null
+}

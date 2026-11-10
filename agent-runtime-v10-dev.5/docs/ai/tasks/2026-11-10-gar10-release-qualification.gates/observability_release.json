@@ -1,0 +1,84 @@
+{
+  "$schema": "../../../../schemas/gate-result.schema.json",
+  "schema_version": "1.0",
+  "task_id": "2026-11-10-gar10-release-qualification",
+  "gate": "observability_release",
+  "phase": "pre_release",
+  "revision": 1,
+  "status": "blocked",
+  "applicability": {
+    "applicable": true,
+    "reason": "Local archive integrity and clean extraction pass, but authenticated publisher provenance, independent reviews and final remote review are not complete."
+  },
+  "summary": "Local archive integrity and clean extraction pass, but authenticated publisher provenance, independent reviews and final remote review are not complete.",
+  "checks": [
+    {
+      "id": "artifact-integrity",
+      "status": "passed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Candidate ZIP and MANIFEST.sha256 validate; clean extraction checks pass."
+    },
+    {
+      "id": "publisher-provenance",
+      "status": "not_verified",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Embedded in-toto-shaped statement is unsigned and is not authenticated publisher provenance."
+    },
+    {
+      "id": "github-review",
+      "status": "not_verified",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Draft review branch/PR not yet prepared."
+    },
+    {
+      "id": "release-readiness",
+      "status": "failed",
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "notes": "Security, comprehension and AI/LLM gates are blocked."
+    }
+  ],
+  "findings": [
+    {
+      "id": "release-evidence",
+      "title": "Release evidence and independent blockers remain unresolved",
+      "severity": "high",
+      "state": "open",
+      "blocking": true,
+      "evidence_refs": [
+        "LOCAL"
+      ],
+      "required_action": "Close all mandatory gates, verify exact reviewed commit and archive, and produce supported publisher attestation before merge/tag/publication.",
+      "due_before": "release",
+      "owner": "Release owner"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "LOCAL",
+      "kind": "file",
+      "pointer": "docs/ai/tasks/2026-11-10-gar10-release-qualification-report.md",
+      "summary": "dev.5 source, package, archive, clean extraction and current local checks.",
+      "sensitivity": "internal",
+      "redacted": false,
+      "captured_at": "2026-11-10T14:20:00Z"
+    }
+  ],
+  "approval": {
+    "required": true,
+    "reason": "Merge/tag/publication requires fresh passing mandatory gates and exact artifact verification.",
+    "status": "pending"
+  },
+  "handoff": [
+    "Keep the candidate as a review draft only; do not publish."
+  ],
+  "generated_at": "2026-11-10T14:20:00Z",
+  "expires_at": null
+}

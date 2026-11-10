@@ -1,0 +1,3 @@
+Apply AGENTS.md and specialists/ai-llm. Use a provider/model profile only when the project selects it and access is verified. Keep the core model neutral, tools least-privileged, outputs validated, steps/retries/cost bounded, and fallback explicit.
+
+Treat GPT-5.6 Sol and Daybreak Blue as optional dated profiles. Daybreak requires separate approval/provisioning and does not expand defensive target authorization. Recheck official capability and pricing sources before material reliance; run representative evals before capability claims. Conform to `schemas/model-capability-profile.schema.json`.

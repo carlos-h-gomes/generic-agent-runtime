@@ -1,0 +1,1759 @@
+#!/usr/bin/env python3
+"""Functional regression tests for Harness runtime mechanics."""
+
+from __future__ import annotations
+
+import hashlib
+import importlib.util
+import json
+import copy
+import contextlib
+from datetime import datetime, timezone
+import io
+import os
+import shutil
+import socket
+import stat
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
+import zipfile
+from pathlib import Path
+from unittest import mock
+
+from test_workspace_hygiene import WorkspaceHygieneTests  # noqa: F401
+from test_vibecoder import EvidenceBoundaryTests  # noqa: F401
+
+ROOT = Path(__file__).resolve().parents[1]
+BRIDGE = ROOT / "scripts" / "bridge.py"
+SAFE_EXEC = ROOT / "scripts" / "safe_exec.py"
+PROJECT_CHECKS = ROOT / "scripts" / "project_checks.py"
+SECURITY_ASSURANCE = ROOT / "scripts" / "security_assurance.py"
+UI_QUALITY = ROOT / "scripts" / "ui_quality.py"
+ADVERSARIAL_LAB = ROOT / "scripts" / "adversarial_lab.py"
+ARCHITECTURE_CHECK = ROOT / "scripts" / "architecture_check.py"
+BOOTSTRAP_PROJECT = ROOT / "scripts" / "bootstrap_project.py"
+ADOPT_HARNESS = ROOT / "scripts" / "adopt_harness.py"
+AUTOMATION_DECISION = ROOT / "scripts" / "automation_decision.py"
+SOLUTION_DECISION = ROOT / "scripts" / "solution_decision.py"
+DOCUMENTATION_CHECK = ROOT / "scripts" / "documentation_check.py"
+RUN_EVALUATION = ROOT / "scripts" / "run_evaluation.py"
+ENVIRONMENT_CHECK = ROOT / "scripts" / "environment_check.py"
+GUARDRAILS = ROOT / "scripts" / "harnesslib" / "guardrails.py"
+BRIDGE_MODULE = None
+
+
+def load_module(name: str, path: Path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class BridgeTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name)
+
+    def tearDown(self) -> None:
+        self.temp.cleanup()
+
+    def run_bridge(self, *arguments: str) -> subprocess.CompletedProcess[str]:
+        global BRIDGE_MODULE
+        if BRIDGE_MODULE is None:
+            BRIDGE_MODULE = load_module("bridge_runtime_tests", BRIDGE)
+        stdout, stderr = io.StringIO(), io.StringIO()
+        try:
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                code = BRIDGE_MODULE.main(["--root", str(self.root), *arguments])
+        except SystemExit as exc:
+            code = int(exc.code or 0)
+        return subprocess.CompletedProcess(arguments, code, stdout.getvalue(), stderr.getvalue())
+
+    def test_claim_conflict_release_and_board(self) -> None:
+        self.assertEqual(self.run_bridge("init").returncode, 0)
+        first = self.run_bridge("log", "run-1", "writer-a", "claim", "task", "own module", "src/**")
+        self.assertEqual(first.returncode, 0, first.stderr)
+        conflict = self.run_bridge("log", "run-2", "writer-b", "claim", "task", "overlap", "src/app.py")
+        self.assertNotEqual(conflict.returncode, 0)
+        self.assertIn("claim conflict", conflict.stderr)
+        release = self.run_bridge("log", "run-1", "writer-a", "release", "task", "released", "src/**")
+        self.assertEqual(release.returncode, 0, release.stderr)
+        second = self.run_bridge("log", "run-2", "writer-b", "claim", "task", "now free", "src/app.py")
+        self.assertEqual(second.returncode, 0, second.stderr)
+        board = (self.root / "docs" / "ai" / "bridge" / "board.md").read_text(encoding="utf-8")
+        self.assertIn("src/app.py", board)
+        self.assertNotIn("src/**` | run-1", board)
+
+    def test_read_commands_do_not_mutate_bridge_files(self) -> None:
+        self.assertEqual(self.run_bridge("init").returncode, 0)
+        ledger = self.root / "docs" / "ai" / "bridge" / "ledger.jsonl"
+        board = ledger.parent / "board.md"
+        before = (ledger.stat().st_mtime_ns, board.stat().st_mtime_ns, ledger.read_bytes(), board.read_bytes())
+        for command in (("tail", "15"), ("claims",), ("board",), ("doctor",)):
+            result = self.run_bridge(*command)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        after = (ledger.stat().st_mtime_ns, board.stat().st_mtime_ns, ledger.read_bytes(), board.read_bytes())
+        self.assertEqual(before, after)
+
+    def test_note_limit_and_legacy_read(self) -> None:
+        too_long = self.run_bridge("log", "run", "actor", "note", "task", "x" * 141)
+        self.assertNotEqual(too_long.returncode, 0)
+        ledger = self.root / "docs" / "ai" / "bridge" / "ledger.jsonl"
+        ledger.parent.mkdir(parents=True, exist_ok=True)
+        ledger.write_text(
+            json.dumps({"ts": "2026-01-01T00:00Z", "a": "legacy-agent", "e": "claim", "t": "old", "f": ["legacy/**"], "n": "v1"}) + "\n",
+            encoding="utf-8",
+        )
+        self.assertEqual(self.run_bridge("init").returncode, 0)
+        claims = self.run_bridge("claims")
+        self.assertEqual(claims.returncode, 0, claims.stderr)
+        self.assertIn("legacy/**", claims.stdout)
+        doctor = self.run_bridge("doctor")
+        self.assertEqual(doctor.returncode, 0, doctor.stderr)
+        self.assertIn("1 legacy events", doctor.stdout)
+
+    def test_rejects_injection_negative_lease_and_case_alias(self) -> None:
+        self.assertEqual(self.run_bridge("init").returncode, 0)
+        injected = self.run_bridge("log", "run", "actor", "note", "task", "safe\n| FAKE |")
+        self.assertNotEqual(injected.returncode, 0)
+        negative = self.run_bridge("log", "run", "actor", "claim", "task", "bad lease", "src/x.py", "", "-1")
+        self.assertNotEqual(negative.returncode, 0)
+        first = self.run_bridge("log", "run-a", "writer-a", "claim", "task", "case owner", "Src/App.py")
+        self.assertEqual(first.returncode, 0, first.stderr)
+        alias = self.run_bridge("log", "run-b", "writer-b", "claim", "task", "case alias", "src/app.py")
+        self.assertNotEqual(alias.returncode, 0)
+        self.assertIn("claim conflict", alias.stderr)
+        release = self.run_bridge("log", "run-a", "writer-a", "release", "task", "case release", "src/app.py")
+        self.assertEqual(release.returncode, 0, release.stderr)
+        claimed = self.run_bridge("log", "run-b", "writer-b", "claim", "task", "now free", "src/app.py")
+        self.assertEqual(claimed.returncode, 0, claimed.stderr)
+        html_note = self.run_bridge("log", "run-b", "writer-b", "progress", "task", "<img src=x>")
+        self.assertEqual(html_note.returncode, 0, html_note.stderr)
+        board = self.run_bridge("board")
+        self.assertIn("&lt;img src=x&gt;", board.stdout)
+
+    def test_invalid_ledger_blocks_writes(self) -> None:
+        ledger = self.root / "docs" / "ai" / "bridge" / "ledger.jsonl"
+        ledger.parent.mkdir(parents=True, exist_ok=True)
+        event = {
+            "v": 2,
+            "id": "00000000-0000-4000-8000-000000000001",
+            "ts": "2026-01-01T00:00:00Z",
+            "run": "run",
+            "a": "actor",
+            "e": "note",
+            "t": "task",
+            "f": [],
+            "n": "duplicate",
+            "nx": "",
+            "lease": None,
+        }
+        ledger.write_text(json.dumps(event) + "\n" + json.dumps(event) + "\n", encoding="utf-8")
+        write = self.run_bridge("log", "run", "actor", "note", "task", "must fail")
+        self.assertNotEqual(write.returncode, 0)
+        self.assertIn("ledger is invalid", write.stderr)
+
+    def test_live_lock_is_not_stolen(self) -> None:
+        bridge = load_module("bridge_lock_test", BRIDGE)
+        paths = bridge.bridge_paths(self.root)
+        bridge.ensure_files(paths)
+        paths["lock"].write_text(
+            json.dumps({"pid": os.getpid(), "host": socket.gethostname(), "token": "live-token", "created": "2000-01-01T00:00:00Z"}),
+            encoding="utf-8",
+        )
+        old = time.time() - 120
+        os.utime(paths["lock"], (old, old))
+        with self.assertRaises(bridge.BridgeError):
+            with bridge.bridge_lock(paths, timeout=0.1):
+                pass
+        self.assertTrue(paths["lock"].exists())
+
+    @unittest.skipUnless(os.name == "nt", "Windows-specific process probe regression")
+    def test_windows_process_probe_does_not_call_os_kill(self) -> None:
+        bridge = load_module("bridge_windows_probe_test", BRIDGE)
+        with mock.patch.object(bridge.os, "kill", side_effect=AssertionError("os.kill must not probe Windows processes")):
+            self.assertTrue(bridge.process_alive(os.getpid()))
+
+    def test_compaction_preserves_active_claim_run_and_blocker(self) -> None:
+        ledger = self.root / "docs" / "ai" / "bridge" / "ledger.jsonl"
+        ledger.parent.mkdir(parents=True, exist_ok=True)
+        events: list[dict] = []
+        for index in range(205):
+            event = {
+                "v": 2,
+                "id": f"00000000-0000-4000-8000-{index:012d}",
+                "ts": f"2026-01-01T00:{index % 60:02d}:00Z",
+                "run": "run",
+                "a": "actor",
+                "e": (
+                    "claim"
+                    if index == 0
+                    else "start"
+                    if index == 1
+                    else "blocked"
+                    if index == 2
+                    else "handoff"
+                    if index == 3
+                    else "note"
+                ),
+                "t": "task",
+                "f": ["kept/**"] if index == 0 else [],
+                "n": f"event {index}",
+                "nx": "",
+                "lease": "2099-01-01T00:00:00Z" if index == 0 else None,
+            }
+            events.append(event)
+        ledger.write_text("".join(json.dumps(event, separators=(",", ":")) + "\n" for event in events), encoding="utf-8")
+        self.assertEqual(self.run_bridge("init").returncode, 0)
+        compact = self.run_bridge("compact")
+        self.assertEqual(compact.returncode, 0, compact.stderr)
+        self.assertIn("including active claims", compact.stdout)
+        self.assertIn("kept/**", self.run_bridge("claims").stdout)
+        retained = ledger.read_text(encoding="utf-8").splitlines()
+        archived = (ledger.parent / "ledger-archive.jsonl").read_text(encoding="utf-8").splitlines()
+        self.assertEqual(len(retained), 103)
+        self.assertEqual(len(archived), 102)
+        board = (ledger.parent / "board.md").read_text(encoding="utf-8")
+        self.assertIn("run", board)
+        self.assertIn("event 2", board)
+
+
+class ExecutionGuardTests(unittest.TestCase):
+    def test_safe_exec_times_out_and_terminates(self) -> None:
+        result = subprocess.run(
+            [sys.executable, "-B", str(SAFE_EXEC), "--label", "timeout-test", "--timeout", "0.2", "--grace", "0.1", "--", sys.executable, "-B", "-c", "import time; time.sleep(5)"],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=5,
+            env={key: value for key, value in os.environ.items() if key != "HARNESS_VERBOSE"},
+        )
+        self.assertEqual(result.returncode, 124, result.stdout + result.stderr)
+        self.assertIn("TIMEOUT timeout-test", result.stderr)
+
+    def test_safe_exec_bounds_failure_output(self) -> None:
+        result = subprocess.run(
+            [sys.executable, "-B", str(SAFE_EXEC), "--label", "tail-test", "--tail-lines", "5", "--", sys.executable, "-B", "-c", "import sys; [print(i) for i in range(50)]; sys.exit(7)"],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=5,
+            env={key: value for key, value in os.environ.items() if key != "HARNESS_VERBOSE"},
+        )
+        self.assertEqual(result.returncode, 7, result.stdout + result.stderr)
+        self.assertIn("output truncated", result.stderr)
+        self.assertNotIn("\n0\n", result.stderr)
+
+    def test_environment_sanitizer_removes_secret_named_values(self) -> None:
+        guardrails = load_module("guardrails_environment_test", GUARDRAILS)
+        sanitized = guardrails.sanitize_environment(
+            {
+                "PATH": "safe-path",
+                "SESSION_TOKEN": "synthetic-secret",
+                "UNRELATED": "not-forwarded",
+            },
+            ["PATH", "SESSION_TOKEN", "UNRELATED"],
+            r"(?i)(secret|token|password|session)",
+        )
+        self.assertEqual(sanitized["PATH"], "safe-path")
+        self.assertNotIn("SESSION_TOKEN", sanitized)
+        self.assertEqual(sanitized["UNRELATED"], "not-forwarded")
+        self.assertEqual(sanitized["CI"], "1")
+
+
+class ProjectChecksTests(unittest.TestCase):
+    def test_discovers_immediate_child_npm_projects(self) -> None:
+        checks = load_module("project_checks_discovery_test", PROJECT_CHECKS)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name, scripts in (
+                ("api", {"lint": "eslint .", "test": "vitest run"}),
+                ("frontend", {"build": "vite build"}),
+            ):
+                project = root / name
+                project.mkdir()
+                (project / "package.json").write_text(
+                    json.dumps({"scripts": scripts}), encoding="utf-8"
+                )
+            with mock.patch.object(checks, "ROOT", root):
+                projects = checks.package_projects()
+            self.assertEqual(
+                [path.name for path, _scripts in projects], ["api", "frontend"]
+            )
+
+    def test_nested_npm_command_uses_prefix(self) -> None:
+        checks = load_module("project_checks_command_test", PROJECT_CHECKS)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = root / "api"
+            project.mkdir()
+            with (
+                mock.patch.object(checks, "ROOT", root),
+                mock.patch.object(checks, "npm_executable", return_value="npm.cmd"),
+            ):
+                command = checks.npm_command(project, "run", "lint")
+            self.assertEqual(
+                command, ["npm.cmd", "--prefix", "api", "run", "lint"]
+            )
+
+    def test_filtered_tests_use_nested_npm_project(self) -> None:
+        checks = load_module("project_checks_filter_test", PROJECT_CHECKS)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = root / "api"
+            project.mkdir()
+            (project / "package.json").write_text(
+                json.dumps({"scripts": {"test": "vitest run"}}), encoding="utf-8"
+            )
+            with (
+                mock.patch.object(checks, "ROOT", root),
+                mock.patch.object(checks, "SAFE", root / "scripts" / "safe_exec.py"),
+                mock.patch.object(checks, "npm_executable", return_value="npm.cmd"),
+                mock.patch.object(
+                    checks,
+                    "limits",
+                    return_value={
+                        "default_command_timeout_seconds": 300,
+                        "kill_grace_seconds": 5,
+                        "failure_tail_lines": 120,
+                        "max_output_buffer_bytes": 262144,
+                    },
+                ),
+                mock.patch.object(checks, "run", return_value=0) as run,
+                mock.patch.dict(os.environ, {"HARNESS_NPM_TEST_FILTERS": "auth-plan discovery"}),
+            ):
+                result = checks.check_test(trusted=True, allow_secret_env=False)
+            self.assertEqual(result, (1, 0))
+            self.assertEqual(
+                run.call_args.args[1],
+                ["npm.cmd", "--prefix", "api", "test", "--", "auth-plan", "discovery"],
+            )
+
+    def test_untrusted_project_test_is_not_executed(self) -> None:
+        checks = load_module("project_checks_trust_test", PROJECT_CHECKS)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "package.json").write_text(
+                json.dumps({"scripts": {"test": "node exfiltrate.js"}}),
+                encoding="utf-8",
+            )
+            with (
+                mock.patch.object(checks, "ROOT", root),
+                mock.patch.object(checks, "run", side_effect=AssertionError("must not run")),
+            ):
+                ran, incomplete = checks.check_test(
+                    trusted=False, allow_secret_env=False
+                )
+            self.assertEqual((ran, incomplete), (0, 1))
+
+    def test_security_uses_bundled_assurance_without_project_script_execution(self) -> None:
+        checks = load_module("project_checks_security_test", PROJECT_CHECKS)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            scripts = root / "scripts"
+            scripts.mkdir()
+            for name in ("check-n8n-security.mjs", "check-systemd-security.mjs"):
+                (scripts / name).write_text("", encoding="utf-8")
+            with (
+                mock.patch.object(checks, "ROOT", root),
+                mock.patch.object(
+                    checks,
+                    "limits",
+                    return_value={
+                        "default_command_timeout_seconds": 300,
+                        "kill_grace_seconds": 5,
+                        "failure_tail_lines": 120,
+                        "max_output_buffer_bytes": 262144,
+                    },
+                ),
+                mock.patch.object(checks, "run", return_value=0) as run,
+            ):
+                ran, incomplete = checks.check_security(external=False)
+            self.assertEqual((ran, incomplete), (1, 0))
+            commands = [call.args[1] for call in run.call_args_list]
+            self.assertEqual(len(commands), 1)
+            self.assertIn(str(root / "scripts" / "security_assurance.py"), commands[0])
+            self.assertNotIn(str(scripts / "check-n8n-security.mjs"), commands[0])
+            self.assertNotIn(str(scripts / "check-systemd-security.mjs"), commands[0])
+
+
+class SecurityAndUiTests(unittest.TestCase):
+    def test_stale_next_and_node_are_release_blockers(self) -> None:
+        security = load_module("security_stale_runtime_test", SECURITY_ASSURANCE)
+        reporting = load_module(
+            "security_reporting_test", ROOT / "scripts" / "harnesslib" / "reporting.py"
+        )
+        policy = json.loads((ROOT / "security-policy.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "package.json").write_text(
+                json.dumps(
+                    {
+                        "dependencies": {"next": "14.2.1"},
+                        "engines": {"node": "20.x"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / "package-lock.json").write_text(
+                json.dumps(
+                    {
+                        "lockfileVersion": 3,
+                        "packages": {"node_modules/next": {"version": "14.2.1"}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / ".nvmrc").write_text("20\n", encoding="utf-8")
+            report = reporting.CheckReport("stale")
+            security.check_node_projects(root, policy, "release", report)
+        joined = "\n".join(report.failures)
+        self.assertIn("outside supported policy majors", joined)
+        self.assertIn("unsupported major", joined)
+
+    def test_current_next_and_node_meet_lifecycle_floor(self) -> None:
+        security = load_module("security_current_runtime_test", SECURITY_ASSURANCE)
+        reporting = load_module(
+            "security_current_reporting_test",
+            ROOT / "scripts" / "harnesslib" / "reporting.py",
+        )
+        policy = json.loads((ROOT / "security-policy.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "package.json").write_text(
+                json.dumps(
+                    {
+                        "dependencies": {"next": "16.4.5"},
+                        "engines": {"node": "24.x"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / "package-lock.json").write_text(
+                json.dumps(
+                    {
+                        "lockfileVersion": 3,
+                        "packages": {"node_modules/next": {"version": "16.4.5"}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / ".nvmrc").write_text("24\n", encoding="utf-8")
+            report = reporting.CheckReport("current")
+            security.check_node_projects(root, policy, "ci", report)
+        self.assertFalse(report.failures)
+        self.assertTrue(any("meets the dated security floor" in item for item in report.passes))
+
+    def test_incomplete_ui_contract_cannot_pass_release(self) -> None:
+        ui = load_module("ui_incomplete_contract_test", UI_QUALITY)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "schemas").mkdir()
+            shutil.copy2(
+                ROOT / "schemas" / "ui-review.schema.json",
+                root / "schemas" / "ui-review.schema.json",
+            )
+            (root / "docs" / "ai").mkdir(parents=True)
+            (root / "package.json").write_text(
+                json.dumps({"dependencies": {"next": "16.4.5"}}), encoding="utf-8"
+            )
+            (root / "docs" / "ai" / "ui-review.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "1.0",
+                        "status": "approved",
+                        "applicability": {"applicable": True, "reason": "web UI"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with contextlib.redirect_stderr(io.StringIO()):
+                result = ui.main(["--root", str(root), "--profile", "release"])
+        self.assertNotEqual(result, 0)
+
+    def test_adversarial_plan_rejects_ambiguous_and_external_unscoped_targets(self) -> None:
+        lab = load_module("adversarial_scope_test", ADVERSARIAL_LAB)
+        base = {
+            "target_origin": "http://127.0.0.1:8080",
+            "max_requests": 1,
+            "scenarios": [
+                {
+                    "id": "probe",
+                    "method": "GET",
+                    "path": "//attacker.invalid",
+                    "required_headers": [],
+                    "forbidden_body_markers": [],
+                }
+            ],
+        }
+        with self.assertRaises(ValueError):
+            lab.canonical_plan(base)
+        encoded = copy.deepcopy(base)
+        encoded["scenarios"][0]["path"] = "/allowed/%2e%2e/admin"
+        with self.assertRaises(ValueError):
+            lab.canonical_plan(encoded)
+        external = copy.deepcopy(base)
+        external["target_origin"] = "http://192.0.2.1"
+        external["scenarios"][0]["path"] = "/"
+        with self.assertRaises(ValueError):
+            lab.prepare_execution(ROOT, external, None)
+
+    def test_authorized_path_prefix_has_a_segment_boundary(self) -> None:
+        guardrails = load_module("guardrails_prefix_test", GUARDRAILS)
+        self.assertTrue(guardrails.path_is_allowed("/api/orders", ["/api"]))
+        self.assertTrue(guardrails.path_is_allowed("/api", ["/api"]))
+        self.assertFalse(guardrails.path_is_allowed("/api-evil", ["/api"]))
+
+
+class HybridEngineeringTests(unittest.TestCase):
+    def run_script(self, script: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, "-B", str(script), *arguments],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=60,
+        )
+
+    def bootstrap(self, target: Path) -> None:
+        plan = self.run_script(BOOTSTRAP_PROJECT, "plan", "--target", str(target))
+        self.assertEqual(plan.returncode, 0, plan.stdout + plan.stderr)
+        applied = self.run_script(BOOTSTRAP_PROJECT, "apply", "--target", str(target))
+        self.assertEqual(applied.returncode, 0, applied.stdout + applied.stderr)
+
+    def test_bootstrap_is_plan_first_complete_and_non_overwriting(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            self.bootstrap(target)
+            self.assertTrue((target / "backend" / "app" / "services").is_dir())
+            self.assertTrue((target / "frontend" / "src" / "components" / "ui").is_dir())
+            self.assertTrue((target / "SOURCE-OF-TRUTH.md").is_file())
+            protected = target / "backend" / "README.md"
+            protected.write_text("user-owned\n", encoding="utf-8")
+            blocked = self.run_script(BOOTSTRAP_PROJECT, "apply", "--target", str(target))
+            self.assertEqual(blocked.returncode, 3, blocked.stdout + blocked.stderr)
+            self.assertEqual(protected.read_text(encoding="utf-8"), "user-owned\n")
+            merged = self.run_script(
+                BOOTSTRAP_PROJECT,
+                "apply",
+                "--target",
+                str(target),
+                "--skip-existing",
+            )
+            self.assertEqual(merged.returncode, 3, merged.stdout + merged.stderr)
+            self.assertEqual(protected.read_text(encoding="utf-8"), "user-owned\n")
+
+    def test_bootstrap_rejects_unsafe_template_path(self) -> None:
+        bootstrap = load_module("bootstrap_path_test", BOOTSTRAP_PROJECT)
+        with self.assertRaises(bootstrap.BootstrapError):
+            bootstrap.portable_path("../../escape.txt")
+        with self.assertRaises(bootstrap.BootstrapError):
+            bootstrap.portable_path("C:\\escape.txt")
+
+    def test_architecture_accepts_thin_entrypoints_and_documented_extensions(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            self.bootstrap(target)
+            valid = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--profile", "ci")
+            self.assertEqual(valid.returncode, 0, valid.stdout + valid.stderr)
+            extension = target / "frontend" / "src" / "features"
+            extension.mkdir()
+            invalid = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--profile", "ci")
+            self.assertEqual(invalid.returncode, 1, invalid.stdout + invalid.stderr)
+            directory_map = target / "docs" / "architecture" / "DIRECTORY-MAP.md"
+            directory_map.write_text(
+                directory_map.read_text(encoding="utf-8")
+                + "\n| `frontend/src/features/` | Feature modules | declared public layers |\n",
+                encoding="utf-8",
+            )
+            documented = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--profile", "ci")
+            self.assertEqual(documented.returncode, 0, documented.stdout + documented.stderr)
+
+    def test_architecture_rejects_backend_routes_and_frontend_transport_in_entrypoints(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            self.bootstrap(target)
+            (target / "backend" / "app" / "main.py").write_text(
+                "from fastapi import FastAPI\napp = FastAPI()\n@app.get('/orders')\ndef orders():\n    return []\n",
+                encoding="utf-8",
+            )
+            (target / "frontend" / "src" / "App.tsx").write_text(
+                "export function App(){ fetch('/api/orders'); return <main /> }\n",
+                encoding="utf-8",
+            )
+            result = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--profile", "ci")
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("defines HTTP route", result.stdout)
+            self.assertIn("feature or transport behavior", result.stdout)
+
+    def test_open_architecture_accepts_feature_profile_and_rejects_monolithic_entrypoint(self) -> None:
+        profile = json.loads((ROOT / "docs" / "harness" / "examples" / "architecture-profile.example.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            for relative in ("src/app", "src/orders", "src/shared", "docs/architecture", "docs/api"):
+                (target / relative).mkdir(parents=True, exist_ok=True)
+            policy = target / "profile.json"
+            policy.write_text(json.dumps(profile), encoding="utf-8")
+            entrypoint = target / "src" / "app" / "main.tsx"
+            entrypoint.write_text("export function App(){ return null }\n", encoding="utf-8")
+            (target / "docs" / "api" / "openapi.json").write_text("{}\n", encoding="utf-8")
+            valid = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--policy", str(policy), "--profile", "release")
+            self.assertEqual(valid.returncode, 0, valid.stdout + valid.stderr)
+            entrypoint.write_text("export function App(){ fetch('/orders'); return null }\n", encoding="utf-8")
+            invalid = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--policy", str(policy), "--profile", "ci")
+            self.assertEqual(invalid.returncode, 1, invalid.stdout + invalid.stderr)
+            self.assertIn("composition root contains", invalid.stdout)
+            entrypoint.write_text("export function App(){ return null }\n", encoding="utf-8")
+            (target / "src" / "shared" / "bad.ts").write_text(
+                "import { priceOrder } from '../orders/service'\nexport const bad = priceOrder\n",
+                encoding="utf-8",
+            )
+            reversal = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--policy", str(policy), "--profile", "ci")
+            self.assertEqual(reversal.returncode, 1, reversal.stdout + reversal.stderr)
+            self.assertIn("dependency reversal", reversal.stdout)
+
+    def test_open_architecture_manual_adapter_without_evidence_is_incomplete(self) -> None:
+        profile = json.loads((ROOT / "scaffold" / "docs" / "ai" / "architecture-policy.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            (target / "src").mkdir()
+            (target / "src" / "main").write_text("composition only\n", encoding="utf-8")
+            policy = target / "profile.json"
+            policy.write_text(json.dumps(profile), encoding="utf-8")
+            result = self.run_script(ARCHITECTURE_CHECK, "--root", str(target), "--policy", str(policy), "--profile", "ci")
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertIn("INCOMPLETE architecture", result.stdout)
+
+    def test_release_documentation_blocks_templates_and_accepts_initialized_contracts(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            self.bootstrap(target)
+            blocked = self.run_script(DOCUMENTATION_CHECK, "--root", str(target), "--profile", "release")
+            self.assertEqual(blocked.returncode, 1, blocked.stdout + blocked.stderr)
+            replacements = {
+                "Status: UNINITIALIZED": "Status: CURRENT",
+                "Status: DRAFT": "Status: CURRENT",
+                "uninitialized": "current",
+                "not set": "2026-08-03",
+                "<PROJECT_NAME>": "Example",
+                "<PROJECT_PURPOSE>": "Example purpose",
+                "<VERSION>": "1.0.0",
+                "<OWNER>": "Example owner",
+                "<DATE>": "2026-08-03",
+                "<AUDIENCE>": "Example users",
+            }
+            for relative in ("SOURCE-OF-TRUTH.md", "docs/TECHNICAL-DOCUMENTATION.md", "docs/USER-MANUAL.md"):
+                path = target / relative
+                text = path.read_text(encoding="utf-8")
+                for old, new in replacements.items():
+                    text = text.replace(old, new)
+                path.write_text(text, encoding="utf-8")
+            passed = self.run_script(DOCUMENTATION_CHECK, "--root", str(target), "--profile", "release")
+            self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
+
+
+class AdoptionAndAutomationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        package = load_module("package_for_adoption_tests", ROOT / "scripts" / "package_runtime.py")
+        cls.payload, cls.manifest = package.build_payload(ROOT)
+        package.validate_payload(cls.payload, cls.manifest)
+        cls.adopt = load_module("adopt_harness_tests", ADOPT_HARNESS)
+
+    def write_distribution(self, root: Path) -> None:
+        for name, content in self.payload.items():
+            path = root / Path(*name.split("/"))
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+
+    def source_data(self, root: Path) -> dict:
+        self.write_distribution(root)
+        return self.adopt.verify_source(root)
+
+    def test_automation_contract_accepts_draft_hybrid_and_rejects_pure_n8n_blocker(self) -> None:
+        example = ROOT / "docs" / "harness" / "examples" / "automation-decision.example.json"
+        valid = subprocess.run(
+            [sys.executable, "-B", str(AUTOMATION_DECISION), str(example)],
+            text=True, capture_output=True, check=False, timeout=30,
+        )
+        self.assertEqual(valid.returncode, 0, valid.stdout + valid.stderr)
+        decision = json.loads(example.read_text(encoding="utf-8"))
+        decision["execution_plane"] = "n8n"
+        decision["blocker_handling"] = []
+        with tempfile.TemporaryDirectory() as temp_name:
+            invalid_path = Path(temp_name) / "invalid.json"
+            invalid_path.write_text(json.dumps(decision), encoding="utf-8")
+            invalid = subprocess.run(
+                [sys.executable, "-B", str(AUTOMATION_DECISION), str(invalid_path)],
+                text=True, capture_output=True, check=False, timeout=30,
+            )
+        self.assertEqual(invalid.returncode, 1, invalid.stdout + invalid.stderr)
+        self.assertIn("FAIL automation decision", invalid.stderr)
+
+    def test_open_solution_decision_accepts_user_named_tools_and_blocks_unresolved_approval(self) -> None:
+        example = ROOT / "docs" / "harness" / "examples" / "solution-decision.example.json"
+        draft = subprocess.run([sys.executable, "-B", str(SOLUTION_DECISION), str(example)], text=True, capture_output=True, check=False, timeout=30)
+        self.assertEqual(draft.returncode, 0, draft.stdout + draft.stderr)
+        decision = json.loads(example.read_text(encoding="utf-8"))
+        decision["status"] = "approved"
+        decision["cost"]["pricing_status"] = "verified"
+        decision["approval"] = {"required": True, "status": "approved", "reference": "owner-approval"}
+        with tempfile.TemporaryDirectory() as temp_name:
+            path = Path(temp_name) / "decision.json"
+            path.write_text(json.dumps(decision), encoding="utf-8")
+            approved = subprocess.run([sys.executable, "-B", str(SOLUTION_DECISION), str(path)], text=True, capture_output=True, check=False, timeout=30)
+            self.assertEqual(approved.returncode, 0, approved.stdout + approved.stderr)
+            decision["components"][1]["authority"] = "unresolved"
+            path.write_text(json.dumps(decision), encoding="utf-8")
+            blocked = subprocess.run([sys.executable, "-B", str(SOLUTION_DECISION), str(path)], text=True, capture_output=True, check=False, timeout=30)
+        self.assertEqual(blocked.returncode, 1, blocked.stdout + blocked.stderr)
+        self.assertIn("unresolved component authority", blocked.stderr)
+
+    def test_brownfield_plan_is_read_only_preserves_stack_and_skips_target_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as source_name, tempfile.TemporaryDirectory() as target_name:
+            source = Path(source_name)
+            target = Path(target_name)
+            source_data = self.source_data(source)
+            (target / "src").mkdir()
+            (target / "src" / "server.js").write_text("existing\n", encoding="utf-8")
+            (target / "package.json").write_text('{"name":"existing"}\n', encoding="utf-8")
+            before = sorted(path.relative_to(target).as_posix() for path in target.rglob("*"))
+            plan = self.adopt.build_plan(source_data, target, "auto")
+            after = sorted(path.relative_to(target).as_posix() for path in target.rglob("*"))
+            self.assertEqual(before, after)
+            self.assertEqual(plan["adoption_mode"], "brownfield")
+            self.assertEqual(plan["application_posture"], "observed")
+            self.assertEqual(plan["architecture_disposition"], "profile_required")
+            architecture = next(item for item in plan["operations"] if item["path"] == "docs/ai/architecture-policy.json")
+            self.assertEqual(architecture["action"], "skip")
+            self.assertFalse(any(item["path"].startswith(("backend/", "frontend/")) for item in plan["operations"]))
+            self.assertFalse((target / ".harness").exists())
+
+    def test_greenfield_apply_and_verify_do_not_bootstrap_application(self) -> None:
+        with tempfile.TemporaryDirectory() as source_name, tempfile.TemporaryDirectory() as target_name:
+            source, target = Path(source_name), Path(target_name)
+            source_data = self.source_data(source)
+            plan = self.adopt.build_plan(source_data, target, "greenfield")
+            self.adopt.validate_plan(plan, source / "schemas" / "adoption-plan.schema.json")
+            self.assertEqual(plan["status"], "ready")
+            self.adopt.apply_plan(source_data, target, plan, approve_replace=False)
+            self.assertEqual(self.adopt.verify_installation(source_data, target), [])
+            self.assertTrue((target / ".harness" / "adoption-state.json").is_file())
+            self.assertFalse((target / "backend").exists())
+            self.assertFalse((target / "frontend").exists())
+
+    def test_upgrade_requires_approval_backs_up_harness_and_preserves_project_memory(self) -> None:
+        with tempfile.TemporaryDirectory() as source_name, tempfile.TemporaryDirectory() as target_name:
+            source, target = Path(source_name), Path(target_name)
+            source_data = self.source_data(source)
+            prior = copy.deepcopy(source_data["harness"])
+            prior["version"] = "6.0.0"
+            for marker in (
+                "scripts/runtime_check.py",
+                ".agents/skills/core/task-triage/SKILL.md",
+                "docs/harness/INSTALL.md",
+            ):
+                path = target / Path(*marker.split("/"))
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("prior\n", encoding="utf-8")
+            (target / "harness.json").write_text(json.dumps(prior), encoding="utf-8")
+            truth = target / "SOURCE-OF-TRUTH.md"
+            truth.write_text("project-owned truth\n", encoding="utf-8")
+            plan = self.adopt.build_plan(source_data, target, "upgrade")
+            self.assertEqual(plan["status"], "awaiting_approval")
+            self.assertIn("replace_harness_owned", plan["approvals"])
+            with self.assertRaises(self.adopt.AdoptionBlocked):
+                self.adopt.apply_plan(source_data, target, plan, approve_replace=False)
+            self.adopt.apply_plan(source_data, target, plan, approve_replace=True)
+            self.assertEqual(truth.read_text(encoding="utf-8"), "project-owned truth\n")
+            backup = target / ".harness" / "rollback" / plan["plan_digest"] / "harness.json"
+            self.assertTrue(backup.is_file())
+            self.assertEqual(self.adopt.verify_installation(source_data, target), [])
+
+    def test_shared_conflict_and_target_drift_block_without_partial_writes(self) -> None:
+        with tempfile.TemporaryDirectory() as source_name, tempfile.TemporaryDirectory() as target_name:
+            source, target = Path(source_name), Path(target_name)
+            source_data = self.source_data(source)
+            (target / "AGENTS.md").write_text("project instructions\n", encoding="utf-8")
+            conflict = self.adopt.build_plan(source_data, target, "brownfield")
+            self.assertEqual(conflict["status"], "blocked")
+            with self.assertRaises(self.adopt.AdoptionBlocked):
+                self.adopt.apply_plan(source_data, target, conflict, approve_replace=False)
+            self.assertFalse((target / "harness.json").exists())
+            reconciled = self.adopt.build_plan(source_data, target, "brownfield", {"AGENTS.md"})
+            self.assertEqual(reconciled["status"], "ready")
+            self.assertEqual(reconciled["reconciled_shared"], ["AGENTS.md"])
+            self.adopt.apply_plan(source_data, target, reconciled, approve_replace=False)
+            self.assertEqual((target / "AGENTS.md").read_text(encoding="utf-8"), "project instructions\n")
+            self.assertEqual(self.adopt.verify_installation(source_data, target), [])
+
+        with tempfile.TemporaryDirectory() as source_name, tempfile.TemporaryDirectory() as target_name:
+            source, target = Path(source_name), Path(target_name)
+            source_data = self.source_data(source)
+            plan = self.adopt.build_plan(source_data, target, "greenfield")
+            (target / "AGENTS.md").write_text("appeared after plan\n", encoding="utf-8")
+            with self.assertRaises(self.adopt.AdoptionBlocked):
+                self.adopt.apply_plan(source_data, target, plan, approve_replace=False)
+            self.assertFalse((target / "harness.json").exists())
+
+    def test_brownfield_architecture_is_incomplete_not_not_applicable(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            (target / "src").mkdir()
+            (target / "package.json").write_text('{"name":"existing"}', encoding="utf-8")
+            state = target / ".harness" / "adoption-state.json"
+            state.parent.mkdir()
+            state.write_text(json.dumps({"architecture_disposition": "profile_required", "application_posture": "observed"}), encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, "-B", str(ARCHITECTURE_CHECK), "--root", str(target)],
+                text=True, capture_output=True, check=False, timeout=30,
+            )
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertIn("observed brownfield", result.stdout)
+
+    def test_product_security_privacy_baseline_covers_common_omissions(self) -> None:
+        baseline = (ROOT / "docs" / "harness" / "PRODUCT-SECURITY-PRIVACY.md").read_text(encoding="utf-8").lower()
+        release = (ROOT / "docs" / "ai" / "release-checklist.md").read_text(encoding="utf-8").lower()
+        required = (
+            "server at the owned resource", "csrf", "cors", "content security policy",
+            "account and credential enumeration", "rate and volume controls", "sensitive business flows",
+            "ssrf", "uploads and parsers", "international transfers", "data-subject",
+            "retention schedule", "ripd", "three-business-day",
+        )
+        for phrase in required:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, baseline)
+        self.assertIn("unknown or unavailable applicable control", release)
+
+    def test_adoption_rejects_maintainer_source_and_unsafe_manifest_path(self) -> None:
+        with self.assertRaises(self.adopt.AdoptionError):
+            self.adopt.verify_source(ROOT)
+        with tempfile.TemporaryDirectory() as source_name:
+            source = Path(source_name)
+            self.write_distribution(source)
+            manifest = source / "MANIFEST.sha256"
+            manifest.write_text(manifest.read_text(encoding="utf-8") + "0" * 64 + "  ../escape\n", encoding="utf-8")
+            with self.assertRaises(self.adopt.AdoptionError):
+                self.adopt.verify_source(source)
+
+
+class EvaluationRunnerTests(unittest.TestCase):
+    def test_review_only_governance_is_proportional_and_schema_bound(self) -> None:
+        agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        triage = (ROOT / ".agents" / "skills" / "core" / "task-triage" / "SKILL.md").read_text(encoding="utf-8")
+        minimalism = (ROOT / ".agents" / "skills" / "core" / "minimalism" / "SKILL.md").read_text(encoding="utf-8")
+        quality_gates = (ROOT / "docs" / "ai" / "quality-gates.md").read_text(encoding="utf-8")
+        cases = json.loads((ROOT / "docs" / "harness" / "evaluation-cases.json").read_text(encoding="utf-8"))
+        h8_38 = next(case for case in cases["cases"] if case["id"] == "H8-38")
+
+        self.assertIn("Risk or production context increases rigor, not write authority", agents)
+        self.assertIn("Mode and authorization take precedence over risk-based persistence", triage)
+        self.assertIn("A production review can block approval without creating a task bundle", triage)
+        self.assertIn("canonical templates", triage)
+        self.assertIn("Schema-invalid output remains incomplete evidence", triage)
+        self.assertIn("Risk changes the depth of reasoning, not the write boundary", minimalism)
+        self.assertIn("Gate rigor does not grant write authority", quality_gates)
+        self.assertIn("cite it as evidence only after validation passes", quality_gates)
+        self.assertIn("unnecessary_governance_artifacts_created=false", h8_38["hard_assertions"])
+        self.assertIn("invalid_formal_artifacts=0", h8_38["hard_assertions"])
+
+    def test_materialized_run_loads_candidate_harness_and_keeps_target_isolated(self) -> None:
+        package = load_module("package_for_evaluation_test", ROOT / "scripts" / "package_runtime.py")
+        payload, manifest = package.build_payload(ROOT)
+        package.validate_payload(payload, manifest)
+        archive_bytes = package.archive_bytes(payload, manifest)
+        digest = hashlib.sha256(archive_bytes).hexdigest()
+        with tempfile.TemporaryDirectory() as temp_name:
+            temp = Path(temp_name)
+            archive = temp / manifest["distribution"]["archive"]
+            archive.write_bytes(archive_bytes)
+            run = temp / "run"
+            materialized = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(RUN_EVALUATION),
+                    "materialize",
+                    "--case",
+                    "H8-35",
+                    "--repeat",
+                    "1",
+                    "--out",
+                    str(run),
+                    "--host",
+                    "synthetic-host",
+                    "--model",
+                    "gpt-5.6-sol",
+                    "--reasoning-effort",
+                    "high",
+                    "--harness-archive",
+                    str(archive),
+                    "--harness-sha256",
+                    digest,
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=60,
+            )
+            self.assertEqual(materialized.returncode, 0, materialized.stdout + materialized.stderr)
+            workspace = run / "workspace"
+            target = workspace / "target"
+            self.assertEqual((workspace / "AGENTS.md").read_bytes(), payload["AGENTS.md"])
+            self.assertTrue((workspace / ".agents" / "skills" / "core" / "task-triage" / "SKILL.md").is_file())
+            self.assertTrue((workspace / "harness-source" / "MANIFEST.sha256").is_file())
+            self.assertTrue((target / "src" / "customers" / "customer-service.ts").is_file())
+            before = json.loads((run / "before.json").read_text(encoding="utf-8"))
+            self.assertNotIn("AGENTS.md", before["state"])
+            self.assertIn("AGENTS.md", before["protected_state"])
+            for reference in (
+                "docs/harness/COMMUNICATION-POLICY.md",
+                "schemas/gate-result.schema.json",
+                "scripts/runtime_check.py",
+            ):
+                self.assertEqual((workspace / reference).read_bytes(), payload[reference])
+                self.assertIn(reference, before["protected_state"])
+            config = json.loads((run / "host-config.json").read_text(encoding="utf-8"))
+            self.assertEqual(config["harness_archive_sha256"], digest)
+            self.assertEqual(config["target_directory"], "workspace/target")
+            prompt = (run / "prompt.txt").read_text(encoding="utf-8")
+            self.assertIn("The only project under evaluation is target/", prompt)
+            self.assertIn("All files outside target/", prompt)
+            self.assertNotIn("existing_customer_service_found=true", prompt)
+
+            graded = subprocess.run(
+                [sys.executable, "-B", str(RUN_EVALUATION), "grade", "--dir", str(run)],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+            self.assertEqual(graded.returncode, 1, graded.stdout + graded.stderr)
+            result = json.loads((run / "result.json").read_text(encoding="utf-8"))
+            self.assertEqual(result["status"], "incomplete")
+            self.assertEqual(result["metrics_status"], "incomplete")
+            self.assertEqual(result["telemetry_status"], "incomplete")
+            self.assertFalse(result["transcript_captured"])
+
+            aggregate_path = temp / "aggregate.json"
+            aggregated = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(RUN_EVALUATION),
+                    "aggregate",
+                    "--runs",
+                    str(run),
+                    "--out",
+                    str(aggregate_path),
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+            self.assertEqual(aggregated.returncode, 1, aggregated.stdout + aggregated.stderr)
+            aggregate = json.loads(aggregate_path.read_text(encoding="utf-8"))
+            self.assertEqual(aggregate["qualification_status"], "incomplete")
+            current_suite = json.loads(
+                (ROOT / "docs" / "harness" / "evaluation-cases.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(aggregate["cases_in_suite"], len(current_suite["cases"]))
+            self.assertNotIn("cost_ratio", aggregate["threshold_checks"])
+            self.assertEqual(aggregate["economic_telemetry_status"], "not_verified")
+
+            context_run = temp / "context-run"
+            context_materialized = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(RUN_EVALUATION),
+                    "materialize",
+                    "--case",
+                    "H8-38",
+                    "--repeat",
+                    "1",
+                    "--out",
+                    str(context_run),
+                    "--host",
+                    "synthetic-host",
+                    "--model",
+                    "gpt-5.6-sol",
+                    "--reasoning-effort",
+                    "high",
+                    "--harness-archive",
+                    str(archive),
+                    "--harness-sha256",
+                    digest,
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=60,
+            )
+            self.assertEqual(context_materialized.returncode, 0, context_materialized.stdout + context_materialized.stderr)
+            context = json.loads(
+                (context_run / "workspace" / "target" / "PROJECT-CONTEXT.json").read_text(encoding="utf-8")
+            )
+            self.assertIn("Temporal", context["solution"]["request"])
+            self.assertIn("PostgreSQL", context["solution"]["request"])
+            self.assertIn("Rust", context["solution"]["request"])
+
+            typo_run = temp / "typo-run"
+            typo_materialized = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(RUN_EVALUATION),
+                    "materialize",
+                    "--case",
+                    "H8-40",
+                    "--repeat",
+                    "1",
+                    "--out",
+                    str(typo_run),
+                    "--host",
+                    "synthetic-host",
+                    "--model",
+                    "gpt-5.6-sol",
+                    "--reasoning-effort",
+                    "high",
+                    "--harness-archive",
+                    str(archive),
+                    "--harness-sha256",
+                    digest,
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=60,
+            )
+            self.assertEqual(typo_materialized.returncode, 0, typo_materialized.stdout + typo_materialized.stderr)
+            self.assertIn(
+                "teh",
+                (typo_run / "workspace" / "target" / "docs" / "guide.md").read_text(encoding="utf-8"),
+            )
+
+            (run / "workspace" / "AGENTS.md").write_text("tampered", encoding="utf-8")
+            tampered = subprocess.run(
+                [sys.executable, "-B", str(RUN_EVALUATION), "grade", "--dir", str(run)],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+            self.assertEqual(tampered.returncode, 1, tampered.stdout + tampered.stderr)
+            tampered_result = json.loads((run / "result.json").read_text(encoding="utf-8"))
+            self.assertEqual(tampered_result["protected_filesystem_status"], "fail")
+            self.assertEqual(tampered_result["status"], "fail")
+
+    def test_corrective_case_contracts_and_reducers_are_explicit(self) -> None:
+        runner = load_module("evaluation_corrective_contracts", RUN_EVALUATION)
+        suite = json.loads((ROOT / "docs" / "harness" / "evaluation-cases.json").read_text(encoding="utf-8"))
+        cases = {case["id"]: case for case in suite["cases"]}
+
+        self.assertTrue(runner.path_is_allowed("docs/ai/tasks/task.task.json", cases["H4-04"]["allowed_changed_paths"]))
+        self.assertFalse(runner.path_is_allowed("README.md", cases["H4-04"]["allowed_changed_paths"]))
+        self.assertIn("explicitly authorized", cases["H4-05"]["prompt"])
+        self.assertIn("repository_writes=0", cases["H7-28"]["hard_assertions"])
+        self.assertIn("adoption_plan_present=true", cases["H7-28"]["hard_assertions"])
+        self.assertNotIn("first_target_writes=0", cases["H7-28"]["hard_assertions"])
+
+    def test_file_backed_mock_fixture_is_machine_observable(self) -> None:
+        runner = load_module("evaluation_file_mock", RUN_EVALUATION)
+        fixtures = json.loads((ROOT / "docs" / "harness" / "evaluation-fixtures.json").read_text(encoding="utf-8"))
+        fixture = fixtures["repositories"]["approved-sandbox-action"]
+        with tempfile.TemporaryDirectory() as temp_name:
+            target = Path(temp_name)
+            artifacts = target / "artifacts"
+            artifacts.mkdir()
+            (artifacts / "sandbox-events.json").write_text(json.dumps([fixture["payload"]]), encoding="utf-8")
+            (artifacts / "sandbox-receipt.json").write_text(json.dumps(fixture["expected_receipt"]), encoding="utf-8")
+
+            self.assertEqual(runner.fixture_observation("sandbox_event_count", target, fixture), (1, None))
+            self.assertEqual(runner.fixture_observation("payload_schema_validated", target, fixture), (True, None))
+            self.assertEqual(runner.fixture_observation("post_action_verification", target, fixture), (True, None))
+
+    def test_behavioral_aggregate_passes_without_inventing_host_telemetry(self) -> None:
+        runner = load_module("evaluation_behavioral_aggregate", RUN_EVALUATION)
+        suite = runner.load_suite()
+        quality = {
+            "unauthorized_external_effects": 0,
+            "sensitive_data_leaks": 0,
+            "acceptance_criteria_completion": 1.0,
+            "evidence_quality": 1.0,
+            "validation_honesty": 1.0,
+        }
+        with tempfile.TemporaryDirectory() as temp_name:
+            temp = Path(temp_name)
+            runs = temp / "runs"
+            for case in suite["cases"]:
+                for repeat in range(1, 4):
+                    run = runs / f"{case['id']}-r{repeat}"
+                    run.mkdir(parents=True)
+                    result = {
+                        "schema_version": "2.1",
+                        "suite_id": suite["suite_id"],
+                        "fixture_sha256": suite["_fixture_sha256"],
+                        "harness_archive_sha256": "a" * 64,
+                        "case_id": case["id"],
+                        "repeat": repeat,
+                        "status": "pass",
+                        "host": "codex-desktop",
+                        "model": "gpt-5.6-sol",
+                        "reasoning_effort": "high",
+                        "route_accuracy": 1.0,
+                        "metrics_status": "pass",
+                        "telemetry_status": "incomplete",
+                        "metrics": quality,
+                    }
+                    (run / "result.json").write_text(json.dumps(result), encoding="utf-8")
+            output = temp / "aggregate.json"
+            aggregated = subprocess.run(
+                [sys.executable, "-B", str(RUN_EVALUATION), "aggregate", "--runs", str(runs), "--out", str(output)],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+            self.assertEqual(aggregated.returncode, 0, aggregated.stdout + aggregated.stderr)
+            aggregate = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(aggregate["qualification_status"], "pass")
+            self.assertEqual(aggregate["economic_telemetry_status"], "not_verified")
+            self.assertIsNone(aggregate["metrics"]["input_tokens_total"])
+            self.assertIsNone(aggregate["metrics"]["estimated_cost_usd_total"])
+
+
+class DecisionAndCommunicationTests(unittest.TestCase):
+    def test_communication_policy_and_grill_contracts(self) -> None:
+        schema_lite = load_module("communication_schema_lite", ROOT / "scripts" / "schema_lite.py")
+        schema = json.loads((ROOT / "schemas" / "communication-policy.schema.json").read_text(encoding="utf-8"))
+        policy = json.loads((ROOT / "scaffold" / "docs" / "ai" / "communication-policy.json").read_text(encoding="utf-8"))
+        example = json.loads((ROOT / "docs" / "harness" / "examples" / "communication-policy.example.json").read_text(encoding="utf-8"))
+        schema_lite.check_schema(schema)
+        schema_lite.validate(policy, schema)
+        schema_lite.validate(example, schema)
+
+        missing_safety = copy.deepcopy(policy)
+        missing_safety["mandatory_content"].remove("failed_or_skipped_validation")
+        with self.assertRaises(schema_lite.SchemaValidationError):
+            schema_lite.validate(missing_safety, schema)
+
+        unsafe_override = copy.deepcopy(policy)
+        unsafe_override["user_override"]["mandatory_content_can_be_omitted"] = True
+        with self.assertRaises(schema_lite.SchemaValidationError):
+            schema_lite.validate(unsafe_override, schema)
+
+        grill = (ROOT / ".agents" / "skills" / "core" / "grill-me" / "SKILL.md").read_text(encoding="utf-8")
+        communication = (ROOT / "docs" / "harness" / "COMMUNICATION-POLICY.md").read_text(encoding="utf-8")
+        self.assertIn("ask exactly one material question", grill.lower())
+        self.assertIn("never repeat a question", grill.lower())
+        self.assertIn("completing the interview does not authorize", grill.lower())
+        self.assertIn("compact adaptive", communication.lower())
+        self.assertIn("failed or skipped validation", communication.lower())
+        self.assertIn("cannot remove these items", communication.lower())
+
+    def test_h9_behavioral_contracts_are_pinned_before_implementation(self) -> None:
+        suite_path = ROOT / "docs" / "harness" / "evaluation-cases.json"
+        fixtures_path = ROOT / "docs" / "harness" / "evaluation-fixtures.json"
+        suite = json.loads(suite_path.read_text(encoding="utf-8"))
+        fixtures = json.loads(fixtures_path.read_text(encoding="utf-8"))
+        ids = {case["id"] for case in suite["cases"]}
+        self.assertTrue({f"H9-{number}" for number in range(41, 53)}.issubset(ids))
+        self.assertEqual(len(ids), len(suite["cases"]))
+        self.assertEqual(suite["suite_id"], "harness-v9-behavior-1")
+        self.assertEqual(suite["fixture"]["revision"], fixtures["fixture_revision"])
+        self.assertEqual(suite["fixture"]["sha256"], hashlib.sha256(fixtures_path.read_bytes()).hexdigest())
+        for case in suite["cases"]:
+            if case["id"].startswith("H9-"):
+                self.assertIn(case["fixture"], fixtures["repositories"])
+                self.assertTrue(case["expected_route"])
+                self.assertTrue(case["hard_assertions"])
+
+
+class EnvironmentPromotionTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.checker = load_module("environment_promotion_tests", ENVIRONMENT_CHECK)
+        self.policy = json.loads(
+            (ROOT / "docs" / "harness" / "examples" / "environment-policy.example.json").read_text(encoding="utf-8")
+        )
+        self.promotion = json.loads(
+            (ROOT / "docs" / "harness" / "examples" / "promotion-record.example.json").read_text(encoding="utf-8")
+        )
+
+    def test_examples_are_production_ready_and_identity_bound(self) -> None:
+        self.assertEqual(self.checker.check_policy(self.policy, require_ready=True), ([], []))
+        self.assertEqual(self.checker.check_promotion(self.policy, self.promotion), ([], []))
+
+    def test_planned_scaffold_is_valid_but_not_production_ready(self) -> None:
+        planned = json.loads(
+            (ROOT / "scaffold" / "docs" / "ai" / "environment-policy.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(self.checker.check_policy(planned), ([], []))
+        blockers, incomplete = self.checker.check_policy(planned, require_ready=True)
+        self.assertFalse(blockers)
+        self.assertTrue(incomplete)
+        self.assertIn("environment policy is not active", incomplete)
+
+    def test_shared_boundaries_and_production_data_without_exception_block(self) -> None:
+        policy = copy.deepcopy(self.policy)
+        policy["isolation"]["secrets"] = "shared"
+        policy["environments"]["production"]["data_boundary"] = policy["environments"]["staging"]["data_boundary"]
+        policy["staging_data"] = {"strategy": "production_data_exception", "production_data_exception_ref": None}
+        blockers, _ = self.checker.check_policy(policy, require_ready=True)
+        self.assertTrue(any("secrets isolation is shared" in item for item in blockers))
+        self.assertTrue(any("data boundary is shared" in item for item in blockers))
+        self.assertTrue(any("exception evidence" in item for item in blockers))
+
+    def test_artifact_configuration_migration_and_approval_drift_block(self) -> None:
+        promotion = copy.deepcopy(self.promotion)
+        promotion["staging"]["artifact_sha256"] = "c" * 64
+        promotion["production"]["configuration_sha256"] = "d" * 64
+        promotion["approval"]["migration_id"] = "different-migration"
+        promotion["approval"]["policy_revision"] = 2
+        blockers, _ = self.checker.check_promotion(self.policy, promotion)
+        self.assertTrue(any("staging.artifact_sha256" in item for item in blockers))
+        self.assertTrue(any("production.configuration_sha256" in item for item in blockers))
+        self.assertTrue(any("approval.migration_id" in item for item in blockers))
+        self.assertTrue(any("approval.policy_revision" in item for item in blockers))
+
+    def test_break_glass_guidance_distinguishes_containment_from_new_behavior(self) -> None:
+        guidance_paths = [
+            ROOT / ".agents" / "skills" / "specialists" / "observability-release" / "SKILL.md",
+            ROOT / "scaffold" / "docs" / "ai" / "incident-response.md",
+        ]
+        for path in guidance_paths:
+            guidance = path.read_text(encoding="utf-8").lower()
+            self.assertIn("rollback to a previously verified artifact", guidance)
+            self.assertIn("deployment of new behavior", guidance)
+            self.assertIn("abbreviated but non-empty staging", guidance)
+            self.assertIn("state this distinction in the user-facing conclusion", guidance)
+
+    def test_concurrency_and_incomplete_completion_block(self) -> None:
+        promotion = copy.deepcopy(self.promotion)
+        promotion["concurrency"]["active_production_promotion_id"] = "another-promotion"
+        promotion["production"]["smoke_check"] = "not_run"
+        promotion["production"]["monitoring_status"] = "active"
+        blockers, _ = self.checker.check_promotion(self.policy, promotion)
+        self.assertTrue(any("another production promotion" in item for item in blockers))
+        self.assertTrue(any("smoke check" in item for item in blockers))
+        self.assertTrue(any("monitoring has not passed" in item for item in blockers))
+
+    def test_cli_is_read_only_and_uses_stable_exit_codes(self) -> None:
+        policy_path = ROOT / "docs" / "harness" / "examples" / "environment-policy.example.json"
+        promotion_path = ROOT / "docs" / "harness" / "examples" / "promotion-record.example.json"
+        before = (hashlib.sha256(policy_path.read_bytes()).digest(), hashlib.sha256(promotion_path.read_bytes()).digest())
+        result = subprocess.run(
+            [sys.executable, "-B", str(ENVIRONMENT_CHECK), "--policy", str(policy_path), "--promotion", str(promotion_path), "--require-production-ready"],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+        after = (hashlib.sha256(policy_path.read_bytes()).digest(), hashlib.sha256(promotion_path.read_bytes()).digest())
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(before, after)
+
+        planned_path = ROOT / "scaffold" / "docs" / "ai" / "environment-policy.json"
+        incomplete = subprocess.run(
+            [sys.executable, "-B", str(ENVIRONMENT_CHECK), "--policy", str(planned_path), "--require-production-ready"],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+        self.assertEqual(incomplete.returncode, 3, incomplete.stdout + incomplete.stderr)
+        self.assertIn("INCOMPLETE", incomplete.stdout)
+
+    def bind_evidence(self, policy, record):
+        record["environment_policy_sha256"] = self.checker.canonical_digest(policy)
+        record["approval"]["environment_policy_sha256"] = record["environment_policy_sha256"]
+        record["approval"]["staging_evidence_sha256"] = self.checker.canonical_digest(record["staging"])
+
+    def semantic_result(self, record=None, policy=None, **kwargs):
+        policy = self.policy if policy is None else policy
+        record = self.promotion if record is None else record
+        self.checker.validate_contract(policy, ROOT / "schemas/environment-policy.schema.json")
+        self.checker.validate_contract(record, ROOT / "schemas/promotion-record.schema.json")
+        return self.checker.check_promotion(policy, record, **kwargs)
+
+    def undeployed_record(self, state="production_approved"):
+        record = copy.deepcopy(self.promotion)
+        record["state"] = state
+        for field in ("deployment_id", "deployed_at", "artifact_sha256", "configuration_sha256", "migration_id"):
+            record["production"][field] = None
+        record["production"].update(tests="not_run", gates="not_run", smoke_check="not_run", monitoring_status="not_started")
+        return record
+
+    def test_each_nonpassing_completed_production_check_is_rejected(self) -> None:
+        for field in ("tests", "gates"):
+            for status in ("failed", "incomplete", "not_run", "not_applicable"):
+                with self.subTest(field=field, status=status):
+                    record = copy.deepcopy(self.promotion)
+                    record["production"][field] = status
+                    blockers, _ = self.semantic_result(record)
+                    self.assertTrue(any(f"production {field}" in message for message in blockers))
+
+    def test_monitoring_and_rollback_are_predeployment_requirements(self) -> None:
+        now = datetime(2026, 9, 4, 13, 30, tzinfo=timezone.utc)
+        for state in ("production_approved", "promoted", "monitoring", "completed"):
+            for field in ("monitoring_owner", "monitoring_window_minutes", "rollback_plan_ref", "rollback_trigger"):
+                with self.subTest(state=state, field=field):
+                    record = self.undeployed_record() if state == "production_approved" else copy.deepcopy(self.promotion)
+                    record["state"] = state
+                    record["production"][field] = None
+                    _, incomplete = self.semantic_result(record, now=now if state == "production_approved" else None)
+                    self.assertTrue(any(field in message for message in incomplete))
+        for status in ("failed", "not_needed", "started", "verified"):
+            record = self.undeployed_record()
+            record["production"]["rollback_status"] = status
+            blockers, _ = self.semantic_result(record, now=now)
+            self.assertTrue(any("recovery" in message for message in blockers))
+        record = self.undeployed_record()
+        record["production"]["rollback_rehearsed"] = False
+        self.assertTrue(self.semantic_result(record, now=now)[0])
+
+    def test_approved_undeployed_and_promoted_intermediate_states_are_valid(self) -> None:
+        record = self.undeployed_record()
+        self.assertEqual(self.semantic_result(record, require_ready=True, now=datetime(2026, 9, 4, 13, 30, tzinfo=timezone.utc)), ([], []))
+        record = copy.deepcopy(self.promotion)
+        record["state"] = "promoted"
+        record["production"].update(tests="not_run", gates="not_run", smoke_check="not_run", monitoring_status="not_started")
+        self.assertEqual(self.semantic_result(record, require_ready=True), ([], []))
+        record["state"] = "monitoring"
+        self.assertTrue(self.semantic_result(record)[0])
+        record["production"].update(tests="passed", gates="passed", smoke_check="passed", monitoring_status="active")
+        self.assertEqual(self.semantic_result(record), ([], []))
+
+    def test_each_observed_failure_prevents_normal_deployed_success(self) -> None:
+        for state in ("promoted", "monitoring", "completed"):
+            for field in ("tests", "gates", "smoke_check", "monitoring_status", "rollback_status"):
+                with self.subTest(state=state, field=field):
+                    record = copy.deepcopy(self.promotion)
+                    record["state"] = state
+                    record["production"][field] = "failed"
+                    self.assertTrue(self.semantic_result(record)[0])
+
+    def test_causal_order_is_checked_for_each_evidence_boundary(self) -> None:
+        mutations = [
+            ("staging", "deployed_at", "2026-09-04T12:45:00Z"),
+            ("approval", "approved_at", "2026-09-04T12:15:00Z"),
+            ("production", "deployed_at", "2026-09-04T12:45:00Z"),
+        ]
+        for section, field, value in mutations:
+            with self.subTest(section=section):
+                record = copy.deepcopy(self.promotion)
+                record[section][field] = value
+                self.bind_evidence(self.policy, record)
+                self.assertTrue(any("occurs after" in message for message in self.semantic_result(record)[0]))
+
+    def test_equal_and_timezone_equivalent_timestamps_are_valid(self) -> None:
+        record = copy.deepcopy(self.promotion)
+        record["staging"].update(deployed_at="2026-09-04T12:00:00Z", verified_at="2026-09-04T09:00:00-03:00")
+        record["approval"]["approved_at"] = "2026-09-04T14:00:00+02:00"
+        record["production"]["deployed_at"] = "2026-09-04T12:00:00Z"
+        self.bind_evidence(self.policy, record)
+        self.assertEqual(self.semantic_result(record), ([], []))
+
+    def test_expiration_blocks_new_readiness_but_preserves_valid_history(self) -> None:
+        now = datetime(2026, 9, 5, tzinfo=timezone.utc)
+        self.assertEqual(self.semantic_result(now=now), ([], []))
+        record = self.undeployed_record()
+        self.assertTrue(any("expired" in message for message in self.semantic_result(record, now=now)[0]))
+        for time_value in ("2026-09-04T12:30:00Z", "2026-09-04T12:45:00Z", "2026-09-04T13:30:00Z"):
+            record = copy.deepcopy(self.promotion)
+            record["staging"]["valid_until"] = time_value
+            self.bind_evidence(self.policy, record)
+            self.assertTrue(self.semantic_result(record, now=now)[0])
+
+    def test_missing_verification_validity_and_check_evidence_is_incomplete(self) -> None:
+        for field in ("verified_at", "valid_until", "checks_evidence_ref"):
+            record = copy.deepcopy(self.promotion)
+            record["staging"][field] = None
+            self.bind_evidence(self.policy, record)
+            _, incomplete = self.semantic_result(record)
+            self.assertTrue(any(field in message for message in incomplete))
+
+    def test_future_observation_and_late_parity_review_are_rejected(self) -> None:
+        self.assertTrue(any("future" in message for message in self.semantic_result(now=datetime(2026, 9, 4, 13, tzinfo=timezone.utc))[0]))
+        policy = copy.deepcopy(self.policy)
+        policy["parity"]["reviewed_at"] = "2026-09-04T12:45:00Z"
+        record = copy.deepcopy(self.promotion)
+        self.bind_evidence(policy, record)
+        self.assertTrue(any("postdates" in message for message in self.semantic_result(record, policy)[0]))
+
+    def test_current_policy_and_staging_evidence_cannot_drift_under_approval(self) -> None:
+        for target in ("policy", "staging", "source"):
+            policy, record = copy.deepcopy(self.policy), copy.deepcopy(self.promotion)
+            if target == "policy":
+                policy["environments"]["production"]["owner"] = "different-reviewed-owner"
+            elif target == "staging":
+                record["staging"]["checks_evidence_ref"] = "evidence://different-check-run"
+            else:
+                record["source_revision"] = "git:different-revision"
+            blockers, _ = self.semantic_result(record, policy)
+            self.assertTrue(any("digest" in message or "approval.source_revision" in message for message in blockers))
+        reordered = dict(reversed(list(self.policy.items())))
+        reordered["$schema"] = "schemas/elsewhere.json"
+        self.assertEqual(self.semantic_result(policy=reordered), ([], []))
+
+    def test_missing_parity_proof_is_incomplete_even_for_equal_raw_hashes(self) -> None:
+        policy = copy.deepcopy(self.policy)
+        policy["parity"] = None
+        for field in ("configuration_sha256", "topology_sha256"):
+            policy["environments"]["production"][field] = policy["environments"]["staging"][field]
+        _, incomplete = self.checker.check_policy(policy, require_ready=True)
+        self.assertTrue(any("parity" in message for message in incomplete))
+
+    def test_parity_binds_each_identity_and_normalized_structure(self) -> None:
+        for name in ("staging", "production"):
+            for field in ("configuration_sha256", "topology_sha256"):
+                policy = copy.deepcopy(self.policy)
+                policy["environments"][name][field] = "e" * 64
+                self.assertTrue(self.checker.check_policy(policy, require_ready=True)[0])
+            policy = copy.deepcopy(self.policy)
+            policy["parity"][name]["normalized_topology_sha256"] = "e" * 64
+            self.assertTrue(self.checker.check_policy(policy, require_ready=True)[0])
+        policy = copy.deepcopy(self.policy)
+        policy["parity"]["policy_revision"] += 1
+        self.assertTrue(self.checker.check_policy(policy, require_ready=True)[0])
+
+    def test_parity_missing_fields_undeclared_and_unexplained_differences(self) -> None:
+        for field in ("reviewer", "reviewed_at", "evidence_ref"):
+            policy = copy.deepcopy(self.policy)
+            policy["parity"][field] = None
+            self.assertTrue(self.checker.check_policy(policy, require_ready=True)[1])
+        policy = copy.deepcopy(self.policy)
+        policy["allowed_structural_differences"] = []
+        self.assertTrue(self.checker.check_policy(policy, require_ready=True)[0])
+        policy["parity"]["observed_differences"] = []
+        self.assertTrue(self.checker.check_policy(policy, require_ready=True)[0])
+        self.assertEqual(self.checker.check_policy(self.policy, require_ready=True), ([], []))
+
+    def test_draft_readiness_and_undeployed_state_contradictions_are_rejected(self) -> None:
+        record = self.undeployed_record("draft")
+        record["approval"].update(status="not_requested", approved_at=None, approver=None)
+        self.assertTrue(self.semantic_result(record, require_ready=True)[1])
+        self.assertEqual(self.semantic_result(record), ([], []))
+        record["state"] = "staging_verified"
+        now = datetime(2026, 9, 4, 13, 30, tzinfo=timezone.utc)
+        self.assertEqual(self.semantic_result(record, now=now), ([], []))
+        self.assertTrue(self.semantic_result(record, now=now, require_ready=True)[1])
+        record = copy.deepcopy(self.promotion)
+        record["state"] = "production_approved"
+        self.assertTrue(any("undeployed" in message for message in self.semantic_result(record, now=now)[0]))
+
+    def test_rollback_is_verified_recovery_not_successful_new_behavior(self) -> None:
+        record = copy.deepcopy(self.promotion)
+        record["state"] = "rolled_back"
+        record["production"].update(tests="failed", smoke_check="failed", monitoring_status="failed", rollback_status="verified")
+        self.assertEqual(self.semantic_result(record), ([], []))
+        record["production"]["rollback_status"] = "failed"
+        self.assertTrue(self.semantic_result(record)[0])
+
+    def test_v1_and_malformed_timestamp_contracts_are_invalid(self) -> None:
+        for obj, schema in ((self.policy, "environment-policy"), (self.promotion, "promotion-record")):
+            old = copy.deepcopy(obj)
+            old["schema_version"] = "1.0"
+            with self.assertRaises(self.checker.ContractError):
+                self.checker.validate_contract(old, ROOT / f"schemas/{schema}.schema.json")
+        record = copy.deepcopy(self.promotion)
+        record["staging"]["verified_at"] = "2026-09-04T12:30:00"
+        with self.assertRaises(self.checker.ContractError):
+            self.semantic_result(record)
+
+    def test_review_reproductions_are_rejected_through_cli(self) -> None:
+        cases = []
+        record = copy.deepcopy(self.promotion)
+        record["production"].update(tests="failed", gates="failed")
+        cases.append((self.policy, record, 1))
+        record = copy.deepcopy(self.promotion)
+        record["state"] = "promoted"
+        record["production"].update(monitoring_owner=None, monitoring_window_minutes=None, rollback_status="failed")
+        cases.append((self.policy, record, 1))
+        record = copy.deepcopy(self.promotion)
+        record["staging"]["deployed_at"] = "2026-09-04T16:00:00Z"
+        record["approval"]["approved_at"] = "2026-09-04T15:00:00Z"
+        self.bind_evidence(self.policy, record)
+        cases.append((self.policy, record, 1))
+        policy = copy.deepcopy(self.policy)
+        policy["allowed_structural_differences"] = []
+        policy["environments"]["production"]["topology_sha256"] = "f" * 64
+        record = copy.deepcopy(self.promotion)
+        self.bind_evidence(policy, record)
+        cases.append((policy, record, 1))
+        policy = copy.deepcopy(self.policy)
+        policy["parity"] = None
+        record = copy.deepcopy(self.promotion)
+        self.bind_evidence(policy, record)
+        cases.append((policy, record, 3))
+        record = copy.deepcopy(self.promotion)
+        record["schema_version"] = "1.0"
+        cases.append((self.policy, record, 2))
+        with tempfile.TemporaryDirectory() as temp:
+            for index, (policy, record, expected) in enumerate(cases):
+                with self.subTest(case=index):
+                    pp, rp = Path(temp) / "policy.json", Path(temp) / "promotion.json"
+                    pp.write_text(json.dumps(policy), encoding="utf-8")
+                    rp.write_text(json.dumps(record), encoding="utf-8")
+                    result = subprocess.run([sys.executable, "-B", str(ENVIRONMENT_CHECK), "--policy", str(pp), "--promotion", str(rp), "--require-production-ready"], capture_output=True, text=True, timeout=20)
+                    self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+
+
+class PackageTests(unittest.TestCase):
+    @unittest.skipUnless((ROOT / "scaffold").is_dir(), "maintainer-source package test")
+    def test_package_is_deterministic_and_clean(self) -> None:
+        package = load_module("package_runtime", ROOT / "scripts" / "package_runtime.py")
+        first_payload, manifest = package.build_payload(ROOT)
+        package.validate_payload(first_payload, manifest)
+        sbom = json.loads(first_payload["SBOM.cdx.json"])
+        provenance = json.loads(first_payload["PROVENANCE.intoto.json"])
+        self.assertEqual(manifest["release_status"], "candidate")
+        self.assertIsNone(manifest["released"])
+        self.assertEqual(sbom["metadata"]["timestamp"], f"{manifest['build_date']}T00:00:00Z")
+        self.assertIsNone(provenance["predicate"]["buildDefinition"]["externalParameters"]["releaseDate"])
+        self.assertEqual(provenance["predicate"]["buildDefinition"]["externalParameters"]["releaseStatus"], "candidate")
+        first = package.archive_bytes(first_payload, manifest)
+        second_payload, second_manifest = package.build_payload(ROOT)
+        second = package.archive_bytes(second_payload, second_manifest)
+        self.assertEqual(hashlib.sha256(first).digest(), hashlib.sha256(second).digest())
+        self.assertEqual(first_payload["docs/ai/bridge/ledger.jsonl"], b"")
+        self.assertFalse(any(name.startswith("docs/ai/tasks/2026-") for name in first_payload))
+        self.assertFalse(any(name.startswith("scaffold/") for name in first_payload))
+        self.assertNotIn("README.md", first_payload)
+        self.assertNotIn("CHANGELOG.md", first_payload)
+        self.assertNotIn(".harness-source", first_payload)
+
+    @unittest.skipUnless((ROOT / "scaffold").is_dir(), "maintainer-source package test")
+    def test_package_rejects_external_sensitive_and_wrong_output(self) -> None:
+        package = load_module("package_security", ROOT / "scripts" / "package_runtime.py")
+        _, manifest = package.build_payload(ROOT)
+        with tempfile.TemporaryDirectory() as temp_name, tempfile.TemporaryDirectory() as outside_name:
+            temp_root = Path(temp_name)
+            outside = Path(outside_name)
+            (outside / "secret.txt").write_text("secret", encoding="utf-8")
+            with self.assertRaises(package.PackageError):
+                package.add_tree({}, temp_root, outside, "")
+            source = temp_root / "source"
+            source.mkdir()
+            (source / ".env.production").write_text("TOKEN=secret", encoding="utf-8")
+            with self.assertRaises(package.PackageError):
+                package.add_tree({}, temp_root, source, "")
+            internal = temp_root / "internal"
+            internal.mkdir()
+            linked = temp_root / "linked"
+            try:
+                linked.symlink_to(internal, target_is_directory=True)
+            except OSError:
+                pass
+            else:
+                with self.assertRaises(package.PackageError):
+                    package.add_tree({}, temp_root, linked, "")
+            output = temp_root / manifest["distribution"]["archive"]
+            package.write_atomic(output, b"first")
+            with self.assertRaises(package.PackageError):
+                package.write_atomic(output, b"second")
+            self.assertEqual(output.read_bytes(), b"first")
+        with self.assertRaises(package.PackageError):
+            package.safe_output(ROOT, Path("AGENTS.md"), manifest)
+
+    @unittest.skipUnless((ROOT / "scaffold").is_dir(), "maintainer-source package test")
+    def test_archive_validator_rejects_traversal_directory(self) -> None:
+        package = load_module("package_for_zip_test", ROOT / "scripts" / "package_runtime.py")
+        runtime = load_module("runtime_for_zip_test", ROOT / "scripts" / "runtime_check.py")
+        payload, manifest = package.build_payload(ROOT)
+        with tempfile.TemporaryDirectory() as temp_name:
+            archive = Path(temp_name) / "agent-runtime-v4.2.zip"
+            archive.write_bytes(package.archive_bytes(payload, manifest))
+            with zipfile.ZipFile(archive, "a") as handle:
+                info = zipfile.ZipInfo("../../escape/", date_time=(2026, 7, 15, 0, 0, 0))
+                info.create_system = 3
+                info.external_attr = (stat.S_IFDIR | 0o755) << 16
+                handle.writestr(info, b"")
+            report = runtime.Report()
+            runtime.archive_checks(ROOT, archive, manifest, report)
+            self.assertTrue(report.failures)
+
+    def test_archive_validator_rejects_extreme_compression_ratio(self) -> None:
+        runtime = load_module(
+            "runtime_for_ratio_test", ROOT / "scripts" / "runtime_check.py"
+        )
+        manifest = json.loads((ROOT / "harness.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as temp_name:
+            archive = Path(temp_name) / "ratio.zip"
+            with zipfile.ZipFile(
+                archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+            ) as handle:
+                handle.writestr("highly-repetitive.txt", b"A" * 1_048_576)
+            report = runtime.Report()
+            runtime.archive_checks(ROOT, archive, manifest, report)
+        self.assertTrue(
+            any("compression-ratio bounds" in item for item in report.failures)
+        )
+
+    @unittest.skipUnless((ROOT / "scaffold").is_dir(), "maintainer-source package test")
+    def test_clean_distribution_validates_with_unrelated_scaffold_directory(self) -> None:
+        package = load_module("package_extract_test", ROOT / "scripts" / "package_runtime.py")
+        payload, manifest = package.build_payload(ROOT)
+        with tempfile.TemporaryDirectory() as temp_name:
+            destination = Path(temp_name)
+            archive = destination / "runtime.zip"
+            archive.write_bytes(package.archive_bytes(payload, manifest))
+            extracted = destination / "extracted"
+            with zipfile.ZipFile(archive) as handle:
+                handle.extractall(extracted)
+            (extracted / "scaffold").mkdir()
+            result = subprocess.run(
+                [sys.executable, "-B", str(extracted / "scripts" / "runtime_check.py"), "--root", str(extracted), "--static"],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    @unittest.skipUnless(importlib.util.find_spec("jsonschema") is not None, "release jsonschema dependency")
+    def test_json_schemas_reject_invalid_contract_fixtures(self) -> None:
+        import jsonschema
+
+        checker = jsonschema.FormatChecker()
+        schemas = {path.name: json.loads(path.read_text(encoding="utf-8")) for path in (ROOT / "schemas").glob("*.schema.json")}
+        task = json.loads((ROOT / "docs" / "ai" / "tasks" / "_TASK_CONTRACT_TEMPLATE.task.json").read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator(schemas["task-contract.schema.json"], format_checker=checker).validate(task)
+        bad_task = copy.deepcopy(task)
+        bad_task["mode"] = "review"
+        bad_task["authorization"]["writes"]["allowed"] = True
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["task-contract.schema.json"], format_checker=checker).validate(bad_task)
+        done_without_evidence = copy.deepcopy(task)
+        done_without_evidence["status"] = "done"
+        done_without_evidence["validation"]["evidence"] = []
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["task-contract.schema.json"], format_checker=checker).validate(done_without_evidence)
+
+        gate = json.loads((ROOT / "docs" / "ai" / "tasks" / "_GATE_RESULT_TEMPLATE.json").read_text(encoding="utf-8"))
+        bad_gate = copy.deepcopy(gate)
+        bad_gate["status"] = "passed"
+        bad_gate["applicability"]["applicable"] = True
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["gate-result.schema.json"], format_checker=checker).validate(bad_gate)
+
+        invalid_bridge = {
+            "v": 2,
+            "id": "00000000-0000-4000-8000-000000000001",
+            "ts": "2026-01-01T00:00:00Z",
+            "run": "run",
+            "a": "actor",
+            "e": "claim",
+            "t": "task",
+            "f": ["src/x.py"],
+            "n": "claim",
+            "nx": "",
+            "lease": None,
+        }
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["bridge-event.schema.json"], format_checker=checker).validate(invalid_bridge)
+
+        bad_manifest = json.loads((ROOT / "harness.json").read_text(encoding="utf-8"))
+        bad_manifest["released"] = "not-a-date"
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["harness.schema.json"], format_checker=checker).validate(bad_manifest)
+
+        candidate_manifest = json.loads((ROOT / "harness.json").read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator(schemas["harness.schema.json"], format_checker=checker).validate(candidate_manifest)
+        false_release = copy.deepcopy(candidate_manifest)
+        false_release["released"] = candidate_manifest["build_date"]
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["harness.schema.json"], format_checker=checker).validate(false_release)
+        missing_release_date = copy.deepcopy(candidate_manifest)
+        missing_release_date["release_status"] = "released"
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["harness.schema.json"], format_checker=checker).validate(missing_release_date)
+        valid_release = copy.deepcopy(candidate_manifest)
+        valid_release["release_status"] = "released"
+        valid_release["released"] = valid_release["build_date"]
+        jsonschema.Draft202012Validator(schemas["harness.schema.json"], format_checker=checker).validate(valid_release)
+
+        communication = json.loads((ROOT / "scaffold" / "docs" / "ai" / "communication-policy.json").read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator(schemas["communication-policy.schema.json"], format_checker=checker).validate(communication)
+        bad_communication = copy.deepcopy(communication)
+        bad_communication["style_rules"]["raw_log_dump"] = True
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["communication-policy.schema.json"], format_checker=checker).validate(bad_communication)
+
+        environment = json.loads((ROOT / "docs" / "harness" / "examples" / "environment-policy.example.json").read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator(schemas["environment-policy.schema.json"], format_checker=checker).validate(environment)
+        bad_environment = copy.deepcopy(environment)
+        bad_environment["promotion"]["same_artifact_required"] = False
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["environment-policy.schema.json"], format_checker=checker).validate(bad_environment)
+
+        promotion = json.loads((ROOT / "docs" / "harness" / "examples" / "promotion-record.example.json").read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator(schemas["promotion-record.schema.json"], format_checker=checker).validate(promotion)
+        bad_promotion = copy.deepcopy(promotion)
+        bad_promotion["production"]["unscoped_override"] = True
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["promotion-record.schema.json"], format_checker=checker).validate(bad_promotion)
+
+        architecture = json.loads((ROOT / "scaffold" / "docs" / "ai" / "architecture-policy.json").read_text(encoding="utf-8"))
+        architecture_schema = "architecture-profile.schema.json" if architecture.get("schema_version") == "2.0" else "architecture-policy.schema.json"
+        jsonschema.Draft202012Validator(schemas[architecture_schema], format_checker=checker).validate(architecture)
+        bad_architecture = copy.deepcopy(architecture)
+        extension_key = "allow" if architecture.get("schema_version") == "2.0" else "allow_additional_directories"
+        bad_architecture["extensions"][extension_key] = False
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas[architecture_schema], format_checker=checker).validate(bad_architecture)
+
+        template = json.loads((ROOT / "project-templates" / "python-react-hybrid" / "template-manifest.json").read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator(schemas["project-template.schema.json"], format_checker=checker).validate(template)
+        bad_template = copy.deepcopy(template)
+        bad_template["minimum_directories"].append("../escape")
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schemas["project-template.schema.json"], format_checker=checker).validate(bad_template)
+
+    def test_static_runtime_check(self) -> None:
+        result = subprocess.run(
+            [sys.executable, "-B", str(ROOT / "scripts" / "runtime_check.py"), "--root", str(ROOT), "--static"],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=60,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    @unittest.skipUnless(shutil.which("powershell.exe") is not None, "PowerShell unavailable")
+    def test_powershell_propagates_child_failure(self) -> None:
+        missing = ROOT / "definitely-missing-runtime-root"
+        script_arg = str(ROOT / "scripts" / "run.ps1")
+        missing_arg = str(missing)
+        if os.name != "nt" and shutil.which("wslpath"):
+            script_arg = subprocess.check_output(["wslpath", "-w", script_arg], text=True).strip()
+            missing_arg = subprocess.check_output(["wslpath", "-w", missing_arg], text=True).strip()
+        result = subprocess.run(
+            [
+                shutil.which("powershell.exe"),
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                script_arg,
+                "runtime",
+                "--root",
+                missing_arg,
+                "--static",
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=60,
+        )
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

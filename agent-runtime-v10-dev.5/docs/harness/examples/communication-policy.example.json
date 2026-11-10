@@ -1,0 +1,59 @@
+{
+  "$schema": "../../../schemas/communication-policy.schema.json",
+  "schema_version": "2.0",
+  "status": "active",
+  "default_profile": "compact_adaptive",
+  "profiles": {
+    "compact": {
+      "purpose": "Short result-first answers for simple or low-risk work.",
+      "detail": "minimal"
+    },
+    "standard": {
+      "purpose": "Balanced context for decisions and normal implementation review.",
+      "detail": "balanced"
+    },
+    "deep": {
+      "purpose": "Thorough evidence for audits, incidents, production, and explicit requests.",
+      "detail": "thorough"
+    }
+  },
+  "expansion_triggers": [
+    "high_or_critical_risk",
+    "production_effect",
+    "destructive_effect",
+    "failed_or_incomplete_validation",
+    "pending_approval",
+    "difficult_reversal",
+    "incident_or_recovery",
+    "explicit_user_request"
+  ],
+  "mandatory_content": [
+    "outcome",
+    "required_decision_or_action",
+    "blockers",
+    "failed_or_skipped_validation",
+    "high_or_critical_risks",
+    "production_or_destructive_effects",
+    "approval_state",
+    "changed_files",
+    "material_pending_work"
+  ],
+  "style_rules": {
+    "result_first": true,
+    "progressive_disclosure": true,
+    "repeat_final_summary": false,
+    "raw_log_dump": false,
+    "hard_word_limit": false,
+    "plain_language": true,
+    "one_idea_per_paragraph": true,
+    "safety_over_brevity": true
+  },
+  "user_override": {
+    "allowed_profiles": [
+      "compact",
+      "standard",
+      "deep"
+    ],
+    "mandatory_content_can_be_omitted": false
+  }
+}

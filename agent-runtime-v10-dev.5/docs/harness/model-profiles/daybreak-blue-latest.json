@@ -1,0 +1,10 @@
+{
+  "$schema": "../../schemas/model-capability-profile.schema.json",
+  "schema_version": "1.0", "profile_id": "openai-daybreak-blue", "provider": "OpenAI", "model": "daybreak-blue-latest",
+  "purpose": "Optional profile with safeguards calibrated for authorized defensive cybersecurity work.", "status": "optional", "checked_at": "2026-08-24",
+  "access": {"separate_provisioning": true, "detect_before_use": true, "never_infer": true},
+  "capabilities": {"reasoning_efforts": [], "tools": ["function calling", "web search", "file search", "code interpreter", "hosted shell", "apply patch", "skills", "computer use", "MCP", "tool search"], "structured_outputs": true, "constraints": ["Requires separate approval and provisioning.", "Does not authorize offensive, destructive, production, public, or ambiguously owned targets.", "The Harness controlled-adversarial-testing policy remains authoritative."]},
+  "budgets": {"tokens": "Set per authorized defensive task.", "latency": "Set per authorized defensive task.", "tool_steps": "Bound by the target authorization and task contract.", "retries": "Bound and stop on scope, authorization, or stability mismatch.", "cost": "Verify current pricing and volume before paid execution."},
+  "fallback": {"behavior": "Use an approved general model for ordinary defensive guidance or report that Daybreak access is unavailable; never imply equivalent access.", "approved_profile_required": true},
+  "sources": [{"url": "https://developers.openai.com/api/docs/models/daybreak-blue-latest", "as_of": "2026-08-24"}]
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../schemas/solution-decision.schema.json",
+  "schema_version": "2.0",
+  "decision_id": "example-crm-sync",
+  "status": "draft",
+  "workload": "Synchronize approved CRM contacts with a mailing provider.",
+  "selection": {"user_choice_known": false, "recommendation_required": true, "candidates": ["custom code", "workflow automation", "managed integration service"], "rationale": "Compare ownership, connector fit, recovery, security, team operations, and cost before the user chooses."},
+  "components": [
+    {"id": "crm", "category": "saas", "technology": "user-selected CRM", "responsibilities": ["Own contact consent and source records"], "authority": "authoritative", "system_of_record": "CRM contact store", "owner": "CRM owner", "interfaces": ["versioned contact API"]},
+    {"id": "sync", "category": "workflow_automation", "technology": "user-selected automation tool", "responsibilities": ["Coordinate bounded synchronization"], "authority": "orchestration", "system_of_record": null, "owner": "integration owner", "interfaces": ["CRM API", "mailing API"]}
+  ],
+  "contracts": {"input_schema": "versioned contact event", "output_schema": "versioned sync result", "versioning": "backward-compatible versions", "validation_failure": "reject and quarantine", "compatibility": "consumer-first rollout"},
+  "reliability": {"timeout_seconds": 30, "max_attempts": 3, "idempotency": "contact and consent version", "replay": "bounded and deduplicated", "partial_failure": "quarantine and reconcile", "reconciliation_owner": "integration owner"},
+  "security": {"credentials_external": true, "least_privilege": true, "input_validation": true, "egress_scoped": true, "sensitive_data_minimized": true, "risky_capabilities_reviewed": true},
+  "operations": {"versioned_artifact": "sanitized configuration export", "environment_separation": true, "correlation": "sync id", "error_path": "quarantine queue", "retention": "project policy", "rollback": "restore prior export", "kill_switch": "disable scheduled trigger"},
+  "cost": {"pricing_status": "unknown", "billing_units": ["executions", "API calls"], "expected_volume": "measure before approval", "burst_volume": "measure before approval", "worst_case": "calculate before approval", "hard_cap": "required before approval", "alert_owner": "integration owner", "unbounded_exposure": false},
+  "evidence": ["synthetic contract review"],
+  "approval": {"required": true, "status": "pending", "reference": null},
+  "decided_at": "2026-08-24T00:00:00-03:00"
+}

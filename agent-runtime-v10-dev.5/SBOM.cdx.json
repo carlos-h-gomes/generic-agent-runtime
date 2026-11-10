@@ -1,0 +1,36 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [],
+  "dependencies": [
+    {
+      "dependsOn": [],
+      "ref": "generic-agent-runtime@10.0.0"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "generic-agent-runtime@10.0.0",
+      "group": "generic-agent-runtime",
+      "name": "generic-agent-runtime",
+      "properties": [
+        {
+          "name": "gar:harness:runtime-dependencies",
+          "value": "Python standard library only"
+        },
+        {
+          "name": "gar:harness:distribution",
+          "value": "portable governance and validation runtime"
+        },
+        {
+          "name": "gar:harness:release-status",
+          "value": "candidate"
+        }
+      ],
+      "type": "application",
+      "version": "10.0.0"
+    },
+    "timestamp": "2026-11-10T00:00:00Z"
+  },
+  "specVersion": "1.7",
+  "version": 1
+}

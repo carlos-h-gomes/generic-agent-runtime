@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/architecture-profile-v2.json",
+  "title": "Harness open architecture profile v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "profile_id", "selection", "organization", "contracts", "extensions"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": "2.0"},
+    "status": {"enum": ["draft", "approved", "observed", "migration_required"]},
+    "profile_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"},
+    "selection": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source", "user_decision_required", "user_decision_status", "languages", "frameworks", "platforms", "rationale", "decision_ref"],
+      "properties": {
+        "source": {"enum": ["observed", "user_supplied", "user_selected", "migration"]},
+        "user_decision_required": {"type": "boolean"},
+        "user_decision_status": {"enum": ["not_required", "pending", "approved", "rejected"]},
+        "languages": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "frameworks": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "platforms": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "rationale": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "decision_ref": {"type": ["string", "null"]}
+      }
+    },
+    "organization": {
+      "type": "object", "additionalProperties": false,
+      "required": ["style", "roots", "modules", "composition_roots"],
+      "properties": {
+        "style": {"enum": ["layered", "feature", "mixed", "ecosystem_native"]},
+        "roots": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/safe_path"}},
+        "modules": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/module"}},
+        "composition_roots": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/composition_root"}}
+      }
+    },
+    "contracts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_of_truth", "technical_documentation", "user_manual", "directory_map", "interfaces"],
+      "properties": {
+        "source_of_truth": {"$ref": "#/$defs/safe_path"},
+        "technical_documentation": {"$ref": "#/$defs/safe_path"},
+        "user_manual": {"$ref": "#/$defs/safe_path"},
+        "directory_map": {"$ref": "#/$defs/safe_path"},
+        "interfaces": {"type": "array", "items": {"$ref": "#/$defs/safe_path"}}
+      }
+    },
+    "extensions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["allow", "require_responsibility", "require_dependency_direction", "authority"],
+      "properties": {
+        "allow": {"const": true},
+        "require_responsibility": {"const": true},
+        "require_dependency_direction": {"const": true},
+        "authority": {"$ref": "#/$defs/safe_path"}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"selection": {"properties": {"user_decision_required": {"const": true}}}}, "required": ["selection"]},
+      "then": {"properties": {"selection": {"properties": {"user_decision_status": {"enum": ["pending", "approved", "rejected"]}}}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "approved"}}, "required": ["status"]},
+      "then": {"properties": {"selection": {"properties": {"user_decision_status": {"enum": ["not_required", "approved"]}}}}}
+    }
+  ],
+  "$defs": {
+    "safe_path": {"type": "string", "minLength": 1, "maxLength": 240, "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"},
+    "module": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "path", "responsibility", "may_depend_on"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$"},
+        "path": {"$ref": "#/$defs/safe_path"},
+        "responsibility": {"type": "string", "minLength": 1, "maxLength": 500},
+        "may_depend_on": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$"}}
+      }
+    },
+    "composition_root": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "adapter", "max_non_comment_lines", "allowed_symbols", "manual_evidence"],
+      "properties": {
+        "path": {"$ref": "#/$defs/safe_path"},
+        "adapter": {"enum": ["python", "javascript", "typescript", "manual"]},
+        "max_non_comment_lines": {"type": "integer", "minimum": 10, "maximum": 300},
+        "allowed_symbols": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "manual_evidence": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  }
+}

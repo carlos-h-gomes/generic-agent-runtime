@@ -1,0 +1,407 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/promotion-record-v2.json",
+  "title": "GAR promotion record v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "promotion_id",
+    "project_id",
+    "state",
+    "policy_revision",
+    "correlation_id",
+    "source_revision",
+    "artifact_sha256",
+    "configuration_sha256",
+    "migration_id",
+    "concurrency",
+    "staging",
+    "approval",
+    "production",
+    "environment_policy_sha256"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "2.0"
+    },
+    "promotion_id": {
+      "$ref": "#/$defs/id"
+    },
+    "project_id": {
+      "$ref": "#/$defs/id"
+    },
+    "state": {
+      "enum": [
+        "draft",
+        "staged",
+        "staging_verified",
+        "awaiting_production_approval",
+        "production_approved",
+        "promoted",
+        "monitoring",
+        "completed",
+        "rejected",
+        "failed",
+        "rolled_back",
+        "blocked_recovery"
+      ]
+    },
+    "policy_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "correlation_id": {
+      "$ref": "#/$defs/id"
+    },
+    "source_revision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "artifact_sha256": {
+      "$ref": "#/$defs/digest"
+    },
+    "configuration_sha256": {
+      "$ref": "#/$defs/digest"
+    },
+    "migration_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "concurrency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "active_production_promotion_id"
+      ],
+      "properties": {
+        "active_production_promotion_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      }
+    },
+    "staging": {
+      "$ref": "#/$defs/deployment"
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "approver",
+        "approved_at",
+        "artifact_sha256",
+        "configuration_sha256",
+        "migration_id",
+        "policy_revision",
+        "environment_policy_sha256",
+        "staging_evidence_sha256",
+        "source_revision"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "not_requested",
+            "pending",
+            "approved",
+            "rejected"
+          ]
+        },
+        "approver": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "approved_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/nullable_digest"
+        },
+        "configuration_sha256": {
+          "$ref": "#/$defs/nullable_digest"
+        },
+        "migration_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "policy_revision": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "environment_policy_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "staging_evidence_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_revision": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 1500,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "production": {
+      "$ref": "#/$defs/production_deployment"
+    },
+    "environment_policy_sha256": {
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "nullable_digest": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "check_status": {
+      "enum": [
+        "not_run",
+        "passed",
+        "failed",
+        "incomplete",
+        "not_applicable"
+      ]
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deployment_id",
+        "artifact_sha256",
+        "configuration_sha256",
+        "migration_id",
+        "deployed_at",
+        "tests",
+        "gates",
+        "rollback_rehearsed",
+        "verified_at",
+        "valid_until",
+        "checks_evidence_ref"
+      ],
+      "properties": {
+        "deployment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/nullable_digest"
+        },
+        "configuration_sha256": {
+          "$ref": "#/$defs/nullable_digest"
+        },
+        "migration_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "deployed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "tests": {
+          "$ref": "#/$defs/check_status"
+        },
+        "gates": {
+          "$ref": "#/$defs/check_status"
+        },
+        "rollback_rehearsed": {
+          "type": "boolean"
+        },
+        "verified_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "valid_until": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "checks_evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 1500,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "production_deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deployment_id",
+        "artifact_sha256",
+        "configuration_sha256",
+        "migration_id",
+        "deployed_at",
+        "tests",
+        "gates",
+        "rollback_rehearsed",
+        "smoke_check",
+        "monitoring_status",
+        "monitoring_owner",
+        "monitoring_window_minutes",
+        "rollback_status",
+        "rollback_plan_ref",
+        "rollback_trigger"
+      ],
+      "properties": {
+        "deployment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/nullable_digest"
+        },
+        "configuration_sha256": {
+          "$ref": "#/$defs/nullable_digest"
+        },
+        "migration_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "deployed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "tests": {
+          "$ref": "#/$defs/check_status"
+        },
+        "gates": {
+          "$ref": "#/$defs/check_status"
+        },
+        "rollback_rehearsed": {
+          "type": "boolean"
+        },
+        "smoke_check": {
+          "enum": [
+            "not_run",
+            "passed",
+            "failed"
+          ]
+        },
+        "monitoring_status": {
+          "enum": [
+            "not_started",
+            "active",
+            "passed",
+            "failed"
+          ]
+        },
+        "monitoring_owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "monitoring_window_minutes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "rollback_status": {
+          "enum": [
+            "not_needed",
+            "available",
+            "started",
+            "verified",
+            "failed"
+          ]
+        },
+        "rollback_plan_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 1500,
+          "pattern": "\\S"
+        },
+        "rollback_trigger": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 1500,
+          "pattern": "\\S"
+        }
+      }
+    }
+  }
+}

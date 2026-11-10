@@ -1,0 +1,254 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "origin",
+    "revision",
+    "artifact",
+    "owner",
+    "observed_at",
+    "expires_at",
+    "reviews"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "origin": {
+      "type": "string",
+      "format": "uri"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}([a-f0-9]{24})?$"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reviews": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "license_notice",
+        "dependencies_advisories",
+        "provenance",
+        "permissions_egress_telemetry",
+        "negative_tests"
+      ],
+      "properties": {
+        "license_notice": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "proof"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "not_verified"
+              ]
+            },
+            "proof": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "sha256"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        },
+        "dependencies_advisories": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "proof"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "not_verified"
+              ]
+            },
+            "proof": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "sha256"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "proof"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "not_verified"
+              ]
+            },
+            "proof": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "sha256"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        },
+        "permissions_egress_telemetry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "proof"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "not_verified"
+              ]
+            },
+            "proof": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "sha256"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        },
+        "negative_tests": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "proof"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "not_verified"
+              ]
+            },
+            "proof": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "sha256"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.local/schemas/component-admission-v1.json"
+}

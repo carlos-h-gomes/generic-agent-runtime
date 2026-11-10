@@ -1,0 +1,5 @@
+interface:
+  display_name: "Context Memory"
+  short_description: "Use for concise durable state in multi-session, multi-writer, or Level 2/3 work"
+policy:
+  allow_implicit_invocation: false
