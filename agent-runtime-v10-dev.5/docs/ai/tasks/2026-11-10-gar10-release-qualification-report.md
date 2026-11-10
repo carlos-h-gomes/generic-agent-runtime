@@ -21,7 +21,7 @@ Date: 2026-11-10. Status: **release blocked**. Candidate source: `agent-runtime-
 - Source strict validation: `python -B scripts/runtime_check.py --strict` — exit 0; 64 pass, 1 optional skip (`jsonschema` meta-schema validator unavailable). All eight current gate records and the task contract validate.
 - Security assurance: `python -B scripts/security_assurance.py --profile release` — exit 0; 4 pass, 3 not applicable (no Node project, Dockerfile or applicable dependency advisory scan).
 - UI quality: no GAR UI detected; UI review is not applicable. This does not substitute for human-comprehension evidence about GAR's communication behavior.
-- Package plan and archive were deterministic; final package plan SHA-256 is the same as the archive above. Archive strict validation — exit 0; 43 pass, 1 optional skip (`jsonschema` meta-schema validator unavailable).
+- Package plan and archive were deterministic; final package plan SHA-256 is the same as the archive above. Archive strict validation — exit 0; 78 pass, 1 optional skip (`jsonschema` meta-schema validator unavailable; final rerun 2026-11-10).
 - Fresh extraction `gar-v10-dev5-clean-extract-20261110-final/`: strict validation exit 0; 17 pass, 2 skips (fresh distribution has no active task contract; optional `jsonschema` meta-schema validator unavailable).
 - No fresh exact-dev.5 external SAST scan was produced: Bandit is not installed in the active Windows Python environment, and `wsl.exe --status` returned access denied. No unpinned install was attempted. No publisher signature/attestation or independent security review was produced in this phase.
 
